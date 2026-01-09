@@ -225,10 +225,12 @@ export function Header() {
                 <div className="w-20 h-9 rounded-lg bg-[#1e293b] animate-pulse" />
               </div>
             ) : user ? (
-              <div className="relative">
+              <div
+                className="relative"
+                onMouseLeave={() => setUserMenuOpen(false)}
+              >
                 <button
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
-                  onBlur={() => setTimeout(() => setUserMenuOpen(false), 150)}
                   className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-[#1e293b] transition-colors"
                 >
                   {getAvatarUrl(profile?.avatar_url) ? (
@@ -256,20 +258,20 @@ export function Header() {
                       <p className="font-medium text-sm truncate text-white">{profile?.full_name || "User"}</p>
                       <p className="text-xs text-[#64748b] truncate">{profile?.email || user.email}</p>
                     </div>
-                    <Link href="/dashboard" className="flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg hover:bg-[#1e293b] text-[#94a3b8] hover:text-white transition-colors">
+                    <Link href="/dashboard" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg hover:bg-[#1e293b] text-[#94a3b8] hover:text-white transition-colors">
                       <LayoutDashboard className="h-4 w-4" />
                       Dashboard
                     </Link>
-                    <Link href="/workflow" className="flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg hover:bg-[#1e293b] text-[#94a3b8] hover:text-white transition-colors">
+                    <Link href="/workflow" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg hover:bg-[#1e293b] text-[#94a3b8] hover:text-white transition-colors">
                       <ArrowUpDown className="h-4 w-4" />
                       Workflow Builder
                     </Link>
-                    <Link href="/settings" className="flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg hover:bg-[#1e293b] text-[#94a3b8] hover:text-white transition-colors">
+                    <Link href="/settings" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg hover:bg-[#1e293b] text-[#94a3b8] hover:text-white transition-colors">
                       <Settings className="h-4 w-4" />
                       Settings
                     </Link>
                     <div className="h-px bg-[#1e293b] my-2" />
-                    <Link href="/changelog" className="flex items-center justify-between px-3 py-2.5 text-sm rounded-lg hover:bg-[#1e293b] text-[#94a3b8] hover:text-white transition-colors">
+                    <Link href="/changelog" onClick={() => setUserMenuOpen(false)} className="flex items-center justify-between px-3 py-2.5 text-sm rounded-lg hover:bg-[#1e293b] text-[#94a3b8] hover:text-white transition-colors">
                       <span className="flex items-center gap-3">
                         <Sparkles className="h-4 w-4" />
                         What&apos;s New
@@ -279,18 +281,18 @@ export function Header() {
                     {!isPro && (
                       <>
                         <div className="h-px bg-[#1e293b] my-2" />
-                        <Link href="/pricing" className="flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg hover:bg-[#1e293b] text-[#0ea5e9] transition-colors">
+                        <Link href="/pricing" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg hover:bg-[#1e293b] text-[#0ea5e9] transition-colors">
                           <Crown className="h-4 w-4" />
                           Upgrade to Pro
                         </Link>
                       </>
                     )}
                     <div className="h-px bg-[#1e293b] my-2" />
-                    <Link href="/privacy" className="flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg hover:bg-[#1e293b] text-[#94a3b8] hover:text-white transition-colors">
+                    <Link href="/privacy" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg hover:bg-[#1e293b] text-[#94a3b8] hover:text-white transition-colors">
                       <Shield className="h-4 w-4" />
                       Privacy Policy
                     </Link>
-                    <Link href="/terms" className="flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg hover:bg-[#1e293b] text-[#94a3b8] hover:text-white transition-colors">
+                    <Link href="/terms" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg hover:bg-[#1e293b] text-[#94a3b8] hover:text-white transition-colors">
                       <FileText className="h-4 w-4" />
                       Terms of Service
                     </Link>
