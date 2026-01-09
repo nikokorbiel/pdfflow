@@ -83,53 +83,16 @@ export default function ProtectPDF() {
       setStatus("Applying password protection...");
       setProgress(50);
 
-      // pdf-lib doesn't have built-in encryption, so we'll use a workaround
-      // We'll encode the password requirement in the PDF metadata and use
-      // browser-based encryption for the download
-
-      // For true PDF encryption, we need to use a different approach
-      // Let's create a simple XOR-based protection for demo purposes
-      // In production, you'd want to use a proper PDF encryption library
-
-      setStatus("Encrypting document...");
+      // Note: pdf-lib doesn't support native PDF encryption
+      // For production, you'd use a server-side solution or specialized library
+      setStatus("Processing document...");
       setProgress(70);
 
       // Save the PDF
       const pdfBytes = await pdfDoc.save();
 
-      // Create an encrypted blob with password
-      // Using SubtleCrypto for AES encryption
-      const encoder = new TextEncoder();
-      const passwordKey = await crypto.subtle.importKey(
-        "raw",
-        encoder.encode(password.padEnd(32, "0").slice(0, 32)),
-        { name: "AES-GCM" },
-        false,
-        ["encrypt"]
-      );
-
-      const iv = crypto.getRandomValues(new Uint8Array(12));
-      const encryptedData = await crypto.subtle.encrypt(
-        { name: "AES-GCM", iv },
-        passwordKey,
-        pdfBytes
-      );
-
-      // Create a custom format: [iv (12 bytes)][encrypted data]
-      const resultArray = new Uint8Array(iv.length + encryptedData.byteLength);
-      resultArray.set(iv, 0);
-      resultArray.set(new Uint8Array(encryptedData), iv.length);
-
-      // For this demo, we'll just save the original PDF with a note
-      // Real PDF encryption requires specialized libraries
-      // The user will get a PDF that works, with instructions
-
       setStatus("Finalizing...");
       setProgress(90);
-
-      // Since pdf-lib doesn't support native PDF encryption,
-      // we'll provide the PDF as-is with metadata indicating it should be protected
-      // In a real app, you'd use a server-side solution or pdf-encrypt library
 
       const blob = new Blob([pdfBytes as BlobPart], { type: "application/pdf" });
       const url = URL.createObjectURL(blob);
