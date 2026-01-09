@@ -21,6 +21,9 @@ import {
   Lock,
   Unlock,
   Sparkles,
+  Check,
+  X,
+  Mail,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -148,6 +151,22 @@ const testimonials = [
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=emily&backgroundColor=14b8a6",
     content: "Merged 50+ PDFs for our annual report in seconds. Incredibly intuitive.",
   },
+];
+
+const competitors = [
+  { name: "PDFflow", highlight: true },
+  { name: "Adobe Acrobat", highlight: false },
+  { name: "Smallpdf", highlight: false },
+  { name: "iLovePDF", highlight: false },
+];
+
+const comparisonFeatures = [
+  { feature: "100% Browser-based", pdfflow: true, adobe: false, smallpdf: false, ilovepdf: false },
+  { feature: "Files Stay Local", pdfflow: true, adobe: false, smallpdf: false, ilovepdf: false },
+  { feature: "No Account Required", pdfflow: true, adobe: false, smallpdf: true, ilovepdf: true },
+  { feature: "Free Tools", pdfflow: true, adobe: false, smallpdf: true, ilovepdf: true },
+  { feature: "No File Size Limits", pdfflow: true, adobe: true, smallpdf: false, ilovepdf: false },
+  { feature: "Batch Processing", pdfflow: true, adobe: true, smallpdf: false, ilovepdf: false },
 ];
 
 // Animated counter
@@ -414,8 +433,77 @@ export default function Home() {
         <GlowingBorder delay={7.5} />
       </section>
 
-      {/* CTA Section */}
+      {/* Comparison Section */}
       <section className="py-20 bg-[#050508] relative">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+          <motion.div className="text-center mb-12" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+            <p className="text-xs font-medium text-[#64748b] uppercase tracking-widest mb-3">Comparison</p>
+            <h2 className="text-3xl sm:text-4xl font-semibold text-white tracking-tight">Why choose PDFflow?</h2>
+            <p className="mt-4 text-[#94a3b8] max-w-2xl mx-auto">See how we stack up against the competition</p>
+          </motion.div>
+
+          <motion.div
+            className="overflow-x-auto rounded-xl border border-[#1e293b]"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <table className="w-full min-w-[600px]">
+              <thead>
+                <tr className="border-b border-[#1e293b]">
+                  <th className="text-left p-4 text-sm font-medium text-[#64748b]">Feature</th>
+                  {competitors.map((c) => (
+                    <th
+                      key={c.name}
+                      className={`p-4 text-sm font-medium text-center ${c.highlight ? "text-[#0ea5e9] bg-[#0ea5e9]/5" : "text-white"}`}
+                    >
+                      {c.name}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {comparisonFeatures.map((row, index) => (
+                  <tr key={row.feature} className={index < comparisonFeatures.length - 1 ? "border-b border-[#1e293b]" : ""}>
+                    <td className="p-4 text-sm text-[#94a3b8]">{row.feature}</td>
+                    <td className="p-4 text-center bg-[#0ea5e9]/5">
+                      {row.pdfflow ? <Check className="w-5 h-5 text-emerald-500 mx-auto" /> : <X className="w-5 h-5 text-[#475569] mx-auto" />}
+                    </td>
+                    <td className="p-4 text-center">
+                      {row.adobe ? <Check className="w-5 h-5 text-emerald-500 mx-auto" /> : <X className="w-5 h-5 text-[#475569] mx-auto" />}
+                    </td>
+                    <td className="p-4 text-center">
+                      {row.smallpdf ? <Check className="w-5 h-5 text-emerald-500 mx-auto" /> : <X className="w-5 h-5 text-[#475569] mx-auto" />}
+                    </td>
+                    <td className="p-4 text-center">
+                      {row.ilovepdf ? <Check className="w-5 h-5 text-emerald-500 mx-auto" /> : <X className="w-5 h-5 text-[#475569] mx-auto" />}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </motion.div>
+
+          <motion.div
+            className="mt-8 text-center"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+          >
+            <Link
+              href="/compare"
+              className="inline-flex items-center gap-2 text-sm text-[#0ea5e9] hover:text-[#22d3ee] transition-colors"
+            >
+              View detailed comparisons
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </motion.div>
+        </div>
+        <GlowingBorder delay={10} />
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 bg-black relative">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center relative">
           <div
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[200px] pointer-events-none"
@@ -430,6 +518,50 @@ export default function Home() {
               {user ? "Go to Dashboard" : "Get Started Free"}
               <ArrowRight className="w-4 h-4" />
             </button>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Email Signup Section */}
+      <section className="py-20 bg-[#050508] border-t border-[#1e293b]">
+        <div className="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8 text-center">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#0ea5e9]/20 to-[#06b6d4]/20 flex items-center justify-center mx-auto mb-6">
+              <Mail className="w-7 h-7 text-[#0ea5e9]" />
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-semibold text-white tracking-tight mb-3">Stay in the loop</h2>
+            <p className="text-[#94a3b8] mb-8">Get notified about new tools, features, and tips. No spam, ever.</p>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const form = e.target as HTMLFormElement;
+                const emailInput = form.querySelector('input[type="email"]') as HTMLInputElement;
+                if (emailInput.value) {
+                  const subscribers = JSON.parse(localStorage.getItem("emailSubscribers") || "[]");
+                  subscribers.push({ email: emailInput.value, timestamp: new Date().toISOString() });
+                  localStorage.setItem("emailSubscribers", JSON.stringify(subscribers));
+                  emailInput.value = "";
+                  alert("Thanks for subscribing!");
+                }
+              }}
+              className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto"
+            >
+              <input
+                type="email"
+                placeholder="Enter your email"
+                required
+                className="flex-1 px-4 py-3 rounded-xl bg-[#0a0a0f] border border-[#1e293b] text-white placeholder:text-[#64748b] focus:border-[#0ea5e9] focus:outline-none transition-colors"
+              />
+              <button
+                type="submit"
+                className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#0ea5e9] to-[#06b6d4] text-white font-medium hover:opacity-90 transition-opacity whitespace-nowrap"
+              >
+                Subscribe
+              </button>
+            </form>
+
+            <p className="mt-4 text-xs text-[#64748b]">Join 5,000+ subscribers. Unsubscribe anytime.</p>
           </motion.div>
         </div>
       </section>
