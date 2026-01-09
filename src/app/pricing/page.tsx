@@ -135,50 +135,66 @@ export default function Pricing() {
                 {/* Pro plan with toggle */}
                 {plan.name === "Pro" ? (
                   <div className="mb-6">
-                    {/* Billing Toggle */}
-                    <div className="flex items-center justify-center gap-3 mb-4 p-1 rounded-full bg-[var(--muted)] border border-[var(--border)]">
-                      <button
-                        onClick={() => setIsAnnual(false)}
-                        className={`px-4 py-2 text-sm font-medium rounded-full transition-all ${
-                          !isAnnual
-                            ? "bg-white text-black shadow-sm"
-                            : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
-                        }`}
-                      >
-                        Monthly
-                      </button>
-                      <button
-                        onClick={() => setIsAnnual(true)}
-                        className={`px-4 py-2 text-sm font-medium rounded-full transition-all flex items-center gap-2 ${
-                          isAnnual
-                            ? "bg-white text-black shadow-sm"
-                            : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
-                        }`}
-                      >
-                        Annual
-                        <span className="px-1.5 py-0.5 text-[10px] font-semibold rounded-full bg-emerald-500 text-white">
-                          -37%
-                        </span>
-                      </button>
+                    {/* Premium Billing Toggle */}
+                    <div className="relative flex items-center justify-center mb-5">
+                      <div className="relative bg-[var(--muted)]/50 backdrop-blur-sm p-1 rounded-xl border border-[var(--border)]">
+                        {/* Sliding background */}
+                        <div
+                          className={`absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-lg bg-gradient-to-r from-[var(--accent)] to-purple-500 shadow-lg transition-all duration-300 ease-out ${
+                            isAnnual ? "left-[calc(50%+2px)]" : "left-1"
+                          }`}
+                        />
+                        <div className="relative flex">
+                          <button
+                            onClick={() => setIsAnnual(false)}
+                            className={`px-5 py-2.5 text-sm font-medium rounded-lg transition-colors duration-300 z-10 ${
+                              !isAnnual
+                                ? "text-white"
+                                : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
+                            }`}
+                          >
+                            Monthly
+                          </button>
+                          <button
+                            onClick={() => setIsAnnual(true)}
+                            className={`px-5 py-2.5 text-sm font-medium rounded-lg transition-colors duration-300 z-10 flex items-center gap-2 ${
+                              isAnnual
+                                ? "text-white"
+                                : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
+                            }`}
+                          >
+                            Annual
+                            <span className={`px-1.5 py-0.5 text-[10px] font-bold rounded-md transition-colors duration-300 ${
+                              isAnnual
+                                ? "bg-white/20 text-white"
+                                : "bg-emerald-500/20 text-emerald-500"
+                            }`}>
+                              -37%
+                            </span>
+                          </button>
+                        </div>
+                      </div>
                     </div>
 
-                    {/* Price Display */}
-                    <div className="text-center">
-                      <span className="text-5xl font-semibold">
-                        {isAnnual ? plan.annualPrice : plan.monthlyPrice}
-                      </span>
-                      <span className="text-[var(--muted-foreground)] ml-1">/month</span>
-                      {isAnnual && (
-                        <p className="text-sm text-[var(--muted-foreground)] mt-1">
-                          Billed {plan.annualTotal}/year
-                        </p>
-                      )}
+                    {/* Price Display - Fixed Height */}
+                    <div className="text-center h-[72px] flex flex-col justify-center">
+                      <div>
+                        <span className="text-5xl font-semibold">
+                          {isAnnual ? plan.annualPrice : plan.monthlyPrice}
+                        </span>
+                        <span className="text-[var(--muted-foreground)] ml-1">/month</span>
+                      </div>
+                      <p className={`text-sm text-[var(--muted-foreground)] mt-1 transition-opacity duration-200 ${isAnnual ? "opacity-100" : "opacity-0"}`}>
+                        Billed {plan.annualTotal}/year
+                      </p>
                     </div>
                   </div>
                 ) : (
-                  <div className="mb-6">
-                    <span className="text-5xl font-semibold">{plan.price}</span>
-                    <span className="text-[var(--muted-foreground)] ml-1">{plan.period}</span>
+                  <div className="mb-6 h-[72px] flex flex-col justify-end">
+                    <div>
+                      <span className="text-5xl font-semibold">{plan.price}</span>
+                      <span className="text-[var(--muted-foreground)] ml-1">{plan.period}</span>
+                    </div>
                   </div>
                 )}
 
