@@ -64,25 +64,25 @@ export function ToolRequestModal({ isOpen, onClose }: ToolRequestModalProps) {
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md z-50 px-4"
+            className="fixed inset-4 sm:inset-auto sm:left-1/2 sm:top-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 w-auto sm:w-full sm:max-w-md z-50 flex items-center justify-center"
           >
-            <div className="bg-[#0a0a0f] border border-[#1e293b] rounded-2xl shadow-2xl overflow-hidden">
+            <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl shadow-2xl overflow-hidden w-full max-h-[90vh] overflow-y-auto">
               {/* Header */}
-              <div className="flex items-center justify-between p-5 border-b border-[#1e293b]">
+              <div className="flex items-center justify-between p-5 border-b border-[var(--border)]">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#0ea5e9] to-[#06b6d4] flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--primary)] to-[var(--accent)] flex items-center justify-center">
                     <Sparkles className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-lg font-semibold text-white">Request a Tool</h2>
-                    <p className="text-xs text-[#64748b]">Tell us what you need</p>
+                    <h2 className="text-lg font-semibold">Request a Tool</h2>
+                    <p className="text-xs text-[var(--text-secondary)]">Tell us what you need</p>
                   </div>
                 </div>
                 <button
                   onClick={onClose}
-                  className="p-2 rounded-lg hover:bg-[#1e293b] transition-colors"
+                  className="p-2 rounded-lg hover:bg-[var(--muted)] transition-colors"
                 >
-                  <X className="w-5 h-5 text-[#64748b]" />
+                  <X className="w-5 h-5 text-[var(--text-secondary)]" />
                 </button>
               </div>
 
@@ -103,7 +103,7 @@ export function ToolRequestModal({ isOpen, onClose }: ToolRequestModalProps) {
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-[#94a3b8] mb-1.5">
+                      <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1.5">
                         Tool Name
                       </label>
                       <input
@@ -112,12 +112,12 @@ export function ToolRequestModal({ isOpen, onClose }: ToolRequestModalProps) {
                         onChange={(e) => setToolName(e.target.value)}
                         placeholder="e.g., PDF to Excel"
                         required
-                        className="w-full px-4 py-2.5 rounded-xl bg-[#050508] border border-[#1e293b] text-white placeholder:text-[#475569] focus:border-[#0ea5e9] focus:outline-none transition-colors"
+                        className="w-full px-4 py-2.5 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border)] placeholder:text-[var(--text-muted)] focus:border-[var(--primary)] focus:outline-none transition-colors"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-[#94a3b8] mb-1.5">
+                      <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1.5">
                         Description
                       </label>
                       <textarea
@@ -126,27 +126,27 @@ export function ToolRequestModal({ isOpen, onClose }: ToolRequestModalProps) {
                         placeholder="Describe what this tool should do..."
                         required
                         rows={3}
-                        className="w-full px-4 py-2.5 rounded-xl bg-[#050508] border border-[#1e293b] text-white placeholder:text-[#475569] focus:border-[#0ea5e9] focus:outline-none transition-colors resize-none"
+                        className="w-full px-4 py-2.5 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border)] placeholder:text-[var(--text-muted)] focus:border-[var(--primary)] focus:outline-none transition-colors resize-none"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-[#94a3b8] mb-1.5">
-                        Email <span className="text-[#475569]">(optional)</span>
+                      <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1.5">
+                        Email <span className="text-[var(--text-muted)]">(optional)</span>
                       </label>
                       <input
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="Get notified when it's ready"
-                        className="w-full px-4 py-2.5 rounded-xl bg-[#050508] border border-[#1e293b] text-white placeholder:text-[#475569] focus:border-[#0ea5e9] focus:outline-none transition-colors"
+                        className="w-full px-4 py-2.5 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border)] placeholder:text-[var(--text-muted)] focus:border-[var(--primary)] focus:outline-none transition-colors"
                       />
                     </div>
 
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-[#0ea5e9] to-[#06b6d4] text-white font-medium hover:opacity-90 disabled:opacity-50 transition-opacity"
+                      className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-[var(--primary)] to-[var(--accent)] text-white font-medium hover:opacity-90 disabled:opacity-50 transition-opacity"
                     >
                       {isSubmitting ? (
                         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

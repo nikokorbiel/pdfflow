@@ -186,6 +186,10 @@ export function Header() {
               <Link href="/blog" className="px-4 py-2 text-sm text-[#94a3b8] hover:text-white hover:bg-[#1e293b] rounded-lg transition-colors">
                 Blog
               </Link>
+
+              <Link href="/changelog" className="px-4 py-2 text-sm text-[#94a3b8] hover:text-white hover:bg-[#1e293b] rounded-lg transition-colors">
+                Changelog
+              </Link>
             </div>
           </div>
 
@@ -361,6 +365,9 @@ export function Header() {
             </Link>
             <Link href="/blog" className="block px-4 py-3 text-sm font-medium rounded-xl hover:bg-[#1e293b] transition-colors" onClick={() => setMobileMenuOpen(false)}>
               Blog
+            </Link>
+            <Link href="/changelog" className="block px-4 py-3 text-sm font-medium rounded-xl hover:bg-[#1e293b] transition-colors" onClick={() => setMobileMenuOpen(false)}>
+              Changelog
             </Link>
 
             {user && (
