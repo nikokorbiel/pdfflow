@@ -24,6 +24,16 @@ import {
   Check,
   X,
   Mail,
+  Table,
+  Presentation,
+  Code,
+  Crop,
+  Trash2,
+  ImageIcon,
+  EyeOff,
+  FileCheck,
+  Wrench,
+  Layers,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -34,6 +44,7 @@ import { GlowingBorder } from "@/components/GlowingBorder";
 import { ToolRequestModal } from "@/components/ToolRequestModal";
 
 const tools = [
+  // Core tools
   {
     name: "Merge PDF",
     description: "Combine multiple PDFs into one",
@@ -52,6 +63,7 @@ const tools = [
     href: "/compress",
     icon: FileDown,
   },
+  // Convert
   {
     name: "PDF to Image",
     description: "Convert pages to PNG/JPG",
@@ -65,22 +77,77 @@ const tools = [
     icon: FileImage,
   },
   {
+    name: "PDF to Word",
+    description: "Convert to editable DOCX",
+    href: "/pdf-to-word",
+    icon: FileText,
+  },
+  {
+    name: "PDF to Excel",
+    description: "Extract tables to spreadsheet",
+    href: "/pdf-to-excel",
+    icon: Table,
+  },
+  {
+    name: "PDF to PowerPoint",
+    description: "Convert to slide images",
+    href: "/pdf-to-powerpoint",
+    icon: Presentation,
+  },
+  {
+    name: "Word to PDF",
+    description: "Convert DOCX to PDF",
+    href: "/word-to-pdf",
+    icon: FileText,
+  },
+  {
+    name: "Excel to PDF",
+    description: "Convert spreadsheets to PDF",
+    href: "/excel-to-pdf",
+    icon: Table,
+  },
+  {
+    name: "PowerPoint to PDF",
+    description: "Convert presentations to PDF",
+    href: "/powerpoint-to-pdf",
+    icon: Presentation,
+  },
+  {
+    name: "HTML to PDF",
+    description: "Convert web pages to PDF",
+    href: "/html-to-pdf",
+    icon: Code,
+  },
+  // Edit
+  {
     name: "Rotate PDF",
     description: "Rotate pages any direction",
     href: "/rotate",
     icon: RotateCw,
   },
   {
+    name: "Crop PDF",
+    description: "Trim and resize pages",
+    href: "/crop",
+    icon: Crop,
+  },
+  {
+    name: "Delete Pages",
+    description: "Remove unwanted pages",
+    href: "/delete-pages",
+    icon: Trash2,
+  },
+  {
+    name: "Extract Images",
+    description: "Pull images from PDF",
+    href: "/extract-images",
+    icon: ImageIcon,
+  },
+  {
     name: "Watermark",
     description: "Add text or image watermarks",
     href: "/watermark",
     icon: Droplets,
-  },
-  {
-    name: "PDF to Word",
-    description: "Convert to editable DOCX",
-    href: "/pdf-to-word",
-    icon: FileText,
   },
   {
     name: "Page Numbers",
@@ -100,6 +167,7 @@ const tools = [
     href: "/sign",
     icon: PenTool,
   },
+  // Security
   {
     name: "Protect PDF",
     description: "Password-protect your PDF",
@@ -111,6 +179,31 @@ const tools = [
     description: "Remove PDF password",
     href: "/unlock",
     icon: Unlock,
+  },
+  {
+    name: "Redact PDF",
+    description: "Hide sensitive information",
+    href: "/redact",
+    icon: EyeOff,
+  },
+  // Advanced
+  {
+    name: "PDF to PDF/A",
+    description: "Convert to archive format",
+    href: "/pdf-to-pdfa",
+    icon: FileCheck,
+  },
+  {
+    name: "Repair PDF",
+    description: "Fix corrupted PDFs",
+    href: "/repair",
+    icon: Wrench,
+  },
+  {
+    name: "Flatten PDF",
+    description: "Flatten forms & layers",
+    href: "/flatten",
+    icon: Layers,
   },
 ];
 
@@ -305,25 +398,25 @@ export default function Home() {
             <h2 className="text-3xl sm:text-4xl font-semibold text-white tracking-tight">Every tool you need</h2>
           </motion.div>
 
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
             {tools.map((tool, index) => (
-              <motion.div key={tool.name} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: index * 0.05 }}>
-                <Link href={tool.href} className="flex flex-col h-full p-4 sm:p-5 rounded-xl bg-[#0a0a0f] border border-[#1e293b] hover:border-[#334155] transition-all group">
-                  <tool.icon className="w-5 h-5 text-[#64748b] group-hover:text-[#0ea5e9] transition-colors mb-3 flex-shrink-0" />
-                  <h3 className="text-sm font-medium text-white mb-1">{tool.name}</h3>
-                  <p className="text-xs text-[#64748b] leading-relaxed">{tool.description}</p>
+              <motion.div key={tool.name} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: Math.min(index * 0.03, 0.5) }}>
+                <Link href={tool.href} className="flex flex-col h-full p-3 sm:p-4 rounded-xl bg-[#0a0a0f] border border-[#1e293b] hover:border-[#334155] transition-all group">
+                  <tool.icon className="w-4 h-4 sm:w-5 sm:h-5 text-[#64748b] group-hover:text-[#0ea5e9] transition-colors mb-2 flex-shrink-0" />
+                  <h3 className="text-xs sm:text-sm font-medium text-white mb-0.5 leading-tight">{tool.name}</h3>
+                  <p className="text-[10px] sm:text-xs text-[#64748b] leading-snug line-clamp-2">{tool.description}</p>
                 </Link>
               </motion.div>
             ))}
             {/* CTA Card */}
-            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: tools.length * 0.05 }}>
+            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.6 }}>
               <button
                 onClick={() => setToolRequestOpen(true)}
-                className="flex flex-col h-full w-full text-left p-4 sm:p-5 rounded-xl bg-gradient-to-br from-[#0ea5e9]/10 to-[#06b6d4]/10 border border-[#0ea5e9]/20 hover:border-[#0ea5e9]/40 transition-all group"
+                className="flex flex-col h-full w-full text-left p-3 sm:p-4 rounded-xl bg-gradient-to-br from-[#0ea5e9]/10 to-[#06b6d4]/10 border border-[#0ea5e9]/20 hover:border-[#0ea5e9]/40 transition-all group"
               >
-                <Sparkles className="w-5 h-5 text-[#0ea5e9] group-hover:text-[#22d3ee] transition-colors mb-3 flex-shrink-0" />
-                <h3 className="text-sm font-medium text-white mb-1">Request a Tool</h3>
-                <p className="text-xs text-[#64748b] leading-relaxed">Need something else? Let us know!</p>
+                <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-[#0ea5e9] group-hover:text-[#22d3ee] transition-colors mb-2 flex-shrink-0" />
+                <h3 className="text-xs sm:text-sm font-medium text-white mb-0.5">Request a Tool</h3>
+                <p className="text-[10px] sm:text-xs text-[#64748b] leading-snug">Need something else?</p>
               </button>
             </motion.div>
           </div>

@@ -19,7 +19,6 @@ import {
   RotateCw,
   Droplets,
   FileText,
-  Hash,
   ArrowUpDown,
   PenTool,
   Lock,
@@ -29,6 +28,14 @@ import {
   Pencil,
   Shield,
   Sparkles,
+  Table,
+  Presentation,
+  Code,
+  Crop,
+  Trash2,
+  ImageIcon,
+  EyeOff,
+  Wrench,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAuthModal } from "@/contexts/AuthModalContext";
@@ -42,6 +49,7 @@ const toolCategories = [
       { name: "Merge PDF", href: "/merge", description: "Combine multiple PDFs", icon: Combine },
       { name: "Split PDF", href: "/split", description: "Extract or divide pages", icon: Split },
       { name: "Reorder Pages", href: "/reorder", description: "Drag & drop to rearrange", icon: ArrowUpDown },
+      { name: "Delete Pages", href: "/delete-pages", description: "Remove unwanted pages", icon: Trash2 },
     ],
   },
   {
@@ -50,7 +58,10 @@ const toolCategories = [
     tools: [
       { name: "PDF to Image", href: "/pdf-to-image", description: "Convert to PNG/JPG", icon: Image },
       { name: "Image to PDF", href: "/image-to-pdf", description: "Create PDF from images", icon: FileImage },
-      { name: "PDF to Word", href: "/pdf-to-word", description: "Convert to editable DOCX", icon: FileText },
+      { name: "PDF to Word", href: "/pdf-to-word", description: "Convert to DOCX", icon: FileText },
+      { name: "PDF to Excel", href: "/pdf-to-excel", description: "Extract to spreadsheet", icon: Table },
+      { name: "PDF to PPT", href: "/pdf-to-powerpoint", description: "Convert to slides", icon: Presentation },
+      { name: "HTML to PDF", href: "/html-to-pdf", description: "Web page to PDF", icon: Code },
     ],
   },
   {
@@ -58,18 +69,21 @@ const toolCategories = [
     icon: Pencil,
     tools: [
       { name: "Compress", href: "/compress", description: "Reduce file size", icon: FileDown },
-      { name: "Rotate PDF", href: "/rotate", description: "Rotate pages any direction", icon: RotateCw },
-      { name: "Watermark", href: "/watermark", description: "Add text or image watermarks", icon: Droplets },
-      { name: "Page Numbers", href: "/page-numbers", description: "Add page numbering", icon: Hash },
-      { name: "Sign PDF", href: "/sign", description: "Add signatures & initials", icon: PenTool },
+      { name: "Rotate PDF", href: "/rotate", description: "Rotate pages", icon: RotateCw },
+      { name: "Crop PDF", href: "/crop", description: "Trim pages", icon: Crop },
+      { name: "Watermark", href: "/watermark", description: "Add watermarks", icon: Droplets },
+      { name: "Sign PDF", href: "/sign", description: "Add signatures", icon: PenTool },
+      { name: "Extract Images", href: "/extract-images", description: "Pull images out", icon: ImageIcon },
     ],
   },
   {
     name: "Security",
     icon: Shield,
     tools: [
-      { name: "Protect PDF", href: "/protect", description: "Password-protect your PDF", icon: Lock },
-      { name: "Unlock PDF", href: "/unlock", description: "Remove PDF password", icon: Unlock },
+      { name: "Protect PDF", href: "/protect", description: "Add password", icon: Lock },
+      { name: "Unlock PDF", href: "/unlock", description: "Remove password", icon: Unlock },
+      { name: "Redact PDF", href: "/redact", description: "Hide sensitive info", icon: EyeOff },
+      { name: "Repair PDF", href: "/repair", description: "Fix corrupted files", icon: Wrench },
     ],
   },
 ];
@@ -192,12 +206,11 @@ export function Header() {
 
           <div className="flex items-center gap-3">
             {isLoading ? (
-              <div className="hidden sm:flex items-center gap-3">
-                <div className="w-16 h-8 rounded-md bg-[#1e293b] animate-pulse" />
-                <div className="w-24 h-8 rounded-md bg-[#1e293b] animate-pulse" />
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="w-20 h-9 rounded-lg bg-[#1e293b] animate-pulse" />
               </div>
             ) : user ? (
-              <div className="relative hidden sm:block">
+              <div className="relative">
                 <button
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
                   onBlur={() => setTimeout(() => setUserMenuOpen(false), 150)}
@@ -266,16 +279,16 @@ export function Header() {
                 )}
               </div>
             ) : (
-              <div className="hidden sm:flex items-center gap-3">
+              <div className="flex items-center gap-2 sm:gap-3">
                 <button
                   onClick={() => openAuthModal("signin")}
-                  className="px-4 py-2 text-sm font-medium text-[#94a3b8] hover:text-white transition-colors"
+                  className="hidden sm:block px-4 py-2 text-sm font-medium text-[#94a3b8] hover:text-white transition-colors"
                 >
                   Log in
                 </button>
                 <button
                   onClick={() => openAuthModal("signup")}
-                  className="px-4 py-2 text-sm font-medium bg-white text-black rounded-lg hover:opacity-90 transition-colors"
+                  className="px-3 sm:px-4 py-2 text-sm font-medium bg-white text-black rounded-lg hover:opacity-90 transition-colors"
                 >
                   Sign Up
                 </button>
