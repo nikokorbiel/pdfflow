@@ -28,6 +28,7 @@ import {
   RefreshCw,
   Pencil,
   Shield,
+  Sparkles,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAuthModal } from "@/contexts/AuthModalContext";
@@ -222,7 +223,7 @@ export function Header() {
                 </button>
 
                 {userMenuOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-56 p-2 rounded-xl bg-[#0a0a0f] border border-[#1e293b] shadow-2xl">
+                  <div className="absolute right-0 top-full mt-2 w-64 p-2 rounded-xl bg-[#0a0a0f] border border-[#1e293b] shadow-2xl">
                     <div className="px-3 py-3 border-b border-[#1e293b] mb-2">
                       <p className="font-medium text-sm truncate text-white">{profile?.full_name || "User"}</p>
                       <p className="text-xs text-[#64748b] truncate">{profile?.email || user.email}</p>
@@ -231,15 +232,30 @@ export function Header() {
                       <LayoutDashboard className="h-4 w-4" />
                       Dashboard
                     </Link>
+                    <Link href="/workflow" className="flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg hover:bg-[#1e293b] text-[#94a3b8] hover:text-white transition-colors">
+                      <ArrowUpDown className="h-4 w-4" />
+                      Workflow Builder
+                    </Link>
                     <Link href="/settings" className="flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg hover:bg-[#1e293b] text-[#94a3b8] hover:text-white transition-colors">
                       <Settings className="h-4 w-4" />
                       Settings
                     </Link>
+                    <div className="h-px bg-[#1e293b] my-2" />
+                    <Link href="/changelog" className="flex items-center justify-between px-3 py-2.5 text-sm rounded-lg hover:bg-[#1e293b] text-[#94a3b8] hover:text-white transition-colors">
+                      <span className="flex items-center gap-3">
+                        <Sparkles className="h-4 w-4" />
+                        What&apos;s New
+                      </span>
+                      <span className="px-1.5 py-0.5 text-[10px] font-medium rounded bg-[#0ea5e9] text-white">v1.3</span>
+                    </Link>
                     {!isPro && (
-                      <Link href="/pricing" className="flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg hover:bg-[#1e293b] text-[#0ea5e9] transition-colors">
-                        <Crown className="h-4 w-4" />
-                        Upgrade to Pro
-                      </Link>
+                      <>
+                        <div className="h-px bg-[#1e293b] my-2" />
+                        <Link href="/pricing" className="flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg hover:bg-[#1e293b] text-[#0ea5e9] transition-colors">
+                          <Crown className="h-4 w-4" />
+                          Upgrade to Pro
+                        </Link>
+                      </>
                     )}
                     <div className="h-px bg-[#1e293b] my-2" />
                     <button onClick={handleSignOut} className="w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg hover:bg-[#1e293b] text-[#ef4444] transition-colors">
