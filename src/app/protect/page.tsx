@@ -131,7 +131,7 @@ export default function ProtectPDF() {
       // we'll provide the PDF as-is with metadata indicating it should be protected
       // In a real app, you'd use a server-side solution or pdf-encrypt library
 
-      const blob = new Blob([pdfBytes], { type: "application/pdf" });
+      const blob = new Blob([pdfBytes as BlobPart], { type: "application/pdf" });
       const url = URL.createObjectURL(blob);
 
       setResultUrl(url);
