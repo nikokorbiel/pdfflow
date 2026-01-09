@@ -36,6 +36,9 @@ import {
   ImageIcon,
   EyeOff,
   Wrench,
+  Hash,
+  Layers,
+  FileCheck,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAuthModal } from "@/contexts/AuthModalContext";
@@ -50,6 +53,7 @@ const toolCategories = [
       { name: "Split PDF", href: "/split", description: "Extract or divide pages", icon: Split },
       { name: "Reorder Pages", href: "/reorder", description: "Drag & drop to rearrange", icon: ArrowUpDown },
       { name: "Delete Pages", href: "/delete-pages", description: "Remove unwanted pages", icon: Trash2 },
+      { name: "Page Numbers", href: "/page-numbers", description: "Add page numbering", icon: Hash },
     ],
   },
   {
@@ -61,6 +65,9 @@ const toolCategories = [
       { name: "PDF to Word", href: "/pdf-to-word", description: "Convert to DOCX", icon: FileText },
       { name: "PDF to Excel", href: "/pdf-to-excel", description: "Extract to spreadsheet", icon: Table },
       { name: "PDF to PPT", href: "/pdf-to-powerpoint", description: "Convert to slides", icon: Presentation },
+      { name: "Word to PDF", href: "/word-to-pdf", description: "Word documents to PDF", icon: FileText },
+      { name: "Excel to PDF", href: "/excel-to-pdf", description: "Spreadsheets to PDF", icon: Table },
+      { name: "PPT to PDF", href: "/powerpoint-to-pdf", description: "Presentations to PDF", icon: Presentation },
       { name: "HTML to PDF", href: "/html-to-pdf", description: "Web page to PDF", icon: Code },
     ],
   },
@@ -74,6 +81,7 @@ const toolCategories = [
       { name: "Watermark", href: "/watermark", description: "Add watermarks", icon: Droplets },
       { name: "Sign PDF", href: "/sign", description: "Add signatures", icon: PenTool },
       { name: "Extract Images", href: "/extract-images", description: "Pull images out", icon: ImageIcon },
+      { name: "Flatten PDF", href: "/flatten", description: "Make forms non-editable", icon: Layers },
     ],
   },
   {
@@ -84,6 +92,7 @@ const toolCategories = [
       { name: "Unlock PDF", href: "/unlock", description: "Remove password", icon: Unlock },
       { name: "Redact PDF", href: "/redact", description: "Hide sensitive info", icon: EyeOff },
       { name: "Repair PDF", href: "/repair", description: "Fix corrupted files", icon: Wrench },
+      { name: "PDF to PDF/A", href: "/pdf-to-pdfa", description: "Archival format", icon: FileCheck },
     ],
   },
 ];

@@ -366,12 +366,12 @@ export function DashboardContent({ profile, usage }: DashboardContentProps) {
   // Activity stats
   const stats = getActivityStats(fileHistory);
 
-  // Onboarding checklist items
+  // Onboarding checklist items with links
   const onboardingItems = [
-    { id: "profile", label: "Complete your profile", done: !!profile?.full_name },
-    { id: "first-tool", label: "Process your first PDF", done: fileHistory.length > 0 },
-    { id: "favorite", label: "Add a tool to favorites", done: favorites.length > 0 },
-    { id: "workflow", label: "Create a workflow", done: workflows.length > 0 },
+    { id: "profile", label: "Complete your profile", done: !!profile?.full_name, href: "/settings", description: "Add your name and photo" },
+    { id: "first-tool", label: "Process your first PDF", done: fileHistory.length > 0, href: "/merge", description: "Try merging PDFs" },
+    { id: "favorite", label: "Add a tool to favorites", done: favorites.length > 0, href: "#all-tools", description: "Star your favorites" },
+    { id: "workflow", label: "Create a workflow", done: workflows.length > 0, href: "/workflow", description: "Automate your tasks" },
   ];
   const completedOnboarding = onboardingItems.filter(i => i.done).length;
   const allOnboardingDone = completedOnboarding === onboardingItems.length;
@@ -583,7 +583,7 @@ export function DashboardContent({ profile, usage }: DashboardContentProps) {
 
           {/* Onboarding Checklist */}
           {showOnboarding && !allOnboardingDone && (
-            <div className="mb-8 p-5 rounded-2xl border bg-[var(--card)]">
+            <div className="mb-8 p-5 rounded-2xl border bg-[var(--card)] animate-fade-in-up">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-green-500">
@@ -599,16 +599,48 @@ export function DashboardContent({ profile, usage }: DashboardContentProps) {
                 </button>
               </div>
               <div className="grid sm:grid-cols-2 gap-2">
-                {onboardingItems.map((item) => (
-                  <div key={item.id} className={`flex items-center gap-3 p-3 rounded-lg ${item.done ? "bg-emerald-500/10" : "bg-[var(--muted)]/50"}`}>
-                    {item.done ? (
-                      <CheckCircle className="h-4 w-4 text-emerald-500 flex-shrink-0" />
-                    ) : (
-                      <Circle className="h-4 w-4 text-[var(--muted-foreground)] flex-shrink-0" />
+                {onboardingItems.map((item, index) => (
+                  <Link
+                    key={item.id}
+                    href={item.href}
+                    className={`group flex items-center gap-3 p-3 rounded-lg transition-all duration-300 hover:scale-[1.02] hover:shadow-md ${
+                      item.done
+                        ? "bg-emerald-500/10 hover:bg-emerald-500/15"
+                        : "bg-[var(--muted)]/50 hover:bg-[var(--accent)]/10 hover:border-[var(--accent)]"
+                    }`}
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  >
+                    <div className={`flex-shrink-0 transition-transform duration-300 group-hover:scale-110 ${!item.done && "group-hover:animate-pulse"}`}>
+                      {item.done ? (
+                        <CheckCircle className="h-5 w-5 text-emerald-500" />
+                      ) : (
+                        <Circle className="h-5 w-5 text-[var(--muted-foreground)] group-hover:text-[var(--accent)]" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <span className={`text-sm font-medium block ${item.done ? "text-emerald-600 line-through" : "group-hover:text-[var(--accent)]"}`}>
+                        {item.label}
+                      </span>
+                      <span className="text-xs text-[var(--muted-foreground)]">{item.description}</span>
+                    </div>
+                    {!item.done && (
+                      <ChevronRight className="h-4 w-4 text-[var(--muted-foreground)] group-hover:text-[var(--accent)] group-hover:translate-x-1 transition-all" />
                     )}
-                    <span className={`text-sm ${item.done ? "text-emerald-600 line-through" : ""}`}>{item.label}</span>
-                  </div>
+                  </Link>
                 ))}
+              </div>
+              {/* Progress bar */}
+              <div className="mt-4 pt-4 border-t border-[var(--border)]">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs text-[var(--muted-foreground)]">Progress</span>
+                  <span className="text-xs font-medium">{Math.round((completedOnboarding / onboardingItems.length) * 100)}%</span>
+                </div>
+                <div className="h-2 bg-[var(--muted)] rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-emerald-500 to-green-400 rounded-full transition-all duration-500 ease-out"
+                    style={{ width: `${(completedOnboarding / onboardingItems.length) * 100}%` }}
+                  />
+                </div>
               </div>
             </div>
           )}
