@@ -60,7 +60,7 @@ const tools = [
   {
     name: "PDF to Image",
     description: "Convert PDF pages to PNG or JPG images",
-    href: "/pdf-to-image",
+    href: "/tools/pdf-to-image",
     toolHref: "/pdf-to-image",
     icon: Image,
     gradient: "from-orange-500 to-amber-400",
@@ -68,7 +68,7 @@ const tools = [
   {
     name: "Image to PDF",
     description: "Create PDF from images",
-    href: "/image-to-pdf",
+    href: "/tools/image-to-pdf",
     toolHref: "/image-to-pdf",
     icon: FileImage,
     gradient: "from-indigo-500 to-blue-400",
@@ -76,7 +76,7 @@ const tools = [
   {
     name: "PDF to Word",
     description: "Convert PDF to editable Word document",
-    href: "/pdf-to-word",
+    href: "/tools/pdf-to-word",
     toolHref: "/pdf-to-word",
     icon: FileText,
     gradient: "from-blue-600 to-blue-400",
@@ -84,7 +84,7 @@ const tools = [
   {
     name: "Rotate PDF",
     description: "Rotate pages in any direction",
-    href: "/rotate",
+    href: "/tools/rotate-pdf",
     toolHref: "/rotate",
     icon: RotateCw,
     gradient: "from-teal-500 to-cyan-400",
@@ -92,7 +92,7 @@ const tools = [
   {
     name: "Watermark PDF",
     description: "Add text or image watermarks",
-    href: "/watermark",
+    href: "/tools/watermark-pdf",
     toolHref: "/watermark",
     icon: Droplets,
     gradient: "from-blue-500 to-indigo-500",
@@ -100,7 +100,7 @@ const tools = [
   {
     name: "Page Numbers",
     description: "Add page numbers to your PDF",
-    href: "/page-numbers",
+    href: "/tools/page-numbers",
     toolHref: "/page-numbers",
     icon: Hash,
     gradient: "from-slate-500 to-gray-400",
@@ -108,7 +108,7 @@ const tools = [
   {
     name: "Reorder Pages",
     description: "Drag and drop to rearrange pages",
-    href: "/reorder",
+    href: "/tools/reorder-pages",
     toolHref: "/reorder",
     icon: ArrowUpDown,
     gradient: "from-pink-500 to-rose-500",
@@ -116,7 +116,7 @@ const tools = [
   {
     name: "Sign PDF",
     description: "Add signatures and initials",
-    href: "/sign",
+    href: "/tools/sign-pdf",
     toolHref: "/sign",
     icon: PenTool,
     gradient: "from-purple-500 to-pink-500",
@@ -124,7 +124,7 @@ const tools = [
   {
     name: "Protect PDF",
     description: "Password-protect your PDF",
-    href: "/protect",
+    href: "/tools/protect-pdf",
     toolHref: "/protect",
     icon: Lock,
     gradient: "from-amber-500 to-yellow-500",
@@ -132,7 +132,7 @@ const tools = [
   {
     name: "Unlock PDF",
     description: "Remove PDF password protection",
-    href: "/unlock",
+    href: "/tools/unlock-pdf",
     toolHref: "/unlock",
     icon: Unlock,
     gradient: "from-cyan-500 to-sky-500",
