@@ -29,8 +29,8 @@ import {
   Pencil,
   Shield,
 } from "lucide-react";
-import { AuthModal } from "./AuthModal";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAuthModal } from "@/contexts/AuthModalContext";
 import { PDFflowLogo } from "./Logo";
 
 const toolCategories = [
@@ -80,10 +80,9 @@ export function Header() {
   const [toolsOpen, setToolsOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [authModalOpen, setAuthModalOpen] = useState(false);
-  const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
 
   const { user, profile, isPro, isLoading, signOut } = useAuth();
+  const { openAuthModal } = useAuthModal();
 
   const getAvatarUrl = (url: string | null | undefined) => {
     if (!url) return null;
@@ -101,11 +100,6 @@ export function Header() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  const openAuth = (mode: "signin" | "signup") => {
-    setAuthMode(mode);
-    setAuthModalOpen(true);
-  };
 
   const handleSignOut = async () => {
     await signOut();
@@ -254,13 +248,13 @@ export function Header() {
             ) : (
               <div className="hidden sm:flex items-center gap-3">
                 <button
-                  onClick={() => openAuth("signin")}
+                  onClick={() => openAuthModal("signin")}
                   className="px-4 py-2 text-sm font-medium text-[#94a3b8] hover:text-white transition-colors"
                 >
                   Log in
                 </button>
                 <button
-                  onClick={() => openAuth("signup")}
+                  onClick={() => openAuthModal("signup")}
                   className="px-4 py-2 text-sm font-medium bg-white text-black rounded-lg hover:bg-gray-200 transition-colors"
                 >
                   Sign Up
@@ -350,10 +344,10 @@ export function Header() {
                 </button>
               ) : (
                 <>
-                  <button onClick={() => { setMobileMenuOpen(false); openAuth("signin"); }} className="w-full py-3 text-sm font-medium text-white rounded-xl border border-[#1e293b] hover:bg-[#1e293b] transition-colors">
+                  <button onClick={() => { setMobileMenuOpen(false); openAuthModal("signin"); }} className="w-full py-3 text-sm font-medium text-white rounded-xl border border-[#1e293b] hover:bg-[#1e293b] transition-colors">
                     Log in
                   </button>
-                  <button onClick={() => { setMobileMenuOpen(false); openAuth("signup"); }} className="w-full py-3 text-sm font-medium bg-white text-black rounded-xl hover:bg-gray-200 transition-colors">
+                  <button onClick={() => { setMobileMenuOpen(false); openAuthModal("signup"); }} className="w-full py-3 text-sm font-medium bg-white text-black rounded-xl hover:bg-gray-200 transition-colors">
                     Sign Up
                   </button>
                 </>
@@ -364,8 +358,6 @@ export function Header() {
       </header>
 
       <div className="h-16" />
-
-      <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} initialMode={authMode} />
     </>
   );
 }

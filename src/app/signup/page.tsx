@@ -1,19 +1,14 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { X, Mail, Lock, User, ArrowRight, Zap, AlertCircle, CheckCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Mail, Lock, User, ArrowRight, Zap, AlertCircle, CheckCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
-interface AuthModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  initialMode?: "signin" | "signup";
-  promptMessage?: string;
-}
-
-export function AuthModal({ isOpen, onClose, initialMode = "signin", promptMessage }: AuthModalProps) {
-  const [mode, setMode] = useState<"signin" | "signup">(initialMode);
+export default function SignupPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -21,7 +16,7 @@ export function AuthModal({ isOpen, onClose, initialMode = "signin", promptMessa
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  const { isConfigured } = useAuth();
+  const { user, isConfigured } = useAuth();
 
   const supabase = useMemo(() => {
     if (!isConfigured) return null;
@@ -32,24 +27,12 @@ export function AuthModal({ isOpen, onClose, initialMode = "signin", promptMessa
     }
   }, [isConfigured]);
 
+  // Redirect if already logged in
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-      setError(null);
-      setSuccess(null);
-    } else {
-      document.body.style.overflow = "unset";
+    if (user) {
+      router.push("/dashboard");
     }
-    return () => {
-      document.body.style.overflow = "unset";
-    };
-  }, [isOpen]);
-
-  useEffect(() => {
-    setMode(initialMode);
-    setError(null);
-    setSuccess(null);
-  }, [initialMode]);
+  }, [user, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,32 +45,23 @@ export function AuthModal({ isOpen, onClose, initialMode = "signin", promptMessa
     setSuccess(null);
 
     try {
-      if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: {
-              full_name: name,
-            },
-            emailRedirectTo: `${window.location.origin}/auth/callback`,
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: name,
           },
-        });
-        if (error) throw error;
-        setSuccess("Check your email for the confirmation link!");
-        setEmail("");
-        setPassword("");
-        setName("");
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        if (error) throw error;
-        onClose();
-      }
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+      if (error) throw error;
+      setSuccess("Check your email for the confirmation link!");
+      setEmail("");
+      setPassword("");
+      setName("");
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : "Authentication failed";
+      const errorMessage = err instanceof Error ? err.message : "Registration failed";
       setError(errorMessage);
     } finally {
       setIsLoading(false);
@@ -111,68 +85,29 @@ export function AuthModal({ isOpen, onClose, initialMode = "signin", promptMessa
     }
   };
 
-  const handleForgotPassword = async () => {
-    if (!supabase) {
-      setError("Authentication is not configured. Please set up Supabase.");
-      return;
-    }
-    if (!email) {
-      setError("Please enter your email address first");
-      return;
-    }
-    setIsLoading(true);
-    setError(null);
-
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`,
-    });
-
-    if (error) {
-      setError(error.message);
-    } else {
-      setSuccess("Password reset email sent! Check your inbox.");
-    }
-    setIsLoading(false);
-  };
-
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-[var(--background)]/80 backdrop-blur-sm animate-fade-in"
-        onClick={onClose}
-      />
+    <div className="min-h-[80vh] flex items-center justify-center px-4 py-16">
+      {/* Background gradient */}
+      <div className="absolute inset-0 -z-10 overflow-hidden">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-[var(--primary)]/20 to-[var(--accent)]/20 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-gradient-to-r from-[var(--accent)]/10 to-[var(--primary)]/10 rounded-full blur-3xl" />
+      </div>
 
-      {/* Modal */}
-      <div className="relative w-full max-w-md animate-scale-in">
+      <div className="w-full max-w-md">
         <div className="relative overflow-hidden rounded-2xl glass-strong shadow-2xl">
           {/* Decorative gradient */}
           <div className="absolute -top-24 -right-24 w-48 h-48 bg-gradient-to-br from-[var(--primary)] to-[var(--accent)] rounded-full opacity-20 blur-3xl" />
           <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-gradient-to-br from-[var(--accent)] to-[var(--primary)] rounded-full opacity-20 blur-3xl" />
 
-          {/* Close button */}
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 p-2 rounded-lg hover:bg-[var(--surface)] transition-colors z-10"
-          >
-            <X className="w-5 h-5 text-[var(--text-muted)]" />
-          </button>
-
           <div className="relative p-8">
             {/* Header */}
             <div className="text-center mb-8">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-[var(--primary)] to-[var(--accent)] mb-4 glow">
+              <Link href="/" className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-[var(--primary)] to-[var(--accent)] mb-4 glow">
                 <Zap className="w-8 h-8 text-white" />
-              </div>
-              <h2 className="text-2xl font-bold tracking-tight">
-                {mode === "signin" ? "Welcome back" : "Create account"}
-              </h2>
+              </Link>
+              <h1 className="text-2xl font-bold tracking-tight">Create account</h1>
               <p className="text-[var(--text-secondary)] mt-2">
-                {promptMessage || (mode === "signin"
-                  ? "Sign in to access your workspace"
-                  : "Start your journey to effortless PDFs")}
+                Start your journey to effortless PDFs
               </p>
             </div>
 
@@ -194,19 +129,17 @@ export function AuthModal({ isOpen, onClose, initialMode = "signin", promptMessa
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
-              {mode === "signup" && (
-                <div className="relative group">
-                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text-muted)] transition-colors group-focus-within:text-[var(--primary)]" />
-                  <input
-                    type="text"
-                    placeholder="Full name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-[var(--surface)] border border-[var(--border)] text-base placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent transition-all"
-                    required
-                  />
-                </div>
-              )}
+              <div className="relative group">
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text-muted)] transition-colors group-focus-within:text-[var(--primary)]" />
+                <input
+                  type="text"
+                  placeholder="Full name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-[var(--surface)] border border-[var(--border)] text-base placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent transition-all"
+                  required
+                />
+              </div>
 
               <div className="relative group">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text-muted)] transition-colors group-focus-within:text-[var(--primary)]" />
@@ -224,7 +157,7 @@ export function AuthModal({ isOpen, onClose, initialMode = "signin", promptMessa
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text-muted)] transition-colors group-focus-within:text-[var(--primary)]" />
                 <input
                   type="password"
-                  placeholder="Password"
+                  placeholder="Password (min 6 characters)"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-[var(--surface)] border border-[var(--border)] text-base placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent transition-all"
@@ -232,18 +165,6 @@ export function AuthModal({ isOpen, onClose, initialMode = "signin", promptMessa
                   minLength={6}
                 />
               </div>
-
-              {mode === "signin" && (
-                <div className="text-right">
-                  <button
-                    type="button"
-                    onClick={handleForgotPassword}
-                    className="text-sm text-[var(--primary)] hover:text-[var(--accent)] transition-colors"
-                  >
-                    Forgot password?
-                  </button>
-                </div>
-              )}
 
               <button
                 type="submit"
@@ -254,7 +175,7 @@ export function AuthModal({ isOpen, onClose, initialMode = "signin", promptMessa
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 ) : (
                   <>
-                    {mode === "signin" ? "Sign in" : "Create account"}
+                    Create account
                     <ArrowRight className="w-4 h-4" />
                   </>
                 )}
@@ -302,18 +223,25 @@ export function AuthModal({ isOpen, onClose, initialMode = "signin", promptMessa
 
             {/* Toggle mode */}
             <p className="text-center text-sm text-[var(--text-secondary)] mt-6">
-              {mode === "signin" ? "Don't have an account?" : "Already have an account?"}{" "}
-              <button
-                type="button"
-                onClick={() => {
-                  setMode(mode === "signin" ? "signup" : "signin");
-                  setError(null);
-                  setSuccess(null);
-                }}
+              Already have an account?{" "}
+              <Link
+                href="/login"
                 className="text-[var(--primary)] font-medium hover:text-[var(--accent)] transition-colors"
               >
-                {mode === "signin" ? "Sign up" : "Sign in"}
-              </button>
+                Sign in
+              </Link>
+            </p>
+
+            {/* Terms */}
+            <p className="text-center text-xs text-[var(--text-muted)] mt-4">
+              By creating an account, you agree to our{" "}
+              <Link href="/terms" className="underline hover:text-[var(--text-secondary)]">
+                Terms of Service
+              </Link>{" "}
+              and{" "}
+              <Link href="/privacy" className="underline hover:text-[var(--text-secondary)]">
+                Privacy Policy
+              </Link>
             </p>
           </div>
         </div>
