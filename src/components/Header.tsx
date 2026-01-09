@@ -74,7 +74,6 @@ const toolCategories = [
 ];
 
 // Flat list for mobile menu
-const allTools = toolCategories.flatMap((cat) => cat.tools);
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);

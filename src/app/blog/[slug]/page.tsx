@@ -3,8 +3,8 @@
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Calendar, Clock, ArrowLeft, User, BookOpen } from "lucide-react";
-import { getBlogPost, getRecentPosts, blogPosts } from "@/lib/blog-data";
+import { Calendar, Clock, ArrowLeft, User } from "lucide-react";
+import { getBlogPost, blogPosts } from "@/lib/blog-data";
 import { notFound } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 

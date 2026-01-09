@@ -18,7 +18,7 @@ export default function PDFToWord() {
   const [status, setStatus] = useState("");
   const [resultUrl, setResultUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [extractedText, setExtractedText] = useState<string>("");
+  const [_extractedText, setExtractedText] = useState<string>("");
 
   const remainingUsage = typeof window !== "undefined" ? getRemainingUsage() : 2;
 

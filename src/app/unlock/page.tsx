@@ -42,14 +42,15 @@ export default function UnlockPDF() {
           await PDFDocument.load(fileBuffer);
           // PDF loaded without password - it's not encrypted
           setNeedsPassword(false);
-        } catch (err: any) {
-          if (err.message?.includes("encrypted") || err.message?.includes("password")) {
+        } catch (err: unknown) {
+          const error = err as Error;
+          if (error.message?.includes("encrypted") || error.message?.includes("password")) {
             setNeedsPassword(true);
           } else {
             setError("Failed to read PDF. The file may be corrupted.");
           }
         }
-      } catch (err) {
+      } catch {
         setError("Failed to read file.");
       }
     }
@@ -94,8 +95,9 @@ export default function UnlockPDF() {
           password: password || undefined,
           ignoreEncryption: true,
         });
-      } catch (err: any) {
-        if (err.message?.includes("password") || err.message?.includes("encrypted")) {
+      } catch (err: unknown) {
+        const error = err as Error;
+        if (error.message?.includes("password") || error.message?.includes("encrypted")) {
           setError("Incorrect password. Please try again.");
           setIsProcessing(false);
           return;
