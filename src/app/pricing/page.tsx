@@ -137,7 +137,7 @@ export default function Pricing() {
                   <div className="mb-6">
                     {/* iOS-style Billing Toggle */}
                     <div className="relative flex items-center justify-center mb-5">
-                      <div className="relative bg-[#1c1c1e] p-[3px] rounded-[10px] w-[220px]">
+                      <div className="relative bg-[#1c1c1e] p-[3px] rounded-[10px] w-[200px]">
                         {/* Sliding pill */}
                         <div
                           className={`absolute top-[3px] bottom-[3px] w-[calc(50%-3px)] rounded-[8px] bg-[#636366] shadow-sm transition-transform duration-200 ease-out ${
@@ -157,32 +157,40 @@ export default function Pricing() {
                           </button>
                           <button
                             onClick={() => setIsAnnual(true)}
-                            className={`py-2 text-[13px] font-semibold rounded-[8px] transition-colors duration-200 z-10 text-center flex items-center justify-center gap-1.5 ${
+                            className={`py-2 text-[13px] font-semibold rounded-[8px] transition-colors duration-200 z-10 text-center ${
                               isAnnual
                                 ? "text-white"
                                 : "text-[#8e8e93]"
                             }`}
                           >
                             Annual
-                            <span className="px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-emerald-500 text-white">
-                              -37%
-                            </span>
                           </button>
                         </div>
                       </div>
                     </div>
 
                     {/* Price Display - Fixed Height */}
-                    <div className="text-center h-[72px] flex flex-col justify-center">
+                    <div className="text-center h-[80px] flex flex-col justify-center">
                       <div>
                         <span className="text-5xl font-semibold">
                           {isAnnual ? plan.annualPrice : plan.monthlyPrice}
                         </span>
                         <span className="text-[var(--muted-foreground)] ml-1">/month</span>
                       </div>
-                      <p className={`text-sm text-[var(--muted-foreground)] mt-1 transition-opacity duration-200 ${isAnnual ? "opacity-100" : "opacity-0"}`}>
-                        Billed {plan.annualTotal}/year
-                      </p>
+                      <div className="h-6 flex items-center justify-center mt-1">
+                        {isAnnual ? (
+                          <p className="text-sm text-[var(--muted-foreground)] flex items-center gap-2">
+                            Billed {plan.annualTotal}/year
+                            <span className="px-2 py-0.5 text-[11px] font-bold rounded-full bg-emerald-500 text-white">
+                              Save 37%
+                            </span>
+                          </p>
+                        ) : (
+                          <p className="text-sm text-[var(--muted-foreground)]">
+                            Billed monthly
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ) : (
