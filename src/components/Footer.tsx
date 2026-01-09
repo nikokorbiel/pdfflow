@@ -9,19 +9,24 @@ const footerLinks = {
     { name: "Compress PDF", href: "/compress" },
     { name: "PDF to Image", href: "/pdf-to-image" },
     { name: "Image to PDF", href: "/image-to-pdf" },
-    { name: "Rotate PDF", href: "/rotate" },
-    { name: "Watermark", href: "/watermark" },
     { name: "PDF to Word", href: "/pdf-to-word" },
-    { name: "Page Numbers", href: "/page-numbers" },
-    { name: "Reorder Pages", href: "/reorder" },
+    { name: "PDF to Excel", href: "/pdf-to-excel" },
+    { name: "Rotate PDF", href: "/rotate" },
+    { name: "Crop PDF", href: "/crop" },
     { name: "Sign PDF", href: "/sign" },
+    { name: "Watermark", href: "/watermark" },
     { name: "Protect PDF", href: "/protect" },
-    { name: "Unlock PDF", href: "/unlock" },
+    { name: "All Tools", href: "/tools" },
   ],
   company: [
     { name: "Pricing", href: "/pricing" },
-    { name: "Privacy", href: "/privacy" },
-    { name: "Terms", href: "/terms" },
+    { name: "Blog", href: "/blog" },
+    { name: "Changelog", href: "/changelog" },
+    { name: "Compare", href: "/compare" },
+  ],
+  legal: [
+    { name: "Privacy Policy", href: "/privacy" },
+    { name: "Terms of Service", href: "/terms" },
   ],
 };
 
@@ -32,9 +37,9 @@ export function Footer() {
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[var(--primary)]/50 to-transparent" />
 
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 gap-12 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-8 lg:grid-cols-5">
           {/* Brand */}
-          <div className="lg:col-span-2">
+          <div className="col-span-2">
             <Link href="/" className="inline-flex">
               <PDFflowLogo size={36} withWordmark />
             </Link>
@@ -74,7 +79,7 @@ export function Footer() {
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className="text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors"
+                    className="text-sm text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors"
                   >
                     {link.name}
                   </Link>
@@ -93,7 +98,26 @@ export function Footer() {
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className="text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors"
+                    className="text-sm text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors"
+                  >
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Legal */}
+          <div>
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+              Legal
+            </h3>
+            <ul className="mt-4 space-y-3">
+              {footerLinks.legal.map((link) => (
+                <li key={link.name}>
+                  <Link
+                    href={link.href}
+                    className="text-sm text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors"
                   >
                     {link.name}
                   </Link>
