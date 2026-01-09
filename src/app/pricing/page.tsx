@@ -1,17 +1,14 @@
+"use client";
+
+import { useState } from "react";
 import { Check, Sparkles, Zap, Building2 } from "lucide-react";
 import Link from "next/link";
-import type { Metadata } from "next";
 import { StripeCheckoutButton } from "@/components/StripeCheckoutButton";
-
-export const metadata: Metadata = {
-  title: "Pricing",
-  description: "Choose the right plan for your PDF processing needs. Free tier available.",
-};
 
 const plans = [
   {
     name: "Free",
-    price: "$0",
+    price: "£0",
     period: "forever",
     description: "Perfect for occasional use",
     icon: Sparkles,
@@ -29,8 +26,9 @@ const plans = [
   },
   {
     name: "Pro",
-    price: "$9",
-    period: "/month",
+    monthlyPrice: "£7.99",
+    annualPrice: "£4.99",
+    annualTotal: "£59.88",
     description: "For power users and professionals",
     icon: Zap,
     gradient: "from-[var(--accent)] to-purple-500",
@@ -49,7 +47,7 @@ const plans = [
   },
   {
     name: "Team",
-    price: "$29",
+    price: "£24",
     period: "/month",
     description: "For teams and businesses",
     icon: Building2,
@@ -64,12 +62,14 @@ const plans = [
       "Dedicated support",
     ],
     cta: "Contact Sales",
-    href: "mailto:sales@pdftools.com",
+    href: "mailto:sales@pdfflow.com",
     highlighted: false,
   },
 ];
 
 export default function Pricing() {
+  const [isAnnual, setIsAnnual] = useState(true);
+
   return (
     <div className="min-h-[80vh]">
       {/* Hero Section */}
@@ -132,10 +132,55 @@ export default function Pricing() {
                   </p>
                 </div>
 
-                <div className="mb-6">
-                  <span className="text-5xl font-semibold">{plan.price}</span>
-                  <span className="text-[var(--muted-foreground)] ml-1">{plan.period}</span>
-                </div>
+                {/* Pro plan with toggle */}
+                {plan.name === "Pro" ? (
+                  <div className="mb-6">
+                    {/* Billing Toggle */}
+                    <div className="flex items-center justify-center gap-3 mb-4 p-1 rounded-full bg-[var(--muted)] border border-[var(--border)]">
+                      <button
+                        onClick={() => setIsAnnual(false)}
+                        className={`px-4 py-2 text-sm font-medium rounded-full transition-all ${
+                          !isAnnual
+                            ? "bg-white text-black shadow-sm"
+                            : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
+                        }`}
+                      >
+                        Monthly
+                      </button>
+                      <button
+                        onClick={() => setIsAnnual(true)}
+                        className={`px-4 py-2 text-sm font-medium rounded-full transition-all flex items-center gap-2 ${
+                          isAnnual
+                            ? "bg-white text-black shadow-sm"
+                            : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
+                        }`}
+                      >
+                        Annual
+                        <span className="px-1.5 py-0.5 text-[10px] font-semibold rounded-full bg-emerald-500 text-white">
+                          -37%
+                        </span>
+                      </button>
+                    </div>
+
+                    {/* Price Display */}
+                    <div className="text-center">
+                      <span className="text-5xl font-semibold">
+                        {isAnnual ? plan.annualPrice : plan.monthlyPrice}
+                      </span>
+                      <span className="text-[var(--muted-foreground)] ml-1">/month</span>
+                      {isAnnual && (
+                        <p className="text-sm text-[var(--muted-foreground)] mt-1">
+                          Billed {plan.annualTotal}/year
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mb-6">
+                    <span className="text-5xl font-semibold">{plan.price}</span>
+                    <span className="text-[var(--muted-foreground)] ml-1">{plan.period}</span>
+                  </div>
+                )}
 
                 <ul className="mb-8 flex-1 space-y-4">
                   {plan.features.map((feature) => (
@@ -149,7 +194,7 @@ export default function Pricing() {
                 </ul>
 
                 {plan.name === "Pro" ? (
-                  <StripeCheckoutButton />
+                  <StripeCheckoutButton isAnnual={isAnnual} />
                 ) : (
                   <Link
                     href={plan.href}
