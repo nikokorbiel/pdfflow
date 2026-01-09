@@ -57,17 +57,24 @@ const toolCategories = [
     ],
   },
   {
-    name: "Convert",
+    name: "Export",
     icon: RefreshCw,
     tools: [
       { name: "PDF to Image", href: "/pdf-to-image", description: "Convert to PNG/JPG", icon: Image },
-      { name: "Image to PDF", href: "/image-to-pdf", description: "Create PDF from images", icon: FileImage },
       { name: "PDF to Word", href: "/pdf-to-word", description: "Convert to DOCX", icon: FileText },
       { name: "PDF to Excel", href: "/pdf-to-excel", description: "Extract to spreadsheet", icon: Table },
       { name: "PDF to PPT", href: "/pdf-to-powerpoint", description: "Convert to slides", icon: Presentation },
-      { name: "Word to PDF", href: "/word-to-pdf", description: "Word documents to PDF", icon: FileText },
+      { name: "Extract Images", href: "/extract-images", description: "Pull images out", icon: ImageIcon },
+    ],
+  },
+  {
+    name: "Create",
+    icon: FileImage,
+    tools: [
+      { name: "Image to PDF", href: "/image-to-pdf", description: "Images to PDF", icon: FileImage },
+      { name: "Word to PDF", href: "/word-to-pdf", description: "DOCX to PDF", icon: FileText },
       { name: "Excel to PDF", href: "/excel-to-pdf", description: "Spreadsheets to PDF", icon: Table },
-      { name: "PPT to PDF", href: "/powerpoint-to-pdf", description: "Presentations to PDF", icon: Presentation },
+      { name: "PPT to PDF", href: "/powerpoint-to-pdf", description: "Slides to PDF", icon: Presentation },
       { name: "HTML to PDF", href: "/html-to-pdf", description: "Web page to PDF", icon: Code },
     ],
   },
@@ -80,8 +87,7 @@ const toolCategories = [
       { name: "Crop PDF", href: "/crop", description: "Trim pages", icon: Crop },
       { name: "Watermark", href: "/watermark", description: "Add watermarks", icon: Droplets },
       { name: "Sign PDF", href: "/sign", description: "Add signatures", icon: PenTool },
-      { name: "Extract Images", href: "/extract-images", description: "Pull images out", icon: ImageIcon },
-      { name: "Flatten PDF", href: "/flatten", description: "Make forms non-editable", icon: Layers },
+      { name: "Flatten PDF", href: "/flatten", description: "Flatten forms", icon: Layers },
     ],
   },
   {
@@ -161,10 +167,10 @@ export function Header() {
                 </button>
 
                 {toolsOpen && (
-                  <div className="absolute top-full left-0 mt-2 w-[720px] p-6 rounded-2xl bg-[#0a0a0f] border border-[#1e293b] shadow-2xl">
+                  <div className="absolute top-full left-0 mt-2 w-[880px] p-6 rounded-2xl bg-[#0a0a0f] border border-[#1e293b] shadow-2xl">
                     <div className="absolute -top-[6px] left-8 w-3 h-3 rotate-45 bg-[#0a0a0f] border-l border-t border-[#1e293b]" />
 
-                    <div className="grid grid-cols-4 gap-6">
+                    <div className="grid grid-cols-5 gap-5">
                       {toolCategories.map((category) => (
                         <div key={category.name}>
                           <div className="flex items-center gap-2 mb-3 pb-2 border-b border-[#1e293b]">

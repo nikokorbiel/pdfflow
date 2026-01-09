@@ -229,19 +229,19 @@ const testimonials = [
   {
     name: "Sarah Chen",
     role: "Product Designer",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=sarah&backgroundColor=0ea5e9",
+    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=face",
     content: "Finally, PDF tools that just work. No bloated software, no sketchy uploads.",
   },
   {
     name: "Marcus Johnson",
     role: "Freelance Developer",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=marcus&backgroundColor=06b6d4",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
     content: "I use PDFflow daily. The privacy aspect is huge - my clients' data stays on my machine.",
   },
   {
     name: "Emily Rodriguez",
     role: "Marketing Manager",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=emily&backgroundColor=14b8a6",
+    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face",
     content: "Merged 50+ PDFs for our annual report in seconds. Incredibly intuitive.",
   },
 ];
