@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // Cache the pdfjsLib instance
 let pdfjsLibInstance: any = null;
 let pdfjsLoadPromise: Promise<any> | null = null;

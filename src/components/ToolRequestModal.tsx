@@ -98,7 +98,7 @@ export function ToolRequestModal({ isOpen, onClose }: ToolRequestModalProps) {
                       <CheckCircle className="w-8 h-8 text-emerald-500" />
                     </div>
                     <h3 className="text-lg font-medium text-white mb-1">Request Submitted!</h3>
-                    <p className="text-sm text-[#64748b]">We'll review your suggestion soon.</p>
+                    <p className="text-sm text-[#64748b]">We&apos;ll review your suggestion soon.</p>
                   </motion.div>
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-4">

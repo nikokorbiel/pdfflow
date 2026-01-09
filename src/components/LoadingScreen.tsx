@@ -31,6 +31,7 @@ export function LoadingScreen() {
       hasShownThisPageLoad = true;
       setIsVisible(true);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Separate effect for the fade-out timer

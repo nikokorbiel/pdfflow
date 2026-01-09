@@ -148,6 +148,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       authSubscription.unsubscribe();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [supabase]);
 
   const signOut = async () => {
