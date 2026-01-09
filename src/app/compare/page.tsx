@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, Shield, Zap, DollarSign } from "lucide-react";
+import { ArrowRight, Shield, Zap, Infinity, Check, X, Sparkles, Lock, Globe, Cpu } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Compare PDFflow - Best Free PDF Tool Alternatives | PDFflow",
@@ -28,47 +28,79 @@ const comparisons = [
     slug: "adobe-acrobat",
     description: "The industry standard, but expensive and requires installation.",
     color: "from-red-500 to-red-600",
-    highlight: "Save $275/year",
+    highlight: "Save £200+/year",
+    theirPrice: "£18/mo",
   },
   {
     name: "Smallpdf",
     slug: "smallpdf",
-    description: "Popular online tool, but limited to 2 free tasks per day.",
+    description: "Popular online tool, but uploads your files to their servers.",
     color: "from-red-400 to-red-500",
-    highlight: "Unlimited tasks",
+    highlight: "100% Private",
+    theirPrice: "£10/mo",
   },
   {
     name: "iLovePDF",
     slug: "ilovepdf",
-    description: "Feature-rich but uploads files to their servers.",
+    description: "Feature-rich but limited free tier and server-side processing.",
     color: "from-rose-500 to-rose-600",
-    highlight: "100% private",
+    highlight: "No Upload Needed",
+    theirPrice: "£5.50/mo",
   },
   {
     name: "PDF24",
     slug: "pdf24",
     description: "Free but ad-supported with a dated interface.",
     color: "from-orange-500 to-orange-600",
-    highlight: "Modern & ad-free",
+    highlight: "Modern & Ad-free",
+    theirPrice: "Free (ads)",
   },
 ];
 
-const whyPDFflow = [
+const pdfflowFeatures = [
   {
     icon: Shield,
-    title: "Privacy First",
-    description: "Files are processed locally in your browser. Nothing is uploaded to external servers.",
+    title: "100% Privacy",
+    description: "Your files never leave your device. All processing happens locally in your browser - no uploads, no servers, no data collection.",
   },
   {
     icon: Zap,
     title: "Instant Processing",
-    description: "No upload or download wait times. Everything happens instantly on your device.",
+    description: "No waiting for uploads or downloads. Everything processes instantly on your device, regardless of file size.",
   },
   {
-    icon: DollarSign,
-    title: "Generous Free Tier",
-    description: "No daily limits, no feature restrictions. Use all basic tools completely free.",
+    icon: Infinity,
+    title: "26 Professional Tools",
+    description: "Merge, split, compress, convert, sign, watermark, protect, and more. All the tools you need in one place.",
   },
+  {
+    icon: Lock,
+    title: "No Account Required",
+    description: "Start using PDFflow immediately. No signup, no email, no credit card. Just open and go.",
+  },
+  {
+    icon: Globe,
+    title: "Works Everywhere",
+    description: "Browser-based means it works on Windows, Mac, Linux, and mobile. No installation needed.",
+  },
+  {
+    icon: Cpu,
+    title: "Offline Capable",
+    description: "Once loaded, PDFflow works without an internet connection. Your data stays completely offline.",
+  },
+];
+
+const detailedComparison = [
+  { feature: "Browser-based (no install)", pdfflow: true, adobe: false, smallpdf: true, ilovepdf: true, pdf24: true },
+  { feature: "Files stay on your device", pdfflow: true, adobe: false, smallpdf: false, ilovepdf: false, pdf24: false },
+  { feature: "No account required", pdfflow: true, adobe: false, smallpdf: false, ilovepdf: true, pdf24: true },
+  { feature: "No daily limits (free)", pdfflow: "2 files/day", adobe: "7-day trial", smallpdf: "2 tasks/day", ilovepdf: "Limited", pdf24: "Unlimited" },
+  { feature: "Ad-free experience", pdfflow: true, adobe: true, smallpdf: "Pro only", ilovepdf: "Pro only", pdf24: false },
+  { feature: "Batch processing", pdfflow: "Pro", adobe: true, smallpdf: "Pro", ilovepdf: "Pro", pdf24: true },
+  { feature: "Max file size (free)", pdfflow: "10MB", adobe: "N/A", smallpdf: "5MB", ilovepdf: "15MB", pdf24: "Unlimited" },
+  { feature: "Max file size (paid)", pdfflow: "100MB", adobe: "Unlimited", smallpdf: "5GB", ilovepdf: "4GB", pdf24: "N/A" },
+  { feature: "Works offline", pdfflow: true, adobe: true, smallpdf: false, ilovepdf: false, pdf24: false },
+  { feature: "Starting price", pdfflow: "£4.99/mo", adobe: "£18/mo", smallpdf: "£10/mo", ilovepdf: "£5.50/mo", pdf24: "Free" },
 ];
 
 export default function ComparePage() {
@@ -82,38 +114,96 @@ export default function ComparePage() {
         </div>
 
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--primary)]/10 text-[var(--primary)] text-sm font-medium mb-6">
+            <Sparkles className="h-4 w-4" />
+            The Privacy-First PDF Tool
+          </div>
           <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-6">
-            Compare PDFflow
+            Why PDFflow?
           </h1>
-          <p className="text-xl text-[var(--text-secondary)] max-w-2xl mx-auto">
-            See how PDFflow stacks up against popular PDF tools.
-            Discover why thousands are making the switch.
+          <p className="text-xl text-[var(--text-secondary)] max-w-2xl mx-auto mb-8">
+            Unlike other PDF tools, PDFflow processes everything locally in your browser.
+            Your files never touch our servers.
           </p>
+          <div className="flex flex-wrap justify-center gap-4">
+            <Link
+              href="/tools"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-[var(--primary)] to-[var(--accent)] text-white font-medium shadow-lg hover:opacity-90 transition-all"
+            >
+              Try PDFflow Free
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
+              href="/pricing"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full border border-[var(--border)] hover:bg-[var(--muted)] transition-all"
+            >
+              View Pricing
+            </Link>
+          </div>
         </div>
       </section>
 
-      {/* Why PDFflow */}
+      {/* What PDFflow Offers */}
       <section className="py-16 border-t border-[var(--border)]">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-center mb-10">Why Choose PDFflow?</h2>
-          <div className="grid md:grid-cols-3 gap-6">
-            {whyPDFflow.map((item) => (
-              <div key={item.title} className="text-center p-6">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <h2 className="text-2xl font-bold text-center mb-4">What You Get With PDFflow</h2>
+          <p className="text-center text-[var(--text-secondary)] mb-10 max-w-2xl mx-auto">
+            A complete PDF toolkit that respects your privacy
+          </p>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {pdfflowFeatures.map((item) => (
+              <div key={item.title} className="p-6 rounded-2xl border bg-[var(--card)] hover:shadow-lg transition-all">
                 <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--primary)]/10 to-[var(--accent)]/10 mb-4">
                   <item.icon className="h-6 w-6 text-[var(--primary)]" />
                 </div>
                 <h3 className="font-semibold mb-2">{item.title}</h3>
-                <p className="text-sm text-[var(--text-secondary)]">{item.description}</p>
+                <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{item.description}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
+      {/* Pricing Highlight */}
+      <section className="py-16 bg-gradient-to-r from-[var(--primary)]/5 to-[var(--accent)]/5">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-2xl font-bold mb-6">Simple, Honest Pricing</h2>
+          <div className="grid sm:grid-cols-2 gap-6 max-w-2xl mx-auto">
+            <div className="p-6 rounded-2xl border bg-[var(--card)]">
+              <p className="text-sm text-[var(--text-secondary)] mb-2">Free Forever</p>
+              <p className="text-4xl font-bold mb-2">£0</p>
+              <ul className="text-sm text-[var(--text-secondary)] space-y-2 text-left">
+                <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /> 2 files per day</li>
+                <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /> All 26 tools</li>
+                <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /> Up to 10MB files</li>
+                <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /> No account needed</li>
+              </ul>
+            </div>
+            <div className="p-6 rounded-2xl border-2 border-[var(--primary)] bg-[var(--card)] relative">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-[var(--primary)] text-white text-xs font-medium">
+                Best Value
+              </div>
+              <p className="text-sm text-[var(--text-secondary)] mb-2">Pro Annual</p>
+              <p className="text-4xl font-bold mb-1">£4.99<span className="text-lg font-normal text-[var(--text-secondary)]">/mo</span></p>
+              <p className="text-xs text-[var(--text-secondary)] mb-4">Billed £59.88/year</p>
+              <ul className="text-sm text-[var(--text-secondary)] space-y-2 text-left">
+                <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /> Unlimited files</li>
+                <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /> Up to 100MB files</li>
+                <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /> Batch processing</li>
+                <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /> Priority support</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Comparison Cards */}
-      <section className="py-16 bg-[var(--muted)]/30">
+      <section className="py-16 border-t border-[var(--border)]">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-center mb-10">Compare With Popular Tools</h2>
+          <h2 className="text-2xl font-bold text-center mb-4">Compare With Alternatives</h2>
+          <p className="text-center text-[var(--text-secondary)] mb-10">
+            See how PDFflow stacks up against popular PDF tools
+          </p>
 
           <div className="grid sm:grid-cols-2 gap-6">
             {comparisons.map((comparison) => (
@@ -131,11 +221,16 @@ export default function ComparePage() {
                       {comparison.description}
                     </p>
                   </div>
-                  <ArrowRight className="h-5 w-5 text-[var(--text-muted)] group-hover:text-[var(--primary)] group-hover:translate-x-1 transition-all" />
+                  <ArrowRight className="h-5 w-5 text-[var(--text-muted)] group-hover:text-[var(--primary)] group-hover:translate-x-1 transition-all flex-shrink-0" />
                 </div>
 
-                <div className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium text-white bg-gradient-to-r ${comparison.color}`}>
-                  {comparison.highlight}
+                <div className="flex items-center justify-between">
+                  <div className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium text-white bg-gradient-to-r ${comparison.color}`}>
+                    {comparison.highlight}
+                  </div>
+                  <span className="text-sm text-[var(--text-secondary)]">
+                    They charge: <span className="font-medium text-[var(--foreground)]">{comparison.theirPrice}</span>
+                  </span>
                 </div>
               </Link>
             ))}
@@ -143,17 +238,17 @@ export default function ComparePage() {
         </div>
       </section>
 
-      {/* Quick Comparison Table */}
-      <section className="py-16 border-t border-[var(--border)]">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-center mb-10">At a Glance</h2>
+      {/* Detailed Comparison Table */}
+      <section className="py-16 bg-[var(--muted)]/30">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <h2 className="text-2xl font-bold text-center mb-10">Feature Comparison</h2>
 
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto rounded-2xl border bg-[var(--card)]">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-[var(--border)]">
+                <tr className="border-b border-[var(--border)] bg-[var(--muted)]/50">
                   <th className="text-left py-4 px-4 font-semibold">Feature</th>
-                  <th className="text-center py-4 px-4 font-semibold text-[var(--primary)]">PDFflow</th>
+                  <th className="text-center py-4 px-4 font-semibold text-[var(--primary)] bg-[var(--primary)]/5">PDFflow</th>
                   <th className="text-center py-4 px-4 font-semibold">Adobe</th>
                   <th className="text-center py-4 px-4 font-semibold">Smallpdf</th>
                   <th className="text-center py-4 px-4 font-semibold">iLovePDF</th>
@@ -161,46 +256,36 @@ export default function ComparePage() {
                 </tr>
               </thead>
               <tbody className="text-[var(--text-secondary)]">
-                <tr className="border-b border-[var(--border)]">
-                  <td className="py-3 px-4">Free Tier</td>
-                  <td className="text-center py-3 px-4 text-green-500">✓ Unlimited</td>
-                  <td className="text-center py-3 px-4">7-day trial</td>
-                  <td className="text-center py-3 px-4">2 tasks/day</td>
-                  <td className="text-center py-3 px-4">Limited</td>
-                  <td className="text-center py-3 px-4">✓ Ad-supported</td>
-                </tr>
-                <tr className="border-b border-[var(--border)]">
-                  <td className="py-3 px-4">Local Processing</td>
-                  <td className="text-center py-3 px-4 text-green-500">✓</td>
-                  <td className="text-center py-3 px-4">Desktop only</td>
-                  <td className="text-center py-3 px-4">✗</td>
-                  <td className="text-center py-3 px-4">✗</td>
-                  <td className="text-center py-3 px-4">Desktop only</td>
-                </tr>
-                <tr className="border-b border-[var(--border)]">
-                  <td className="py-3 px-4">No Account Required</td>
-                  <td className="text-center py-3 px-4 text-green-500">✓</td>
-                  <td className="text-center py-3 px-4">✗</td>
-                  <td className="text-center py-3 px-4">✗</td>
-                  <td className="text-center py-3 px-4">✓</td>
-                  <td className="text-center py-3 px-4">✓</td>
-                </tr>
-                <tr className="border-b border-[var(--border)]">
-                  <td className="py-3 px-4">Ad-Free</td>
-                  <td className="text-center py-3 px-4 text-green-500">✓</td>
-                  <td className="text-center py-3 px-4">✓</td>
-                  <td className="text-center py-3 px-4">Pro only</td>
-                  <td className="text-center py-3 px-4">Pro only</td>
-                  <td className="text-center py-3 px-4">✗</td>
-                </tr>
-                <tr className="border-b border-[var(--border)]">
-                  <td className="py-3 px-4">Starting Price</td>
-                  <td className="text-center py-3 px-4 text-[var(--primary)] font-semibold">$9/mo</td>
-                  <td className="text-center py-3 px-4">$12.99/mo</td>
-                  <td className="text-center py-3 px-4">$12/mo</td>
-                  <td className="text-center py-3 px-4">$7/mo</td>
-                  <td className="text-center py-3 px-4">Free</td>
-                </tr>
+                {detailedComparison.map((row, index) => (
+                  <tr key={row.feature} className={index < detailedComparison.length - 1 ? "border-b border-[var(--border)]" : ""}>
+                    <td className="py-3 px-4 font-medium text-[var(--foreground)]">{row.feature}</td>
+                    <td className="text-center py-3 px-4 bg-[var(--primary)]/5">
+                      {row.pdfflow === true ? <Check className="h-5 w-5 text-green-500 mx-auto" /> :
+                       row.pdfflow === false ? <X className="h-5 w-5 text-red-400 mx-auto" /> :
+                       <span className="text-[var(--primary)] font-medium">{row.pdfflow}</span>}
+                    </td>
+                    <td className="text-center py-3 px-4">
+                      {row.adobe === true ? <Check className="h-5 w-5 text-green-500 mx-auto" /> :
+                       row.adobe === false ? <X className="h-5 w-5 text-red-400 mx-auto" /> :
+                       <span>{row.adobe}</span>}
+                    </td>
+                    <td className="text-center py-3 px-4">
+                      {row.smallpdf === true ? <Check className="h-5 w-5 text-green-500 mx-auto" /> :
+                       row.smallpdf === false ? <X className="h-5 w-5 text-red-400 mx-auto" /> :
+                       <span>{row.smallpdf}</span>}
+                    </td>
+                    <td className="text-center py-3 px-4">
+                      {row.ilovepdf === true ? <Check className="h-5 w-5 text-green-500 mx-auto" /> :
+                       row.ilovepdf === false ? <X className="h-5 w-5 text-red-400 mx-auto" /> :
+                       <span>{row.ilovepdf}</span>}
+                    </td>
+                    <td className="text-center py-3 px-4">
+                      {row.pdf24 === true ? <Check className="h-5 w-5 text-green-500 mx-auto" /> :
+                       row.pdf24 === false ? <X className="h-5 w-5 text-red-400 mx-auto" /> :
+                       <span>{row.pdf24}</span>}
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
@@ -208,21 +293,29 @@ export default function ComparePage() {
       </section>
 
       {/* CTA */}
-      <section className="py-20 bg-[var(--muted)]/30">
+      <section className="py-20">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold mb-4">
             Ready to Try PDFflow?
           </h2>
           <p className="text-[var(--text-secondary)] mb-8">
-            Join thousands who switched to PDFflow. No credit card, no signup required.
+            Join thousands who switched to PDFflow. Start free, no credit card required.
           </p>
-          <Link
-            href="/tools"
-            className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-gradient-to-r from-[var(--primary)] to-[var(--accent)] text-white font-medium shadow-lg hover:opacity-90 transition-all"
-          >
-            Start Using PDFflow Free
-            <ArrowRight className="h-5 w-5" />
-          </Link>
+          <div className="flex flex-wrap justify-center gap-4">
+            <Link
+              href="/tools"
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-gradient-to-r from-[var(--primary)] to-[var(--accent)] text-white font-medium shadow-lg hover:opacity-90 transition-all"
+            >
+              Start Using PDFflow Free
+              <ArrowRight className="h-5 w-5" />
+            </Link>
+            <Link
+              href="/pricing"
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full border border-[var(--border)] hover:bg-[var(--muted)] font-medium transition-all"
+            >
+              View All Plans
+            </Link>
+          </div>
         </div>
       </section>
     </div>
