@@ -112,6 +112,17 @@ export default function OnboardingPage() {
 
       if (error) throw error;
 
+      // Send welcome email (fire and forget)
+      fetch("/api/email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "welcome",
+          email: user.email,
+          name: fullName,
+        }),
+      }).catch(console.error);
+
       await refreshUser();
       router.push("/dashboard");
     } catch (error) {

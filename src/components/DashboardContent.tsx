@@ -38,6 +38,14 @@ import {
   Circle,
   TrendingUp,
   BarChart3,
+  Table,
+  Presentation,
+  Code,
+  Crop,
+  EyeOff,
+  FileCheck,
+  Wrench,
+  ImageIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -70,18 +78,36 @@ interface DashboardContentProps {
 }
 
 const allTools = [
+  // Core tools
   { id: "merge", name: "Merge PDF", href: "/merge", description: "Combine multiple PDFs into one", gradient: "from-blue-500 to-cyan-500", icon: Combine, shortcut: "M" },
   { id: "split", name: "Split PDF", href: "/split", description: "Extract or divide pages", gradient: "from-purple-500 to-pink-500", icon: Split, shortcut: "S" },
   { id: "compress", name: "Compress", href: "/compress", description: "Reduce file size", gradient: "from-orange-500 to-red-500", icon: FileDown, shortcut: "C" },
+  // Conversion tools
   { id: "pdf-to-image", name: "PDF to Image", href: "/pdf-to-image", description: "Convert to PNG/JPG", gradient: "from-green-500 to-emerald-500", icon: Image, shortcut: "I" },
   { id: "image-to-pdf", name: "Image to PDF", href: "/image-to-pdf", description: "Create PDF from images", gradient: "from-indigo-500 to-purple-500", icon: FileImage, shortcut: "P" },
+  { id: "pdf-to-excel", name: "PDF to Excel", href: "/pdf-to-excel", description: "Extract data to spreadsheet", gradient: "from-green-500 to-emerald-400", icon: Table, shortcut: "E" },
+  { id: "pdf-to-powerpoint", name: "PDF to PPT", href: "/pdf-to-powerpoint", description: "Convert to presentation", gradient: "from-orange-500 to-red-400", icon: Presentation, shortcut: "T" },
+  { id: "word-to-pdf", name: "Word to PDF", href: "/word-to-pdf", description: "Convert Word documents", gradient: "from-blue-500 to-indigo-400", icon: FileText, shortcut: "D" },
+  { id: "excel-to-pdf", name: "Excel to PDF", href: "/excel-to-pdf", description: "Convert spreadsheets", gradient: "from-green-500 to-emerald-400", icon: Table, shortcut: "X" },
+  { id: "powerpoint-to-pdf", name: "PPT to PDF", href: "/powerpoint-to-pdf", description: "Convert presentations", gradient: "from-orange-500 to-red-400", icon: Presentation, shortcut: "Y" },
+  { id: "html-to-pdf", name: "HTML to PDF", href: "/html-to-pdf", description: "Convert web pages", gradient: "from-violet-500 to-purple-400", icon: Code, shortcut: "H" },
+  // Page editing
   { id: "rotate", name: "Rotate PDF", href: "/rotate", description: "Rotate pages any direction", gradient: "from-pink-500 to-rose-500", icon: RotateCw, shortcut: "R" },
+  { id: "crop", name: "Crop PDF", href: "/crop", description: "Trim page margins", gradient: "from-rose-500 to-pink-400", icon: Crop, shortcut: "K" },
+  { id: "delete-pages", name: "Delete Pages", href: "/delete-pages", description: "Remove unwanted pages", gradient: "from-red-500 to-orange-400", icon: Trash2, shortcut: "B" },
+  { id: "reorder", name: "Reorder Pages", href: "/reorder", description: "Drag & drop to rearrange", gradient: "from-teal-500 to-cyan-500", icon: ArrowUpDown, shortcut: "O" },
+  // Annotation tools
   { id: "watermark", name: "Watermark", href: "/watermark", description: "Add text or image watermarks", gradient: "from-blue-500 to-indigo-500", icon: Droplets, shortcut: "W" },
   { id: "page-numbers", name: "Page Numbers", href: "/page-numbers", description: "Add page numbering", gradient: "from-slate-500 to-gray-500", icon: Hash, shortcut: "N" },
-  { id: "reorder", name: "Reorder Pages", href: "/reorder", description: "Drag & drop to rearrange", gradient: "from-teal-500 to-cyan-500", icon: ArrowUpDown, shortcut: "O" },
   { id: "sign", name: "Sign PDF", href: "/sign", description: "Add signatures & initials", gradient: "from-purple-500 to-pink-500", icon: PenTool, shortcut: "G" },
+  { id: "redact", name: "Redact PDF", href: "/redact", description: "Hide sensitive content", gradient: "from-slate-600 to-gray-500", icon: EyeOff, shortcut: "A" },
+  // Security & Advanced
   { id: "protect", name: "Protect PDF", href: "/protect", description: "Password-protect your PDF", gradient: "from-amber-500 to-yellow-500", icon: Lock, shortcut: "L" },
   { id: "unlock", name: "Unlock PDF", href: "/unlock", description: "Remove PDF password", gradient: "from-cyan-500 to-sky-500", icon: Unlock, shortcut: "U" },
+  { id: "extract-images", name: "Extract Images", href: "/extract-images", description: "Pull images from PDF", gradient: "from-cyan-500 to-blue-400", icon: ImageIcon, shortcut: "Z" },
+  { id: "flatten", name: "Flatten PDF", href: "/flatten", description: "Make forms non-editable", gradient: "from-indigo-500 to-blue-400", icon: Layers, shortcut: "F" },
+  { id: "repair", name: "Repair PDF", href: "/repair", description: "Fix corrupted files", gradient: "from-amber-500 to-orange-400", icon: Wrench, shortcut: "Q" },
+  { id: "pdf-to-pdfa", name: "PDF to PDF/A", href: "/pdf-to-pdfa", description: "Convert to archival format", gradient: "from-emerald-500 to-green-400", icon: FileCheck, shortcut: "V" },
 ];
 
 const FAVORITES_KEY = "pdfflow_favorite_tools";
@@ -159,6 +185,7 @@ function getActivityStats(history: FileHistoryItem[]) {
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Combine, Split, FileDown, Image, FileImage, FileText, RotateCw, Droplets, Hash, ArrowUpDown, PenTool, Lock, Unlock,
+  Table, Presentation, Code, Crop, EyeOff, FileCheck, Wrench, ImageIcon, Trash2, Layers,
 };
 
 const toolColors: Record<string, string> = {
@@ -168,13 +195,26 @@ const toolColors: Record<string, string> = {
   "pdf-to-image": "from-orange-500 to-amber-400",
   "image-to-pdf": "from-indigo-500 to-blue-400",
   "pdf-to-word": "from-blue-600 to-blue-400",
+  "pdf-to-excel": "from-green-500 to-emerald-400",
+  "pdf-to-powerpoint": "from-orange-500 to-red-400",
+  "word-to-pdf": "from-blue-500 to-indigo-400",
+  "excel-to-pdf": "from-green-500 to-emerald-400",
+  "powerpoint-to-pdf": "from-orange-500 to-red-400",
+  "html-to-pdf": "from-violet-500 to-purple-400",
   rotate: "from-teal-500 to-cyan-400",
+  crop: "from-rose-500 to-pink-400",
+  "delete-pages": "from-red-500 to-orange-400",
   watermark: "from-blue-500 to-indigo-500",
   "page-numbers": "from-slate-500 to-gray-400",
   reorder: "from-pink-500 to-rose-500",
   sign: "from-purple-500 to-pink-500",
+  redact: "from-slate-600 to-gray-500",
   protect: "from-amber-500 to-yellow-500",
   unlock: "from-cyan-500 to-sky-500",
+  "extract-images": "from-cyan-500 to-blue-400",
+  flatten: "from-indigo-500 to-blue-400",
+  repair: "from-amber-500 to-orange-400",
+  "pdf-to-pdfa": "from-emerald-500 to-green-400",
 };
 
 // Animated Greeting Component

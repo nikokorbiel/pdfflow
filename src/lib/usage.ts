@@ -161,3 +161,42 @@ export async function canProcessFileAsync(userId?: string): Promise<boolean> {
   const remaining = await getRemainingUsageAsync(userId);
   return remaining > 0;
 }
+
+// Send usage limit notification email
+export async function notifyUsageLimitReached(): Promise<void> {
+  try {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user?.email) return;
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("full_name")
+      .eq("id", user.id)
+      .single();
+
+    // Check if we already sent this email today
+    const emailSentKey = `usage-limit-email-${new Date().toISOString().split("T")[0]}`;
+    if (typeof window !== "undefined" && localStorage.getItem(emailSentKey)) {
+      return; // Already sent today
+    }
+
+    await fetch("/api/email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type: "usage_limit",
+        email: user.email,
+        name: profile?.full_name,
+      }),
+    });
+
+    // Mark as sent for today
+    if (typeof window !== "undefined") {
+      localStorage.setItem(emailSentKey, "true");
+    }
+  } catch (error) {
+    console.error("Failed to send usage limit email:", error);
+  }
+}
