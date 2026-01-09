@@ -16,12 +16,13 @@ export function GlowingBorder({ className = "", delay = 0 }: GlowingBorderProps)
       {/* Animated glow particle */}
       <div className="absolute inset-0 overflow-hidden">
         <div
-          className="glowing-particle absolute top-1/2 -translate-y-1/2 w-24 sm:w-32 h-[3px] rounded-full"
+          className="glowing-particle absolute left-0 top-1/2 w-24 sm:w-32 h-[3px] rounded-full will-change-transform"
           style={{
             background: "linear-gradient(90deg, transparent, #0ea5e9, #06b6d4, #0ea5e9, transparent)",
             boxShadow: "0 0 15px 2px rgba(14, 165, 233, 0.5), 0 0 30px 4px rgba(6, 182, 212, 0.3)",
             animation: `borderGlow 10s linear infinite`,
             animationDelay: `${delay}s`,
+            transform: "translateY(-50%)",
           }}
         />
       </div>
@@ -29,7 +30,7 @@ export function GlowingBorder({ className = "", delay = 0 }: GlowingBorderProps)
       <style jsx>{`
         @keyframes borderGlow {
           0% {
-            left: -15%;
+            transform: translateX(-15%) translateY(-50%);
             opacity: 0;
           }
           3% {
@@ -39,7 +40,7 @@ export function GlowingBorder({ className = "", delay = 0 }: GlowingBorderProps)
             opacity: 1;
           }
           100% {
-            left: 115%;
+            transform: translateX(calc(100vw + 15%)) translateY(-50%);
             opacity: 0;
           }
         }
