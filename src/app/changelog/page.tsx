@@ -21,6 +21,17 @@ import {
   Split,
   Image,
   FileImage,
+  Table,
+  Presentation,
+  Code,
+  Crop,
+  Trash2,
+  EyeOff,
+  Wrench,
+  Layers,
+  FileCheck,
+  LayoutDashboard,
+  Mail,
 } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -43,6 +54,96 @@ interface Update {
 }
 
 const updates: Update[] = [
+  {
+    version: "1.4.0",
+    date: "January 2025",
+    title: "13 New Tools & Interactive Dashboard",
+    description: "Major expansion with conversion tools, editing features, and a revamped dashboard experience.",
+    features: [
+      {
+        title: "PDF to Excel",
+        description: "Extract tables and data from PDF documents into spreadsheet format for easy editing.",
+        icon: Table,
+        link: "/pdf-to-excel",
+        isNew: true,
+      },
+      {
+        title: "PDF to PowerPoint",
+        description: "Convert PDF presentations back to editable PowerPoint slides.",
+        icon: Presentation,
+        link: "/pdf-to-powerpoint",
+        isNew: true,
+      },
+      {
+        title: "Word/Excel/PPT to PDF",
+        description: "Convert Microsoft Office documents to PDF format with perfect formatting.",
+        icon: FileText,
+        link: "/word-to-pdf",
+        isNew: true,
+      },
+      {
+        title: "HTML to PDF",
+        description: "Convert web pages and HTML content to PDF documents.",
+        icon: Code,
+        link: "/html-to-pdf",
+        isNew: true,
+      },
+      {
+        title: "Crop PDF",
+        description: "Trim margins and resize pages to focus on the content that matters.",
+        icon: Crop,
+        link: "/crop",
+        isNew: true,
+      },
+      {
+        title: "Delete Pages",
+        description: "Remove unwanted pages from your PDF documents with visual selection.",
+        icon: Trash2,
+        link: "/delete-pages",
+        isNew: true,
+      },
+      {
+        title: "Redact PDF",
+        description: "Permanently hide sensitive information with secure redaction.",
+        icon: EyeOff,
+        link: "/redact",
+        isNew: true,
+      },
+      {
+        title: "Repair & Flatten PDF",
+        description: "Fix corrupted files and flatten form fields for sharing.",
+        icon: Wrench,
+        link: "/repair",
+        isNew: true,
+      },
+      {
+        title: "PDF to PDF/A",
+        description: "Convert documents to archival format for long-term preservation.",
+        icon: FileCheck,
+        link: "/pdf-to-pdfa",
+        isNew: true,
+      },
+      {
+        title: "Interactive Dashboard",
+        description: "New Get Started checklist with clickable tasks, progress tracking, and smooth animations.",
+        icon: LayoutDashboard,
+        link: "/dashboard",
+        isNew: true,
+      },
+      {
+        title: "Email Notifications",
+        description: "Welcome emails, usage alerts, and subscription updates via Resend integration.",
+        icon: Mail,
+        isNew: true,
+      },
+      {
+        title: "Enhanced Navigation",
+        description: "All 26 tools now accessible from the header dropdown with improved categorization.",
+        icon: Layers,
+        isNew: true,
+      },
+    ],
+  },
   {
     version: "1.3.0",
     date: "January 2025",

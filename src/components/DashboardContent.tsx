@@ -111,7 +111,7 @@ const allTools = [
 ];
 
 const FAVORITES_KEY = "pdfflow_favorite_tools";
-const BANNER_DISMISSED_KEY = "pdfflow_whats_new_dismissed_v1.3";
+const BANNER_DISMISSED_KEY = "pdfflow_whats_new_dismissed_v1.4";
 const COLLAPSED_SECTIONS_KEY = "pdfflow_collapsed_sections";
 const ONBOARDING_KEY = "pdfflow_onboarding_dismissed";
 
@@ -476,8 +476,8 @@ export function DashboardContent({ profile, usage }: DashboardContentProps) {
                     <Sparkles className="h-5 w-5 text-white" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm">New in v1.3: Workflow Builder</p>
-                    <p className="text-xs text-[var(--muted-foreground)]">Chain multiple tools together and save templates for reuse.</p>
+                    <p className="font-medium text-sm">New in v1.4: 13 New Tools</p>
+                    <p className="text-xs text-[var(--muted-foreground)]">PDF to Excel, Crop, Redact, and more conversion tools added.</p>
                   </div>
                   <Link href="/changelog" className="hidden sm:flex items-center gap-1 text-sm text-[var(--accent)] hover:opacity-80 transition-opacity whitespace-nowrap">
                     See all updates <ArrowRight className="h-3 w-3" />

@@ -268,7 +268,7 @@ export function Header() {
                         <Sparkles className="h-4 w-4" />
                         What&apos;s New
                       </span>
-                      <span className="px-1.5 py-0.5 text-[10px] font-medium rounded bg-[#0ea5e9] text-white">v1.3</span>
+                      <span className="px-1.5 py-0.5 text-[10px] font-medium rounded bg-[#0ea5e9] text-white">v1.4</span>
                     </Link>
                     {!isPro && (
                       <>
