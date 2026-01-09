@@ -66,30 +66,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const fetchUserData = async (userId: string) => {
     if (!supabase) return;
 
-    // Fetch profile
-    const { data: profileData } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", userId)
-      .single();
+    // Fetch profile and subscription in parallel
+    const [profileResult, subResult] = await Promise.all([
+      supabase.from("profiles").select("*").eq("id", userId).single(),
+      supabase.from("subscriptions").select("*").eq("user_id", userId).single(),
+    ]);
 
-    if (profileData) {
-      setProfile(profileData);
+    if (profileResult.data) {
+      setProfile(profileResult.data);
     }
 
-    // Fetch subscription
-    const { data: subData } = await supabase
-      .from("subscriptions")
-      .select("*")
-      .eq("user_id", userId)
-      .single();
-
-    if (subData) {
-      setSubscription(subData);
+    if (subResult.data) {
+      setSubscription(subResult.data);
       // Cache pro status for sync checks
       localStorage.setItem(
         "pdf-tools-pro-cached",
-        subData.plan === "pro" || subData.plan === "team" ? "true" : "false"
+        subResult.data.plan === "pro" || subResult.data.plan === "team" ? "true" : "false"
       );
     }
   };
