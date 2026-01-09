@@ -31,7 +31,9 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAuthModal } from "@/contexts/AuthModalContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import { PDFflowLogo } from "./Logo";
+import { Sun, Moon } from "lucide-react";
 
 const toolCategories = [
   {
@@ -83,6 +85,11 @@ export function Header() {
 
   const { user, profile, isPro, isLoading, signOut } = useAuth();
   const { openAuthModal } = useAuthModal();
+  const { resolvedTheme, setTheme } = useTheme();
+
+  const toggleTheme = () => {
+    setTheme(resolvedTheme === "dark" ? "light" : "dark");
+  };
 
   const getAvatarUrl = (url: string | null | undefined) => {
     if (!url) return null;
@@ -248,18 +255,44 @@ export function Header() {
             ) : (
               <div className="hidden sm:flex items-center gap-3">
                 <button
+                  onClick={toggleTheme}
+                  className="p-2 rounded-lg hover:bg-[var(--surface-light)] transition-colors"
+                  title={resolvedTheme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+                >
+                  {resolvedTheme === "dark" ? (
+                    <Sun className="h-5 w-5 text-[var(--text-secondary)]" />
+                  ) : (
+                    <Moon className="h-5 w-5 text-[var(--text-secondary)]" />
+                  )}
+                </button>
+                <button
                   onClick={() => openAuthModal("signin")}
-                  className="px-4 py-2 text-sm font-medium text-[#94a3b8] hover:text-white transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
                 >
                   Log in
                 </button>
                 <button
                   onClick={() => openAuthModal("signup")}
-                  className="px-4 py-2 text-sm font-medium bg-white text-black rounded-lg hover:bg-gray-200 transition-colors"
+                  className="px-4 py-2 text-sm font-medium bg-[var(--text-primary)] text-[var(--background)] rounded-lg hover:opacity-90 transition-colors"
                 >
                   Sign Up
                 </button>
               </div>
+            )}
+
+            {/* Theme toggle for logged-in users */}
+            {user && (
+              <button
+                onClick={toggleTheme}
+                className="hidden sm:flex p-2 rounded-lg hover:bg-[var(--surface-light)] transition-colors mr-2"
+                title={resolvedTheme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+              >
+                {resolvedTheme === "dark" ? (
+                  <Sun className="h-5 w-5 text-[var(--text-secondary)]" />
+                ) : (
+                  <Moon className="h-5 w-5 text-[var(--text-secondary)]" />
+                )}
+              </button>
             )}
 
             {/* Mobile menu button */}

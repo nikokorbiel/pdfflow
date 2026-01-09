@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AuthModalProvider } from "@/contexts/AuthModalContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Background } from "@/components/Background";
@@ -63,14 +64,16 @@ export default function RootLayout({
         <meta name="theme-color" content="#0f172a" />
       </head>
       <body className={`${inter.variable} font-sans antialiased min-h-screen flex flex-col`}>
-        <AuthProvider>
-          <AuthModalProvider>
-            <Background />
-            <Header />
-            <main className="flex-1 relative z-10">{children}</main>
-            <Footer />
-          </AuthModalProvider>
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <AuthModalProvider>
+              <Background />
+              <Header />
+              <main className="flex-1 relative z-10">{children}</main>
+              <Footer />
+            </AuthModalProvider>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

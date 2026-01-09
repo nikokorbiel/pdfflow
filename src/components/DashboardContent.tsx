@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import {
   User,
   Calendar,
@@ -9,9 +10,32 @@ import {
   Settings as SettingsIcon,
   ArrowRight,
   Sparkles,
+  Clock,
+  Trash2,
+  ExternalLink,
+  Combine,
+  Split,
+  FileDown,
+  Image,
+  FileImage,
+  RotateCw,
+  Droplets,
+  Hash,
+  ArrowUpDown,
+  PenTool,
+  Lock,
+  Unlock,
 } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
+import {
+  getFileHistory,
+  removeFromHistory,
+  clearFileHistory,
+  formatRelativeTime,
+  formatFileSize,
+  FileHistoryItem,
+} from "@/lib/file-history";
 
 interface DashboardContentProps {
   profile: {
@@ -69,6 +93,39 @@ const tools = [
   },
 ];
 
+// Icon map for history items
+const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  Combine,
+  Split,
+  FileDown,
+  Image,
+  FileImage,
+  FileText,
+  RotateCw,
+  Droplets,
+  Hash,
+  ArrowUpDown,
+  PenTool,
+  Lock,
+  Unlock,
+};
+
+const toolColors: Record<string, string> = {
+  merge: "from-violet-500 to-purple-500",
+  split: "from-blue-500 to-cyan-400",
+  compress: "from-emerald-500 to-teal-400",
+  "pdf-to-image": "from-orange-500 to-amber-400",
+  "image-to-pdf": "from-indigo-500 to-blue-400",
+  "pdf-to-word": "from-blue-600 to-blue-400",
+  rotate: "from-teal-500 to-cyan-400",
+  watermark: "from-blue-500 to-indigo-500",
+  "page-numbers": "from-slate-500 to-gray-400",
+  reorder: "from-pink-500 to-rose-500",
+  sign: "from-purple-500 to-pink-500",
+  protect: "from-amber-500 to-yellow-500",
+  unlock: "from-cyan-500 to-sky-500",
+};
+
 export function DashboardContent({
   profile,
   subscription,
@@ -77,6 +134,22 @@ export function DashboardContent({
   const { signOut, isPro } = useAuth();
   const todayUsage = usage?.file_count ?? 0;
   const maxFiles = isPro ? "Unlimited" : "2";
+
+  const [fileHistory, setFileHistory] = useState<FileHistoryItem[]>([]);
+
+  useEffect(() => {
+    setFileHistory(getFileHistory());
+  }, []);
+
+  const handleRemoveFromHistory = (id: string) => {
+    removeFromHistory(id);
+    setFileHistory(getFileHistory());
+  };
+
+  const handleClearHistory = () => {
+    clearFileHistory();
+    setFileHistory([]);
+  };
 
   return (
     <div className="min-h-[80vh]">
@@ -206,10 +279,80 @@ export function DashboardContent({
             </div>
           )}
 
+          {/* Recent Files */}
+          {fileHistory.length > 0 && (
+            <div
+              className="mt-12 animate-fade-in-up"
+              style={{ animationDelay: "0.2s" }}
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold flex items-center gap-2">
+                  <Clock className="h-5 w-5 text-[var(--muted-foreground)]" />
+                  Recent Files
+                </h2>
+                <button
+                  onClick={handleClearHistory}
+                  className="text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
+                >
+                  Clear all
+                </button>
+              </div>
+              <div className="space-y-3">
+                {fileHistory.map((item) => {
+                  const IconComponent = iconMap[item.toolIcon] || FileText;
+                  const gradient = toolColors[item.tool] || "from-gray-500 to-gray-400";
+
+                  return (
+                    <div
+                      key={item.id}
+                      className="group flex items-center gap-4 p-4 rounded-2xl border bg-[var(--card)] hover:shadow-glass transition-all"
+                    >
+                      <div
+                        className={`flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${gradient} shadow-lg flex-shrink-0`}
+                      >
+                        <IconComponent className="h-5 w-5 text-white" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate">{item.originalName}</p>
+                        <div className="flex items-center gap-2 text-sm text-[var(--muted-foreground)]">
+                          <span>{item.toolName}</span>
+                          {item.fileSize && (
+                            <>
+                              <span>•</span>
+                              <span>{formatFileSize(item.fileSize)}</span>
+                            </>
+                          )}
+                          <span>•</span>
+                          <span>{formatRelativeTime(item.timestamp)}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Link
+                          href={`/${item.tool}`}
+                          className="p-2 rounded-lg hover:bg-[var(--muted)] transition-colors"
+                          title="Process again"
+                        >
+                          <ExternalLink className="h-4 w-4 text-[var(--muted-foreground)]" />
+                        </Link>
+                        <button
+                          onClick={() => handleRemoveFromHistory(item.id)}
+                          className="p-2 rounded-lg hover:bg-[var(--muted)] transition-colors"
+                          title="Remove from history"
+                        >
+                          <Trash2 className="h-4 w-4 text-[var(--muted-foreground)]" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Quick actions */}
           <div
             className="mt-12 animate-fade-in-up"
-            style={{ animationDelay: "0.2s" }}
+            style={{ animationDelay: "0.25s" }}
           >
             <h2 className="text-xl font-semibold mb-6">Quick Actions</h2>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

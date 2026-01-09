@@ -61,6 +61,59 @@
     --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     --font-display: 'Outfit', 'Inter', sans-serif;
   }
+
+  /* Light mode */
+  .light {
+    /* Backgrounds */
+    --bg-primary: #ffffff;
+    --bg-secondary: #fafafa;
+    --bg-surface: #f4f4f5;
+
+    /* Borders */
+    --border: #e4e4e7;
+    --border-hover: #d4d4d8;
+
+    /* Text */
+    --text-primary: #18181b;
+    --text-secondary: #52525b;
+    --text-muted: #71717a;
+
+    /* Legacy mapping */
+    --background: #ffffff;
+    --surface: #f4f4f5;
+    --surface-light: #e4e4e7;
+    --surface-hover: #d4d4d8;
+    --foreground: #18181b;
+    --glass-bg: rgba(255, 255, 255, 0.8);
+    --glass-border: rgba(228, 228, 231, 0.5);
+
+    /* Cards */
+    --card: #ffffff;
+    --muted: #f4f4f5;
+    --muted-foreground: #71717a;
+  }
+
+  /* Dark mode (explicit class) */
+  .dark {
+    --bg-primary: #000000;
+    --bg-secondary: #050510;
+    --bg-surface: #0a0a0f;
+    --border: #1e293b;
+    --border-hover: #334155;
+    --text-primary: #ffffff;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --background: #000000;
+    --surface: #0a0a0f;
+    --surface-light: #1e293b;
+    --surface-hover: #334155;
+    --foreground: #ffffff;
+    --glass-bg: rgba(10, 10, 15, 0.8);
+    --glass-border: rgba(30, 41, 59, 0.5);
+    --card: #0a0a0f;
+    --muted: #1e293b;
+    --muted-foreground: #94a3b8;
+  }
 }
 
 @layer base {
