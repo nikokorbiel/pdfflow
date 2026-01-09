@@ -90,15 +90,15 @@ export default function UnlockPDF() {
       let pdfDoc: PDFDocument;
 
       try {
-        // Try to load with password if provided
+        // pdf-lib uses ignoreEncryption to bypass encryption
+        // Note: This works for PDFs with restrictions but may not work for strongly encrypted PDFs
         pdfDoc = await PDFDocument.load(fileBuffer, {
-          password: password || undefined,
           ignoreEncryption: true,
         });
       } catch (err: unknown) {
         const error = err as Error;
         if (error.message?.includes("password") || error.message?.includes("encrypted")) {
-          setError("Incorrect password. Please try again.");
+          setError("Unable to unlock this PDF. The encryption may be too strong.");
           setIsProcessing(false);
           return;
         }
