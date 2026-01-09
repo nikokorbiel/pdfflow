@@ -1,11 +1,19 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { PDFDocument, rgb, degrees, StandardFonts } from "pdf-lib";
 import { FileDropzone } from "@/components/FileDropzone";
 import { ProgressBar } from "@/components/ProgressBar";
+import { TemplateManager } from "@/components/TemplateManager";
 import { Download, Droplets, Sparkles, Type, Image as ImageIcon } from "lucide-react";
 import { getRemainingUsage, incrementUsage, getMaxFileSize } from "@/lib/usage";
+import {
+  WatermarkTemplate,
+  getWatermarkTemplates,
+  saveWatermarkTemplate,
+  deleteWatermarkTemplate,
+  initializeDefaultWatermarkTemplates,
+} from "@/lib/templates";
 import Link from "next/link";
 
 type WatermarkType = "text" | "image";
@@ -31,7 +39,56 @@ export default function WatermarkPDF() {
   const [applyToAll, setApplyToAll] = useState(true);
   const [specificPages, setSpecificPages] = useState("");
 
+  // Templates
+  const [templates, setTemplates] = useState<WatermarkTemplate[]>([]);
+
+  // Initialize default templates on mount
+  useEffect(() => {
+    initializeDefaultWatermarkTemplates();
+    setTemplates(getWatermarkTemplates());
+  }, []);
+
   const remainingUsage = typeof window !== "undefined" ? getRemainingUsage() : 2;
+
+  const handleSelectTemplate = (template: WatermarkTemplate) => {
+    setWatermarkType(template.type);
+    if (template.text) setWatermarkText(template.text);
+    if (template.fontSize) setFontSize(template.fontSize);
+    if (template.color) setColor(template.color);
+    if (template.opacity) setOpacity(template.opacity);
+    if (template.rotation) setRotation(template.rotation);
+    if (template.position) {
+      // Map template position to page position (handle "diagonal" -> "center")
+      const posMap: Record<string, Position> = {
+        center: "center",
+        "top-left": "top-left",
+        "top-right": "top-right",
+        "bottom-left": "bottom-left",
+        "bottom-right": "bottom-right",
+        diagonal: "center",
+      };
+      setPosition(posMap[template.position] || "center");
+    }
+  };
+
+  const handleSaveTemplate = (name: string) => {
+    saveWatermarkTemplate({
+      name,
+      type: watermarkType,
+      text: watermarkText,
+      fontSize,
+      color,
+      opacity,
+      rotation,
+      position: position === "tiled" ? "center" : position,
+    });
+    setTemplates(getWatermarkTemplates());
+  };
+
+  const handleDeleteTemplate = (id: string) => {
+    deleteWatermarkTemplate(id);
+    setTemplates(getWatermarkTemplates());
+  };
 
   const handleFilesSelected = useCallback((newFiles: File[]) => {
     setFiles(newFiles.slice(0, 1)); // Only allow 1 file
@@ -346,6 +403,40 @@ export default function WatermarkPDF() {
             {/* Watermark Options */}
             {files.length > 0 && !isProcessing && !resultUrl && (
               <div className="rounded-3xl border bg-[var(--card)] p-6 shadow-glass animate-fade-in space-y-6">
+                {/* Templates */}
+                <div className="flex items-center justify-between">
+                  <TemplateManager
+                    templates={templates}
+                    onSelect={handleSelectTemplate}
+                    onSave={handleSaveTemplate}
+                    onDelete={handleDeleteTemplate}
+                    label="Watermark Templates"
+                    renderPreview={(template) => (
+                      <div className="flex items-center gap-2 text-xs">
+                        {template.type === "text" && (
+                          <>
+                            <span
+                              className="px-2 py-0.5 rounded"
+                              style={{
+                                backgroundColor: `${template.color}20`,
+                                color: template.color,
+                              }}
+                            >
+                              {template.text}
+                            </span>
+                            <span className="text-[var(--text-muted)]">
+                              {template.fontSize}px, {Math.round((template.opacity || 0.3) * 100)}%
+                            </span>
+                          </>
+                        )}
+                        {template.type === "image" && (
+                          <span className="text-[var(--text-muted)]">Image watermark</span>
+                        )}
+                      </div>
+                    )}
+                  />
+                </div>
+
                 {/* Type Selection */}
                 <div>
                   <label className="text-sm font-medium mb-3 block">Watermark Type</label>

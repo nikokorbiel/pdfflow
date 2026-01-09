@@ -4,12 +4,19 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { PDFDocument } from "pdf-lib";
 import { FileDropzone } from "@/components/FileDropzone";
 import { ProgressBar } from "@/components/ProgressBar";
+import { TemplateManager } from "@/components/TemplateManager";
 import { Download, PenTool, Sparkles, Type, Pencil, Upload, Trash2, Check } from "lucide-react";
 import {
   getRemainingUsage,
   incrementUsage,
   getMaxFileSize,
 } from "@/lib/usage";
+import {
+  SignatureTemplate,
+  getSignatureTemplates,
+  saveSignatureTemplate,
+  deleteSignatureTemplate,
+} from "@/lib/templates";
 import Link from "next/link";
 
 type SignatureMode = "draw" | "type" | "upload";
@@ -50,6 +57,45 @@ export default function SignPDF() {
   const previewRef = useRef<HTMLDivElement>(null);
 
   const remainingUsage = typeof window !== "undefined" ? getRemainingUsage() : 2;
+
+  // Signature templates
+  const [signatureTemplates, setSignatureTemplates] = useState<SignatureTemplate[]>([]);
+
+  // Load saved signature templates on mount
+  useEffect(() => {
+    setSignatureTemplates(getSignatureTemplates());
+  }, []);
+
+  const handleSelectSignatureTemplate = (template: SignatureTemplate) => {
+    if (template.signatureData) {
+      setSignatureDataUrl(template.signatureData);
+    }
+    if (template.type === "type" && template.typedText) {
+      setTypedName(template.typedText);
+      setSelectedFont(template.fontFamily || "Dancing Script");
+      setSignatureMode("type");
+    } else if (template.type === "draw" || template.type === "image") {
+      setSignatureMode(template.type === "image" ? "upload" : "draw");
+    }
+  };
+
+  const handleSaveSignatureTemplate = (name: string) => {
+    if (!signatureDataUrl) return;
+
+    saveSignatureTemplate({
+      name,
+      type: signatureMode === "upload" ? "image" : signatureMode,
+      signatureData: signatureDataUrl,
+      typedText: signatureMode === "type" ? typedName : undefined,
+      fontFamily: signatureMode === "type" ? selectedFont : undefined,
+    });
+    setSignatureTemplates(getSignatureTemplates());
+  };
+
+  const handleDeleteSignatureTemplate = (id: string) => {
+    deleteSignatureTemplate(id);
+    setSignatureTemplates(getSignatureTemplates());
+  };
 
   // Initialize drawing canvas
   useEffect(() => {
@@ -382,7 +428,53 @@ export default function SignPDF() {
               <div className="grid lg:grid-cols-2 gap-6">
                 {/* Signature creation panel */}
                 <div className="rounded-3xl border bg-[var(--card)] p-6 shadow-glass animate-fade-in">
-                  <h3 className="text-lg font-semibold mb-4">Create Your Signature</h3>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold">Create Your Signature</h3>
+                    {signatureDataUrl && (
+                      <TemplateManager
+                        templates={signatureTemplates}
+                        onSelect={handleSelectSignatureTemplate}
+                        onSave={handleSaveSignatureTemplate}
+                        onDelete={handleDeleteSignatureTemplate}
+                        label="Signatures"
+                        renderPreview={(template) => (
+                          <div className="mt-1">
+                            {template.signatureData && (
+                              <img
+                                src={template.signatureData}
+                                alt={template.name}
+                                className="h-8 max-w-full object-contain bg-white rounded px-2"
+                              />
+                            )}
+                          </div>
+                        )}
+                      />
+                    )}
+                  </div>
+
+                  {/* Saved signatures quick access */}
+                  {!signatureDataUrl && signatureTemplates.length > 0 && (
+                    <div className="mb-4 p-3 rounded-xl bg-[var(--muted)]/50 border border-[var(--border)]">
+                      <p className="text-xs text-[var(--text-muted)] mb-2">Quick access - Saved signatures</p>
+                      <div className="flex flex-wrap gap-2">
+                        {signatureTemplates.slice(0, 4).map((template) => (
+                          <button
+                            key={template.id}
+                            onClick={() => handleSelectSignatureTemplate(template)}
+                            className="p-2 bg-white rounded-lg border border-[var(--border)] hover:border-emerald-500 transition-colors"
+                          >
+                            {template.signatureData && (
+                              <img
+                                src={template.signatureData}
+                                alt={template.name}
+                                className="h-6 max-w-[80px] object-contain"
+                              />
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Mode tabs */}
                   <div className="flex gap-2 mb-4">
