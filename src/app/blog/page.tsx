@@ -14,7 +14,7 @@ export default function BlogPage() {
     });
   };
 
-  const categories = [...new Set(blogPosts.map((post) => post.category))];
+  const categories = Array.from(new Set(blogPosts.map((post) => post.category)));
 
   return (
     <div className="min-h-screen bg-black">
