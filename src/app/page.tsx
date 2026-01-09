@@ -1,101 +1,441 @@
-import Image from "next/image";
+"use client";
+
+import Link from "next/link";
+import { motion } from "framer-motion";
+import {
+  Combine,
+  Split,
+  FileDown,
+  Image,
+  FileImage,
+  RotateCw,
+  Zap,
+  Shield,
+  Gift,
+  ArrowRight,
+  FileText,
+  Droplets,
+  Hash,
+  ArrowUpDown,
+  PenTool,
+  Lock,
+  Unlock,
+  Sparkles,
+} from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { AuthModal } from "@/components/AuthModal";
+import { ParticleBackground } from "@/components/ParticleBackground";
+import { useAuth } from "@/contexts/AuthContext";
+import { GlowingBorder } from "@/components/GlowingBorder";
+import { ToolRequestModal } from "@/components/ToolRequestModal";
+
+const tools = [
+  {
+    name: "Merge PDF",
+    description: "Combine multiple PDFs into one",
+    href: "/merge",
+    icon: Combine,
+  },
+  {
+    name: "Split PDF",
+    description: "Extract or divide your PDF",
+    href: "/split",
+    icon: Split,
+  },
+  {
+    name: "Compress PDF",
+    description: "Reduce file size, keep quality",
+    href: "/compress",
+    icon: FileDown,
+  },
+  {
+    name: "PDF to Image",
+    description: "Convert pages to PNG/JPG",
+    href: "/pdf-to-image",
+    icon: Image,
+  },
+  {
+    name: "Image to PDF",
+    description: "Create PDF from images",
+    href: "/image-to-pdf",
+    icon: FileImage,
+  },
+  {
+    name: "Rotate PDF",
+    description: "Rotate pages any direction",
+    href: "/rotate",
+    icon: RotateCw,
+  },
+  {
+    name: "Watermark",
+    description: "Add text or image watermarks",
+    href: "/watermark",
+    icon: Droplets,
+  },
+  {
+    name: "PDF to Word",
+    description: "Convert to editable DOCX",
+    href: "/pdf-to-word",
+    icon: FileText,
+  },
+  {
+    name: "Page Numbers",
+    description: "Add page numbering",
+    href: "/page-numbers",
+    icon: Hash,
+  },
+  {
+    name: "Reorder Pages",
+    description: "Drag & drop to rearrange",
+    href: "/reorder",
+    icon: ArrowUpDown,
+  },
+  {
+    name: "Sign PDF",
+    description: "Add signatures & initials",
+    href: "/sign",
+    icon: PenTool,
+  },
+  {
+    name: "Protect PDF",
+    description: "Password-protect your PDF",
+    href: "/protect",
+    icon: Lock,
+  },
+  {
+    name: "Unlock PDF",
+    description: "Remove PDF password",
+    href: "/unlock",
+    icon: Unlock,
+  },
+];
+
+const features = [
+  {
+    name: "Lightning Fast",
+    description: "Instant results with browser-based processing.",
+    icon: Zap,
+  },
+  {
+    name: "100% Private",
+    description: "Files never leave your device. Fully local.",
+    icon: Shield,
+  },
+  {
+    name: "Free to Start",
+    description: "Try all tools free. Upgrade for more.",
+    icon: Gift,
+  },
+];
+
+const testimonials = [
+  {
+    name: "Sarah Chen",
+    role: "Product Designer",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=sarah&backgroundColor=0ea5e9",
+    content: "Finally, PDF tools that just work. No bloated software, no sketchy uploads.",
+  },
+  {
+    name: "Marcus Johnson",
+    role: "Freelance Developer",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=marcus&backgroundColor=06b6d4",
+    content: "I use PDFflow daily. The privacy aspect is huge - my clients' data stays on my machine.",
+  },
+  {
+    name: "Emily Rodriguez",
+    role: "Marketing Manager",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=emily&backgroundColor=14b8a6",
+    content: "Merged 50+ PDFs for our annual report in seconds. Incredibly intuitive.",
+  },
+];
+
+// Animated counter
+function AnimatedCounter({ target }: { target: number }) {
+  const [count, setCount] = useState(0);
+  const ref = useRef<HTMLSpanElement>(null);
+  const hasAnimated = useRef(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !hasAnimated.current) {
+          hasAnimated.current = true;
+          const duration = 2000;
+          const startTime = performance.now();
+          const animate = (currentTime: number) => {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const easeOut = 1 - Math.pow(1 - progress, 3);
+            setCount(Math.floor(easeOut * target));
+            if (progress < 1) requestAnimationFrame(animate);
+          };
+          requestAnimationFrame(animate);
+        }
+      },
+      { threshold: 0.5 }
+    );
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [target]);
+
+  return <span ref={ref}>{count.toLocaleString()}+</span>;
+}
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { staggerChildren: 0.15, delayChildren: 0.3 } },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.25, 0.1, 0.25, 1] as const } },
+};
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [toolRequestOpen, setToolRequestOpen] = useState(false);
+  const { user } = useAuth();
+  const router = useRouter();
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const handleGetStarted = () => {
+    if (user) {
+      router.push("/dashboard");
+    } else {
+      setAuthModalOpen(true);
+    }
+  };
+
+  return (
+    <div className="relative">
+      {/* Hero Section */}
+      <section className="relative min-h-[90vh] flex items-center justify-center px-4 overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <ParticleBackground />
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+
+        <div
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] pointer-events-none z-0"
+          style={{
+            background: "radial-gradient(ellipse at center, rgba(14, 165, 233, 0.25) 0%, rgba(6, 182, 212, 0.12) 40%, transparent 70%)",
+            filter: "blur(60px)",
+          }}
+        />
+
+        <motion.div
+          className="mx-auto max-w-4xl text-center relative z-10"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
         >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+          <motion.h1 className="hero-heading" variants={itemVariants}>
+            PDF tools that <span className="text-gradient">flow</span>.
+          </motion.h1>
+
+          <motion.p className="mt-6 text-lg sm:text-xl text-[#94a3b8] max-w-xl mx-auto leading-relaxed" variants={itemVariants}>
+            Fast, private, browser-based PDF editing.
+            <br className="hidden sm:block" />
+            No uploads. No hassle.
+          </motion.p>
+
+          <motion.div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4" variants={itemVariants}>
+            <button
+              onClick={handleGetStarted}
+              className="px-8 py-3.5 text-sm font-medium bg-white text-black rounded-lg hover:bg-gray-200 transition-colors inline-flex items-center gap-2"
+            >
+              {user ? "Go to Dashboard" : "Get Started"}
+              <ArrowRight className="w-4 h-4" />
+            </button>
+            <Link href="#tools" className="px-6 py-3 text-sm font-medium text-white border border-[#334155] rounded-lg hover:bg-white/5 transition-colors">
+              All Tools
+            </Link>
+          </motion.div>
+        </motion.div>
+
+        <GlowingBorder delay={0} />
+      </section>
+
+      {/* Social Proof with Avatars */}
+      <section className="py-10 border-b border-[#1e293b] bg-[#050508]">
+        <div className="max-w-4xl mx-auto px-4 text-center">
+          <div className="flex items-center justify-center mb-3">
+            <div className="flex -space-x-2">
+              {testimonials.map((t, i) => (
+                <img key={i} src={t.avatar} alt="" className="w-8 h-8 rounded-full border-2 border-[#050508] bg-[#1e293b]" />
+              ))}
+              <div className="w-8 h-8 rounded-full border-2 border-[#050508] bg-[#1e293b] flex items-center justify-center text-[10px] font-medium text-[#94a3b8]">
+                +9k
+              </div>
+            </div>
+          </div>
+          <p className="text-sm text-[#94a3b8]">
+            Trusted by <span className="text-white font-semibold"><AnimatedCounter target={10000} /></span> users worldwide
+          </p>
+          <div className="mt-2 flex items-center justify-center gap-1">
+            <span className="text-[#fbbf24]">★★★★★</span>
+            <span className="text-xs text-[#64748b] ml-1">4.9/5</span>
+          </div>
+        </div>
+      </section>
+
+      {/* Tools Grid */}
+      <section id="tools" className="py-20 bg-black relative">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <motion.div className="text-center mb-12" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+            <p className="text-xs font-medium text-[#64748b] uppercase tracking-widest mb-3">PDF Tools</p>
+            <h2 className="text-3xl sm:text-4xl font-semibold text-white tracking-tight">Every tool you need</h2>
+          </motion.div>
+
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+            {tools.map((tool, index) => (
+              <motion.div key={tool.name} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: index * 0.05 }}>
+                <Link href={tool.href} className="flex flex-col h-full p-4 sm:p-5 rounded-xl bg-[#0a0a0f] border border-[#1e293b] hover:border-[#334155] transition-all group">
+                  <tool.icon className="w-5 h-5 text-[#64748b] group-hover:text-[#0ea5e9] transition-colors mb-3 flex-shrink-0" />
+                  <h3 className="text-sm font-medium text-white mb-1">{tool.name}</h3>
+                  <p className="text-xs text-[#64748b] leading-relaxed">{tool.description}</p>
+                </Link>
+              </motion.div>
+            ))}
+            {/* CTA Card */}
+            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: tools.length * 0.05 }}>
+              <button
+                onClick={() => setToolRequestOpen(true)}
+                className="flex flex-col h-full w-full text-left p-4 sm:p-5 rounded-xl bg-gradient-to-br from-[#0ea5e9]/10 to-[#06b6d4]/10 border border-[#0ea5e9]/20 hover:border-[#0ea5e9]/40 transition-all group"
+              >
+                <Sparkles className="w-5 h-5 text-[#0ea5e9] group-hover:text-[#22d3ee] transition-colors mb-3 flex-shrink-0" />
+                <h3 className="text-sm font-medium text-white mb-1">Request a Tool</h3>
+                <p className="text-xs text-[#64748b] leading-relaxed">Need something else? Let us know!</p>
+              </button>
+            </motion.div>
+          </div>
+        </div>
+        <GlowingBorder delay={2.5} />
+      </section>
+
+      {/* Features Section */}
+      <section className="py-20 bg-[#050508] relative">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <motion.p className="text-xs font-medium text-[#64748b] uppercase tracking-widest mb-3" initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}>
+                Why PDFflow
+              </motion.p>
+              <motion.h2 className="text-3xl sm:text-4xl font-semibold text-white tracking-tight mb-8" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+                Built for speed and privacy
+              </motion.h2>
+
+              <div className="space-y-5">
+                {features.map((feature, index) => (
+                  <motion.div key={feature.name} className="flex gap-4" initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: index * 0.1 }}>
+                    <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-[#0a0a0f] border border-[#1e293b] flex items-center justify-center">
+                      <feature.icon className="w-5 h-5 text-[#0ea5e9]" />
+                    </div>
+                    <div>
+                      <h3 className="text-base font-medium text-white mb-1">{feature.name}</h3>
+                      <p className="text-sm text-[#94a3b8] leading-relaxed">{feature.description}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+
+            {/* Browser mockup */}
+            <motion.div className="relative" initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }}>
+              <div className="bg-[#0a0a0f] border border-[#1e293b] rounded-xl overflow-hidden">
+                <div className="flex items-center gap-2 px-4 py-3 border-b border-[#1e293b]">
+                  <div className="flex gap-1.5">
+                    <div className="w-2.5 h-2.5 rounded-full bg-[#ef4444]/60" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-[#fbbf24]/60" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-[#10b981]/60" />
+                  </div>
+                  <div className="flex-1 mx-4">
+                    <div className="bg-[#1e293b] rounded px-3 py-1 text-xs text-[#64748b] text-center">pdfflow.app</div>
+                  </div>
+                </div>
+                <div className="p-6">
+                  <div className="text-center mb-4">
+                    <p className="text-xs text-[#64748b] mb-3">Drop your files here</p>
+                    <motion.div
+                      className="w-full h-24 border-2 border-dashed border-[#1e293b] rounded-lg flex items-center justify-center"
+                      animate={{ borderColor: ["#1e293b", "#0ea5e9", "#1e293b"] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    >
+                      <motion.div animate={{ y: [0, -4, 0] }} transition={{ duration: 1.5, repeat: Infinity }}>
+                        <FileText className="w-6 h-6 text-[#64748b]" />
+                      </motion.div>
+                    </motion.div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between text-xs text-[#64748b]">
+                      <span>Processing...</span>
+                      <span>100%</span>
+                    </div>
+                    <div className="h-1 bg-[#1e293b] rounded-full overflow-hidden">
+                      <motion.div
+                        className="h-full bg-gradient-to-r from-[#0ea5e9] to-[#06b6d4] rounded-full"
+                        initial={{ width: "0%" }}
+                        whileInView={{ width: "100%" }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 2 }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+        <GlowingBorder delay={5} />
+      </section>
+
+      {/* Testimonials */}
+      <section className="py-20 bg-black relative">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <motion.div className="text-center mb-12" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+            <p className="text-xs font-medium text-[#64748b] uppercase tracking-widest mb-3">Testimonials</p>
+            <h2 className="text-3xl sm:text-4xl font-semibold text-white tracking-tight">Loved by thousands</h2>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {testimonials.map((t, index) => (
+              <motion.div key={t.name} className="p-5 rounded-xl bg-[#0a0a0f] border border-[#1e293b]" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: index * 0.1 }}>
+                <div className="flex items-center gap-3 mb-3">
+                  <img src={t.avatar} alt={t.name} className="w-10 h-10 rounded-full bg-[#1e293b]" />
+                  <div>
+                    <p className="text-sm font-medium text-white">{t.name}</p>
+                    <p className="text-xs text-[#64748b]">{t.role}</p>
+                  </div>
+                </div>
+                <p className="text-sm text-[#94a3b8] leading-relaxed">&ldquo;{t.content}&rdquo;</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+        <GlowingBorder delay={7.5} />
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 bg-[#050508] relative">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center relative">
+          <div
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[200px] pointer-events-none"
+            style={{ background: "radial-gradient(ellipse at center, rgba(14, 165, 233, 0.08) 0%, transparent 70%)", filter: "blur(40px)" }}
           />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+          <motion.div className="relative" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+            <h2 className="text-3xl sm:text-4xl font-semibold text-white tracking-tight mb-6">Ready to streamline your PDFs?</h2>
+            <button
+              onClick={handleGetStarted}
+              className="px-8 py-4 text-base font-medium bg-white text-black rounded-lg hover:bg-gray-200 transition-colors inline-flex items-center gap-2"
+            >
+              {user ? "Go to Dashboard" : "Get Started Free"}
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </motion.div>
+        </div>
+      </section>
+
+      <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} initialMode="signup" />
+      <ToolRequestModal isOpen={toolRequestOpen} onClose={() => setToolRequestOpen(false)} />
     </div>
   );
 }
