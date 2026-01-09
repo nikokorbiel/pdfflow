@@ -135,40 +135,36 @@ export default function Pricing() {
                 {/* Pro plan with toggle */}
                 {plan.name === "Pro" ? (
                   <div className="mb-6">
-                    {/* Premium Billing Toggle */}
+                    {/* iOS-style Billing Toggle */}
                     <div className="relative flex items-center justify-center mb-5">
-                      <div className="relative bg-[var(--muted)]/50 backdrop-blur-sm p-1 rounded-xl border border-[var(--border)]">
-                        {/* Sliding background */}
+                      <div className="relative bg-[#1c1c1e] p-[3px] rounded-[10px] w-[220px]">
+                        {/* Sliding pill */}
                         <div
-                          className={`absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-lg bg-gradient-to-r from-[var(--accent)] to-purple-500 shadow-lg transition-all duration-300 ease-out ${
-                            isAnnual ? "left-[calc(50%+2px)]" : "left-1"
+                          className={`absolute top-[3px] bottom-[3px] w-[calc(50%-3px)] rounded-[8px] bg-[#636366] shadow-sm transition-transform duration-200 ease-out ${
+                            isAnnual ? "translate-x-[calc(100%+3px)]" : "translate-x-0"
                           }`}
                         />
-                        <div className="relative flex">
+                        <div className="relative grid grid-cols-2">
                           <button
                             onClick={() => setIsAnnual(false)}
-                            className={`px-5 py-2.5 text-sm font-medium rounded-lg transition-colors duration-300 z-10 ${
+                            className={`py-2 text-[13px] font-semibold rounded-[8px] transition-colors duration-200 z-10 text-center ${
                               !isAnnual
                                 ? "text-white"
-                                : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
+                                : "text-[#8e8e93]"
                             }`}
                           >
                             Monthly
                           </button>
                           <button
                             onClick={() => setIsAnnual(true)}
-                            className={`px-5 py-2.5 text-sm font-medium rounded-lg transition-colors duration-300 z-10 flex items-center gap-2 ${
+                            className={`py-2 text-[13px] font-semibold rounded-[8px] transition-colors duration-200 z-10 text-center flex items-center justify-center gap-1.5 ${
                               isAnnual
                                 ? "text-white"
-                                : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
+                                : "text-[#8e8e93]"
                             }`}
                           >
                             Annual
-                            <span className={`px-1.5 py-0.5 text-[10px] font-bold rounded-md transition-colors duration-300 ${
-                              isAnnual
-                                ? "bg-white/20 text-white"
-                                : "bg-emerald-500/20 text-emerald-500"
-                            }`}>
+                            <span className="px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-emerald-500 text-white">
                               -37%
                             </span>
                           </button>
