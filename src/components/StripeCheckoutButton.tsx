@@ -1,44 +1,71 @@
 "use client";
 
+import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useAuthModal } from "@/contexts/AuthModalContext";
+import { Loader2 } from "lucide-react";
+
 interface StripeCheckoutButtonProps {
   isAnnual?: boolean;
 }
 
 export function StripeCheckoutButton({ isAnnual = true }: StripeCheckoutButtonProps) {
+  const [isLoading, setIsLoading] = useState(false);
+  const { user } = useAuth();
+  const { openAuthModal } = useAuthModal();
+
   const handleCheckout = async () => {
-    // This is a placeholder for Stripe integration
-    // In production, this would call your API to create a Stripe Checkout session
-    // Example:
-    // const priceId = isAnnual ? 'price_annual_xxx' : 'price_monthly_xxx';
-    // const response = await fetch('/api/checkout', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify({ priceId }),
-    // });
-    // const { url } = await response.json();
-    // window.location.href = url;
+    // If not logged in, prompt to sign up
+    if (!user) {
+      openAuthModal("signup");
+      return;
+    }
 
-    const plan = isAnnual ? "Annual (£59.88/year)" : "Monthly (£7.99/month)";
+    setIsLoading(true);
 
-    alert(
-      `Stripe Checkout Integration\n\n` +
-        `Selected Plan: Pro ${plan}\n\n` +
-        "To enable payments:\n" +
-        "1. Create a Stripe account at stripe.com\n" +
-        "2. Get your API keys from the Stripe Dashboard\n" +
-        "3. Create products and prices in Stripe (monthly + annual)\n" +
-        "4. Add STRIPE_SECRET_KEY to your environment variables\n" +
-        "5. Create an API route at /api/checkout to create sessions\n\n" +
-        "See the README for detailed setup instructions."
-    );
+    try {
+      const response = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          priceType: isAnnual ? "annual" : "monthly",
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.error) {
+        alert(data.error);
+        return;
+      }
+
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch (error) {
+      console.error("Checkout error:", error);
+      alert("Something went wrong. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <button
       onClick={handleCheckout}
-      className="flex items-center justify-center rounded-full bg-gradient-to-r from-[var(--accent)] to-purple-500 px-6 py-4 font-medium text-white shadow-lg shadow-[var(--accent)]/25 hover:opacity-90 transition-all press-effect"
+      disabled={isLoading}
+      className="flex items-center justify-center rounded-full bg-gradient-to-r from-[var(--accent)] to-purple-500 px-6 py-4 font-medium text-white shadow-lg shadow-[var(--accent)]/25 hover:opacity-90 transition-all press-effect disabled:opacity-70 disabled:cursor-not-allowed"
     >
-      Upgrade to Pro
+      {isLoading ? (
+        <>
+          <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+          Loading...
+        </>
+      ) : (
+        "Upgrade to Pro"
+      )}
     </button>
   );
 }
