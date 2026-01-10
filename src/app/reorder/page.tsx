@@ -162,7 +162,7 @@ export default function ReorderPages() {
   };
 
   const hasChanges = () => {
-    if (pages.length !== originalOrder.length) return false;
+    if (pages.length !== originalOrder.length) return true;
     return pages.some((page, index) => page.id !== originalOrder[index].id);
   };
 

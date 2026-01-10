@@ -31,39 +31,10 @@ export default function WordToPDF() {
   }, []);
 
   const convertToPDF = async () => {
-    if (files.length === 0) {
-      setError("Please select a Word document");
-      return;
-    }
-
-    if (remainingUsage <= 0) {
-      setError("Daily limit reached. Upgrade to Pro for unlimited processing.");
-      return;
-    }
-
-    setIsProcessing(true);
-    setProgress(0);
-    setError(null);
-
-    try {
-      setStatus("Processing document...");
-      setProgress(30);
-
-      // For client-side, Word to PDF conversion requires server-side processing
-      // Show a helpful message directing users to Pro
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      setProgress(100);
-      setStatus("Complete!");
-
-      setError("Word to PDF conversion requires server-side processing. This feature is available with PDFflow Pro. For now, you can use Microsoft Word's built-in 'Save as PDF' feature, or Google Docs to convert your document.");
-
-    } catch (err) {
-      console.error("Conversion error:", err);
-      setError("Failed to convert document. Please try again.");
-    } finally {
-      setIsProcessing(false);
-    }
+    setError(
+      "Word to PDF conversion requires server-side processing to preserve formatting and styles. " +
+      "This feature will be available with PDFflow Pro. For now, you can use Microsoft Word or Google Docs' built-in 'Export as PDF' option."
+    );
   };
 
   return (

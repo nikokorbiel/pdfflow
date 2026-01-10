@@ -66,22 +66,13 @@ export const generatePdfThumbnails = async (
   scale: number = 0.3
 ): Promise<string[]> => {
   try {
-    console.log("[PDF Utils] Loading pdfjs-dist from CDN...");
     const pdfjsLib = await loadPdfJs();
-    console.log("[PDF Utils] pdfjs-dist loaded, version:", pdfjsLib.version);
-
-    console.log("[PDF Utils] Reading file buffer...");
     const fileBuffer = await file.arrayBuffer();
-    console.log("[PDF Utils] File buffer size:", fileBuffer.byteLength);
-
-    console.log("[PDF Utils] Loading PDF document...");
     const pdf = await pdfjsLib.getDocument({ data: fileBuffer }).promise;
-    console.log("[PDF Utils] PDF loaded, pages:", pdf.numPages);
 
     const images: string[] = [];
 
     for (let i = 1; i <= pdf.numPages; i++) {
-      console.log(`[PDF Utils] Rendering page ${i}...`);
       const page = await pdf.getPage(i);
       const viewport = page.getViewport({ scale });
 
@@ -94,10 +85,9 @@ export const generatePdfThumbnails = async (
       images.push(canvas.toDataURL("image/jpeg", 0.7));
     }
 
-    console.log("[PDF Utils] All pages rendered successfully");
     return images;
   } catch (error) {
-    console.error("[PDF Utils] Error:", error);
+    console.error("[PDF Utils] Error generating thumbnails:", error);
     throw error;
   }
 };

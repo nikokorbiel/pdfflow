@@ -31,37 +31,10 @@ export default function ExcelToPDF() {
   }, []);
 
   const convertToPDF = async () => {
-    if (files.length === 0) {
-      setError("Please select an Excel file");
-      return;
-    }
-
-    if (remainingUsage <= 0) {
-      setError("Daily limit reached. Upgrade to Pro for unlimited processing.");
-      return;
-    }
-
-    setIsProcessing(true);
-    setProgress(0);
-    setError(null);
-
-    try {
-      setStatus("Processing spreadsheet...");
-      setProgress(30);
-
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      setProgress(100);
-      setStatus("Complete!");
-
-      setError("Excel to PDF conversion requires server-side processing. This feature is available with PDFflow Pro. For now, you can use Microsoft Excel's built-in 'Save as PDF' feature, or Google Sheets to convert your spreadsheet.");
-
-    } catch (err) {
-      console.error("Conversion error:", err);
-      setError("Failed to convert spreadsheet. Please try again.");
-    } finally {
-      setIsProcessing(false);
-    }
+    setError(
+      "Excel to PDF conversion requires server-side processing to maintain formatting and formulas. " +
+      "This feature will be available with PDFflow Pro. For now, you can use Microsoft Excel or Google Sheets' built-in 'Export as PDF' option."
+    );
   };
 
   return (

@@ -72,38 +72,30 @@ export default function ProtectPDF() {
     setError(null);
 
     try {
-      setStatus("Loading PDF...");
+      setStatus("Validating PDF...");
       setProgress(20);
 
       const fileBuffer = await files[0].arrayBuffer();
 
-      // Load the PDF
-      const pdfDoc = await PDFDocument.load(fileBuffer, { ignoreEncryption: true });
+      // Validate the PDF can be loaded
+      await PDFDocument.load(fileBuffer, { ignoreEncryption: true });
 
-      setStatus("Applying password protection...");
+      setStatus("Preparing encryption...");
       setProgress(50);
 
-      // Note: pdf-lib doesn't support native PDF encryption
-      // For production, you'd use a server-side solution or specialized library
-      setStatus("Processing document...");
-      setProgress(70);
+      // PDF encryption requires server-side processing for security
+      // Client-side JavaScript cannot securely implement PDF encryption standards (RC4/AES)
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
-      // Save the PDF
-      const pdfBytes = await pdfDoc.save();
-
-      setStatus("Finalizing...");
-      setProgress(90);
-
-      const blob = new Blob([pdfBytes as BlobPart], { type: "application/pdf" });
-      const url = URL.createObjectURL(blob);
-
-      setResultUrl(url);
       setProgress(100);
-      setStatus("Complete!");
-      incrementUsage();
+      setStatus("Ready");
+      setError(
+        "PDF password protection requires secure server-side encryption. " +
+        "This feature is available with PDFflow Pro. Upgrade to protect your PDFs with industry-standard AES-256 encryption."
+      );
     } catch (err) {
       console.error("Protection error:", err);
-      setError("Failed to protect PDF. Please try again.");
+      setError("Failed to read PDF. The file may be corrupted or invalid.");
     } finally {
       setIsProcessing(false);
     }

@@ -31,37 +31,10 @@ export default function PDFToPDFA() {
   }, []);
 
   const convertToPDFA = async () => {
-    if (files.length === 0) {
-      setError("Please select a PDF file");
-      return;
-    }
-
-    if (remainingUsage <= 0) {
-      setError("Daily limit reached. Upgrade to Pro for unlimited processing.");
-      return;
-    }
-
-    setIsProcessing(true);
-    setProgress(0);
-    setError(null);
-
-    try {
-      setStatus("Analyzing PDF...");
-      setProgress(30);
-
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      setProgress(100);
-      setStatus("Complete!");
-
-      setError("PDF/A conversion requires specialized server-side processing to ensure archival compliance. This feature is available with PDFflow Pro, which includes PDF/A-1b, PDF/A-2b, and PDF/A-3b conversion with full validation.");
-
-    } catch (err) {
-      console.error("Conversion error:", err);
-      setError("Failed to convert PDF. Please try again.");
-    } finally {
-      setIsProcessing(false);
-    }
+    setError(
+      "PDF/A conversion requires specialized processing to ensure archival compliance (embedding fonts, color profiles, metadata). " +
+      "This feature will be available with PDFflow Pro, supporting PDF/A-1b, PDF/A-2b, and PDF/A-3b standards."
+    );
   };
 
   return (
