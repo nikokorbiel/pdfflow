@@ -2,7 +2,6 @@
 
 import { useState, useCallback } from "react";
 import { FileDropzone } from "@/components/FileDropzone";
-import { ProgressBar } from "@/components/ProgressBar";
 import { FileCheck, Sparkles, AlertCircle, Shield } from "lucide-react";
 import {
   getRemainingUsage,
@@ -12,9 +11,6 @@ import Link from "next/link";
 
 export default function PDFToPDFA() {
   const [files, setFiles] = useState<File[]>([]);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [status, setStatus] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   const remainingUsage = typeof window !== "undefined" ? getRemainingUsage() : 2;
@@ -85,14 +81,8 @@ export default function PDFToPDFA() {
               maxFiles={1}
               files={files}
               onRemoveFile={handleRemoveFile}
-              disabled={isProcessing}
+              disabled={false}
             />
-
-            {isProcessing && (
-              <div className="rounded-3xl border bg-[var(--card)] p-6 shadow-glass animate-fade-in">
-                <ProgressBar progress={progress} status={status} />
-              </div>
-            )}
 
             {error && (
               <div className="rounded-3xl bg-amber-500/10 border border-amber-500/20 p-5 animate-fade-in">
@@ -125,7 +115,7 @@ export default function PDFToPDFA() {
             <div className="flex flex-col sm:flex-row gap-4">
               <button
                 onClick={convertToPDFA}
-                disabled={files.length === 0 || isProcessing}
+                disabled={files.length === 0}
                 className="flex-1 flex items-center justify-center gap-3 rounded-full bg-gradient-to-r from-emerald-500 to-green-400 px-8 py-4 font-medium text-white shadow-lg shadow-emerald-500/25 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all press-effect"
               >
                 <FileCheck className="h-5 w-5" />

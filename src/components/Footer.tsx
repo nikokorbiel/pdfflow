@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Heart } from "lucide-react";
 import { PDFflowLogo } from "./Logo";
 
 const footerLinks = {

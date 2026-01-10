@@ -7,7 +7,6 @@ import { ProgressBar } from "@/components/ProgressBar";
 import { Download, Lock, Sparkles, Eye, EyeOff, ShieldCheck } from "lucide-react";
 import {
   getRemainingUsage,
-  incrementUsage,
   getMaxFileSize,
 } from "@/lib/usage";
 import Link from "next/link";
