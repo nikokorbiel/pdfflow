@@ -66,23 +66,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const fetchUserData = async (userId: string) => {
     if (!supabase) return;
 
-    // Fetch profile and subscription in parallel
-    const [profileResult, subResult] = await Promise.all([
-      supabase.from("profiles").select("*").eq("id", userId).single(),
-      supabase.from("subscriptions").select("*").eq("user_id", userId).single(),
-    ]);
+    try {
+      // Fetch profile and subscription in parallel
+      const [profileResult, subResult] = await Promise.all([
+        supabase.from("profiles").select("*").eq("id", userId).single(),
+        supabase.from("subscriptions").select("*").eq("user_id", userId).single(),
+      ]);
 
-    if (profileResult.data) {
-      setProfile(profileResult.data);
-    }
+      if (profileResult.data) {
+        setProfile(profileResult.data);
+      }
 
-    if (subResult.data) {
-      setSubscription(subResult.data);
-      // Cache pro status for sync checks
-      localStorage.setItem(
-        "pdf-tools-pro-cached",
-        subResult.data.plan === "pro" || subResult.data.plan === "team" ? "true" : "false"
-      );
+      if (subResult.data) {
+        setSubscription(subResult.data);
+        // Cache pro status for sync checks
+        localStorage.setItem(
+          "pdf-tools-pro-cached",
+          subResult.data.plan === "pro" || subResult.data.plan === "team" ? "true" : "false"
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
     }
   };
 
@@ -105,17 +109,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     const initAuth = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      setSession(session);
-      setUser(session?.user ?? null);
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        setSession(session);
+        setUser(session?.user ?? null);
 
-      if (session?.user) {
-        await fetchUserData(session.user.id);
+        if (session?.user) {
+          await fetchUserData(session.user.id);
+        }
+      } catch (error) {
+        console.error("Auth initialization error:", error);
+      } finally {
+        setIsLoading(false);
       }
-
-      setIsLoading(false);
     };
 
     initAuth();
@@ -123,18 +131,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const {
       data: { subscription: authSubscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
+      try {
+        setSession(session);
+        setUser(session?.user ?? null);
 
-      if (session?.user) {
-        await fetchUserData(session.user.id);
-      } else {
-        setProfile(null);
-        setSubscription(null);
-        localStorage.removeItem("pdf-tools-pro-cached");
+        if (session?.user) {
+          await fetchUserData(session.user.id);
+        } else {
+          setProfile(null);
+          setSubscription(null);
+          localStorage.removeItem("pdf-tools-pro-cached");
+        }
+      } catch (error) {
+        console.error("Auth state change error:", error);
+      } finally {
+        setIsLoading(false);
       }
-
-      setIsLoading(false);
     });
 
     return () => {
