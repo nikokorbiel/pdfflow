@@ -143,7 +143,7 @@ export function FileDropzone({
           className="absolute inset-0 h-full w-full cursor-pointer opacity-0 disabled:cursor-not-allowed z-10"
         />
 
-        <div className="relative p-12 text-center">
+        <div className="relative p-8 sm:p-12 text-center">
           {/* Icon with animation */}
           <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[var(--muted)] border border-[var(--border)] mb-6 transition-all duration-300 ${isDragging ? "scale-110 shadow-glow" : ""}`}>
             <Upload className={`h-7 w-7 text-[var(--accent)] transition-transform duration-300 ${isDragging ? "-translate-y-1" : ""}`} />

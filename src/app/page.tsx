@@ -244,6 +244,18 @@ const testimonials = [
     avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face",
     content: "Merged 50+ PDFs for our annual report in seconds. Incredibly intuitive.",
   },
+  {
+    name: "David Park",
+    role: "Startup Founder",
+    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
+    content: "Switched from Adobe Acrobat. PDFflow is faster and I don't need a subscription for basic tasks.",
+  },
+  {
+    name: "Rachel Thompson",
+    role: "Legal Assistant",
+    avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&h=100&fit=crop&crop=face",
+    content: "The compression tool saved me hours. Reduced a 50MB contract to under 5MB without losing quality.",
+  },
 ];
 
 const competitors = [
@@ -258,7 +270,9 @@ const comparisonFeatures = [
   { feature: "Files Stay Local", pdfflow: true, adobe: false, smallpdf: false, ilovepdf: false },
   { feature: "No Account Required", pdfflow: true, adobe: false, smallpdf: true, ilovepdf: true },
   { feature: "Free Tools", pdfflow: true, adobe: false, smallpdf: true, ilovepdf: true },
-  { feature: "No File Size Limits", pdfflow: true, adobe: true, smallpdf: false, ilovepdf: false },
+  { feature: "No Watermarks (Free)", pdfflow: true, adobe: false, smallpdf: false, ilovepdf: false },
+  { feature: "Modern UI", pdfflow: true, adobe: false, smallpdf: true, ilovepdf: false },
+  { feature: "No Ads", pdfflow: true, adobe: true, smallpdf: false, ilovepdf: false },
   { feature: "Batch Processing", pdfflow: true, adobe: true, smallpdf: false, ilovepdf: false },
 ];
 
@@ -350,7 +364,16 @@ export default function Home() {
             No uploads. No hassle.
           </motion.p>
 
-          <motion.div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4" variants={itemVariants}>
+          {/* Privacy trust statement */}
+          <motion.div
+            className="mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#0a0a0f]/80 border border-[#1e293b] text-sm text-[#94a3b8]"
+            variants={itemVariants}
+          >
+            <Shield className="w-4 h-4 text-emerald-500" />
+            <span>Everything stays in your browser. No uploads. No tracking.</span>
+          </motion.div>
+
+          <motion.div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4" variants={itemVariants}>
             <button
               onClick={handleGetStarted}
               className="px-8 py-3.5 text-sm font-medium bg-white text-black rounded-lg hover:bg-gray-200 transition-colors inline-flex items-center gap-2"
