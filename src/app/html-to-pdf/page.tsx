@@ -69,43 +69,53 @@ export default function HTMLToPDF() {
         html = htmlContent;
       }
 
-      // Create a hidden iframe to render the HTML
+      // Create a hidden container to render the HTML
       setStatus("Rendering HTML...");
       setProgress(40);
 
-      const iframe = document.createElement("iframe");
-      iframe.style.position = "absolute";
-      iframe.style.left = "-9999px";
-      iframe.style.width = "800px";
-      iframe.style.height = "auto";
-      document.body.appendChild(iframe);
+      const container = document.createElement("div");
+      container.style.position = "absolute";
+      container.style.left = "-9999px";
+      container.style.top = "0";
+      container.style.width = "800px";
+      container.style.backgroundColor = "#ffffff";
+      container.style.padding = "40px";
+      container.style.fontFamily = "system-ui, -apple-system, sans-serif";
+      container.innerHTML = html;
+      document.body.appendChild(container);
 
-      const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
-      if (!iframeDoc) {
-        throw new Error("Could not access iframe document");
-      }
+      // Wait for content and images to load
+      await new Promise(resolve => setTimeout(resolve, 300));
 
-      // Write the HTML content
-      iframeDoc.open();
-      iframeDoc.write(html);
-      iframeDoc.close();
-
-      // Wait for content to load
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Wait for any images to load
+      const images = container.querySelectorAll("img");
+      await Promise.all(
+        Array.from(images).map(
+          (img) =>
+            new Promise((resolve) => {
+              if (img.complete) resolve(true);
+              else {
+                img.onload = () => resolve(true);
+                img.onerror = () => resolve(false);
+              }
+            })
+        )
+      );
 
       setStatus("Creating PDF...");
       setProgress(60);
 
       // Use html2canvas to capture the content
-      const canvas = await html2canvas(iframeDoc.body, {
+      const canvas = await html2canvas(container, {
         scale: 2,
         useCORS: true,
         allowTaint: true,
         backgroundColor: "#ffffff",
+        logging: false,
       });
 
-      // Clean up iframe
-      document.body.removeChild(iframe);
+      // Clean up container
+      document.body.removeChild(container);
 
       setProgress(80);
 
