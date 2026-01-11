@@ -253,7 +253,8 @@ export function Header() {
                 </button>
 
                 {userMenuOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-64 p-2 rounded-xl bg-[#0a0a0f] border border-[#1e293b] shadow-2xl">
+                  <div className="absolute right-0 top-full pt-2 w-64">
+                    <div className="p-2 rounded-xl bg-[#0a0a0f] border border-[#1e293b] shadow-2xl">
                     <div className="px-3 py-3 border-b border-[#1e293b] mb-2">
                       <p className="font-medium text-sm truncate text-white">{profile?.full_name || "User"}</p>
                       <p className="text-xs text-[#64748b] truncate">{profile?.email || user.email}</p>
@@ -301,6 +302,7 @@ export function Header() {
                       <LogOut className="h-4 w-4" />
                       Sign out
                     </button>
+                    </div>
                   </div>
                 )}
               </div>
