@@ -1,13 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
-import { createClient } from "@supabase/supabase-js";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import Stripe from "stripe";
 
-// Use service role for webhook (no user context)
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+// Lazy initialization for getSupabaseAdmin()
+let getSupabaseAdmin()Instance: SupabaseClient | null = null;
+
+function getSupabaseAdmin(): SupabaseClient {
+  if (!getSupabaseAdmin()Instance) {
+    getSupabaseAdmin()Instance = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+  }
+  return getSupabaseAdmin()Instance;
+}
 
 export async function POST(request: NextRequest) {
   const body = await request.text();
@@ -39,7 +46,7 @@ export async function POST(request: NextRequest) {
 
         if (userId) {
           // Update user's subscription status
-          await supabaseAdmin
+          await getSupabaseAdmin()
             .from("profiles")
             .update({
               stripe_customer_id: customerId,
@@ -57,7 +64,7 @@ export async function POST(request: NextRequest) {
         const customerId = subscription.customer as string;
 
         // Find user by customer ID
-        const { data: profile } = await supabaseAdmin
+        const { data: profile } = await getSupabaseAdmin()
           .from("profiles")
           .select("id")
           .eq("stripe_customer_id", customerId)
@@ -67,7 +74,7 @@ export async function POST(request: NextRequest) {
           const status = subscription.status;
           const plan = status === "active" ? "pro" : "free";
 
-          await supabaseAdmin
+          await getSupabaseAdmin()
             .from("profiles")
             .update({
               plan,
@@ -84,14 +91,14 @@ export async function POST(request: NextRequest) {
         const customerId = subscription.customer as string;
 
         // Find user and downgrade to free
-        const { data: profile } = await supabaseAdmin
+        const { data: profile } = await getSupabaseAdmin()
           .from("profiles")
           .select("id")
           .eq("stripe_customer_id", customerId)
           .single();
 
         if (profile) {
-          await supabaseAdmin
+          await getSupabaseAdmin()
             .from("profiles")
             .update({
               plan: "free",
