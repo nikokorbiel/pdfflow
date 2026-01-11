@@ -3,17 +3,17 @@ import { stripe } from "@/lib/stripe";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import Stripe from "stripe";
 
-// Lazy initialization for getSupabaseAdmin()
-let getSupabaseAdmin()Instance: SupabaseClient | null = null;
+// Lazy initialization for supabase admin client
+let supabaseAdminInstance: SupabaseClient | null = null;
 
 function getSupabaseAdmin(): SupabaseClient {
-  if (!getSupabaseAdmin()Instance) {
-    getSupabaseAdmin()Instance = createClient(
+  if (!supabaseAdminInstance) {
+    supabaseAdminInstance = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
   }
-  return getSupabaseAdmin()Instance;
+  return supabaseAdminInstance;
 }
 
 export async function POST(request: NextRequest) {
