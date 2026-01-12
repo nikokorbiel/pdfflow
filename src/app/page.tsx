@@ -36,7 +36,6 @@ import {
   Layers,
   Smartphone,
   Monitor,
-  Download,
   WifiOff,
 } from "lucide-react";
 import { useState } from "react";
