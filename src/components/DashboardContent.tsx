@@ -230,7 +230,7 @@ function CommandPalette({
             </div>
           ) : (
             <div className="py-12 text-center text-white/40">
-              No tools found for "{query}"
+              No tools found for &quot;{query}&quot;
             </div>
           )}
         </div>
@@ -717,7 +717,7 @@ export function DashboardContent({ profile, usage }: DashboardContentProps) {
                     <Sparkles className="h-4 w-4 text-emerald-400" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-white/80 group-hover:text-white transition-colors">What's New</p>
+                    <p className="text-sm font-medium text-white/80 group-hover:text-white transition-colors">What&apos;s New</p>
                     <p className="text-xs text-white/40">Latest updates</p>
                   </div>
                 </Link>
