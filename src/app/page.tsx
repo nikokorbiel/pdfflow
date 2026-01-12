@@ -256,6 +256,12 @@ const testimonials = [
     avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&h=100&fit=crop&crop=face",
     content: "The compression tool saved me hours. Reduced a 50MB contract to under 5MB without losing quality.",
   },
+  {
+    name: "Alex Rivera",
+    role: "Operations Manager",
+    avatar: "https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=100&h=100&fit=crop&crop=face",
+    content: "Our team processes hundreds of PDFs weekly. PDFflow cut our workflow time in half. Game changer.",
+  },
 ];
 
 const competitors = [
