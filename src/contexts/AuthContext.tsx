@@ -162,14 +162,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [supabase]);
 
   const signOut = async () => {
-    if (!supabase) return;
-
-    await supabase.auth.signOut();
+    // Always clear local state first
     setUser(null);
     setProfile(null);
     setSubscription(null);
     setSession(null);
     localStorage.removeItem("pdf-tools-pro-cached");
+
+    // Then sign out from Supabase if available
+    if (supabase) {
+      try {
+        await supabase.auth.signOut();
+      } catch (error) {
+        console.error("Error signing out:", error);
+      }
+    }
+
+    // Force reload to ensure clean state
+    window.location.href = "/";
   };
 
   const isPro = subscription?.plan === "pro" || subscription?.plan === "team";
