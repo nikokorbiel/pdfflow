@@ -35,7 +35,7 @@ import {
   Wrench,
   Layers,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { AuthModal } from "@/components/AuthModal";
 import { ParticleBackground } from "@/components/ParticleBackground";
@@ -227,40 +227,40 @@ const features = [
 
 const testimonials = [
   {
-    name: "Sarah Chen",
-    role: "Product Designer",
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=face",
+    initials: "S.C.",
+    role: "Designer at a Tech Startup",
     content: "Finally, PDF tools that just work. No bloated software, no sketchy uploads.",
+    color: "from-blue-500 to-cyan-500",
   },
   {
-    name: "Marcus Johnson",
+    initials: "M.J.",
     role: "Freelance Developer",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
-    content: "I use PDFflow daily. The privacy aspect is huge - my clients' data stays on my machine.",
+    content: "The privacy aspect is huge - my clients' data stays on my machine. Essential for contract work.",
+    color: "from-violet-500 to-purple-500",
   },
   {
-    name: "Emily Rodriguez",
-    role: "Marketing Manager",
-    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face",
-    content: "Merged 50+ PDFs for our annual report in seconds. Incredibly intuitive.",
+    initials: "E.R.",
+    role: "Marketing at a SaaS Company",
+    content: "Merged 50+ PDFs for our annual report in seconds. The batch processing is incredibly fast.",
+    color: "from-emerald-500 to-teal-500",
   },
   {
-    name: "David Park",
-    role: "Startup Founder",
-    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
-    content: "Switched from Adobe Acrobat. PDFflow is faster and I don't need a subscription for basic tasks.",
+    initials: "D.P.",
+    role: "Small Business Owner",
+    content: "Switched from Adobe. PDFflow does everything I need without the expensive subscription.",
+    color: "from-orange-500 to-amber-500",
   },
   {
-    name: "Rachel Thompson",
-    role: "Legal Assistant",
-    avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&h=100&fit=crop&crop=face",
-    content: "The compression tool saved me hours. Reduced a 50MB contract to under 5MB without losing quality.",
+    initials: "R.T.",
+    role: "Legal Professional",
+    content: "The compression tool is excellent. Reduced a 50MB contract to under 5MB for email.",
+    color: "from-pink-500 to-rose-500",
   },
   {
-    name: "Alex Rivera",
-    role: "Operations Manager",
-    avatar: "https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=100&h=100&fit=crop&crop=face",
-    content: "Our team processes hundreds of PDFs weekly. PDFflow cut our workflow time in half. Game changer.",
+    initials: "A.R.",
+    role: "Operations at a Consulting Firm",
+    content: "We process hundreds of PDFs weekly. The local processing means no compliance headaches.",
+    color: "from-indigo-500 to-blue-500",
   },
 ];
 
@@ -281,38 +281,6 @@ const comparisonFeatures = [
   { feature: "No Ads", pdfflow: true, adobe: true, smallpdf: false, ilovepdf: false },
   { feature: "Batch Processing", pdfflow: true, adobe: true, smallpdf: false, ilovepdf: false },
 ];
-
-// Animated counter
-function AnimatedCounter({ target }: { target: number }) {
-  const [count, setCount] = useState(0);
-  const ref = useRef<HTMLSpanElement>(null);
-  const hasAnimated = useRef(false);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !hasAnimated.current) {
-          hasAnimated.current = true;
-          const duration = 2000;
-          const startTime = performance.now();
-          const animate = (currentTime: number) => {
-            const elapsed = currentTime - startTime;
-            const progress = Math.min(elapsed / duration, 1);
-            const easeOut = 1 - Math.pow(1 - progress, 3);
-            setCount(Math.floor(easeOut * target));
-            if (progress < 1) requestAnimationFrame(animate);
-          };
-          requestAnimationFrame(animate);
-        }
-      },
-      { threshold: 0.5 }
-    );
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, [target]);
-
-  return <span ref={ref}>{count.toLocaleString()}+</span>;
-}
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -597,17 +565,19 @@ export default function Home() {
       <section className="py-20 bg-black relative">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <motion.div className="text-center mb-12" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
-            <p className="text-xs font-medium text-[#64748b] uppercase tracking-widest mb-3">Testimonials</p>
-            <h2 className="text-3xl sm:text-4xl font-semibold text-white tracking-tight">Loved by thousands</h2>
+            <p className="text-xs font-medium text-[#64748b] uppercase tracking-widest mb-3">What People Say</p>
+            <h2 className="text-3xl sm:text-4xl font-semibold text-white tracking-tight">Real feedback from real users</h2>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {testimonials.map((t, index) => (
-              <motion.div key={t.name} className="p-5 rounded-xl bg-[#0a0a0f] border border-[#1e293b]" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: index * 0.1 }}>
+              <motion.div key={t.initials} className="p-5 rounded-xl bg-[#0a0a0f] border border-[#1e293b]" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: index * 0.1 }}>
                 <div className="flex items-center gap-3 mb-3">
-                  <img src={t.avatar} alt={t.name} className="w-10 h-10 rounded-full bg-[#1e293b]" />
+                  <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${t.color} flex items-center justify-center text-white text-sm font-semibold`}>
+                    {t.initials}
+                  </div>
                   <div>
-                    <p className="text-sm font-medium text-white">{t.name}</p>
+                    <p className="text-sm font-medium text-white">{t.initials}</p>
                     <p className="text-xs text-[#64748b]">{t.role}</p>
                   </div>
                 </div>
