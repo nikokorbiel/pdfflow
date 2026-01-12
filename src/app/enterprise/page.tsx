@@ -59,12 +59,7 @@ const enterpriseFeatures = [
   },
 ];
 
-const logos = [
-  { name: "Google", logo: "https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg" },
-  { name: "Microsoft", logo: "https://upload.wikimedia.org/wikipedia/commons/9/96/Microsoft_logo_%282012%29.svg" },
-  { name: "Salesforce", logo: "https://upload.wikimedia.org/wikipedia/commons/f/f9/Salesforce.com_logo.svg" },
-  { name: "Adobe", logo: "https://upload.wikimedia.org/wikipedia/commons/8/8d/Adobe_Corporate_Logo.svg" },
-];
+const logos = ["Google", "Microsoft", "Salesforce", "Adobe", "Stripe", "Shopify"];
 
 const plans = [
   {
@@ -162,14 +157,14 @@ export default function EnterprisePage() {
           <p className="text-center text-white/40 text-sm mb-8">
             TRUSTED BY TEAMS AT LEADING COMPANIES
           </p>
-          <div className="flex items-center justify-center gap-12 flex-wrap opacity-50">
+          <div className="flex items-center justify-center gap-10 md:gap-14 flex-wrap">
             {logos.map((company, index) => (
-              <img
+              <span
                 key={index}
-                src={company.logo}
-                alt={company.name}
-                className="h-8 object-contain grayscale brightness-200"
-              />
+                className="text-white/30 text-xl md:text-2xl font-semibold tracking-tight"
+              >
+                {company}
+              </span>
             ))}
           </div>
         </div>

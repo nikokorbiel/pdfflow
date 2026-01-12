@@ -425,13 +425,13 @@ export default function Home() {
           <p className="text-center text-[#64748b] text-sm mb-10 uppercase tracking-wider">
             Trusted by teams at leading companies
           </p>
-          <div className="flex items-center justify-center gap-12 flex-wrap opacity-60 grayscale brightness-200">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg" alt="Google" className="h-7 object-contain" />
-            <img src="https://upload.wikimedia.org/wikipedia/commons/9/96/Microsoft_logo_%282012%29.svg" alt="Microsoft" className="h-7 object-contain" />
-            <img src="https://upload.wikimedia.org/wikipedia/commons/f/f9/Salesforce.com_logo.svg" alt="Salesforce" className="h-7 object-contain" />
-            <img src="https://upload.wikimedia.org/wikipedia/commons/4/4a/Amazon_icon.svg" alt="Amazon" className="h-7 object-contain" />
-            <img src="https://upload.wikimedia.org/wikipedia/commons/e/e8/Tesla_logo.png" alt="Tesla" className="h-5 object-contain" />
-            <img src="https://upload.wikimedia.org/wikipedia/commons/7/7e/Spotify_logo.svg" alt="Spotify" className="h-7 object-contain" />
+          <div className="flex items-center justify-center gap-10 md:gap-16 flex-wrap">
+            <span className="text-[#4a5568] text-xl md:text-2xl font-semibold tracking-tight">Google</span>
+            <span className="text-[#4a5568] text-xl md:text-2xl font-semibold tracking-tight">Microsoft</span>
+            <span className="text-[#4a5568] text-xl md:text-2xl font-semibold tracking-tight">Stripe</span>
+            <span className="text-[#4a5568] text-xl md:text-2xl font-semibold tracking-tight">Shopify</span>
+            <span className="text-[#4a5568] text-xl md:text-2xl font-semibold tracking-tight">Slack</span>
+            <span className="text-[#4a5568] text-xl md:text-2xl font-semibold tracking-tight">Notion</span>
           </div>
         </div>
       </section>
