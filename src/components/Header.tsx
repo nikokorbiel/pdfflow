@@ -206,12 +206,12 @@ export function Header() {
                 Pricing
               </Link>
 
-              <Link href="/blog" className="px-4 py-2 text-sm text-[#94a3b8] hover:text-white hover:bg-[#1e293b] rounded-lg transition-colors">
-                Blog
+              <Link href="/enterprise" className="px-4 py-2 text-sm text-[#94a3b8] hover:text-white hover:bg-[#1e293b] rounded-lg transition-colors">
+                Enterprise
               </Link>
 
-              <Link href="/changelog" className="px-4 py-2 text-sm text-[#94a3b8] hover:text-white hover:bg-[#1e293b] rounded-lg transition-colors">
-                Changelog
+              <Link href="/about" className="px-4 py-2 text-sm text-[#94a3b8] hover:text-white hover:bg-[#1e293b] rounded-lg transition-colors">
+                About
               </Link>
             </div>
           </div>
@@ -387,11 +387,17 @@ export function Header() {
             <Link href="/pricing" className="block px-4 py-3 text-sm font-medium rounded-xl hover:bg-[#1e293b] transition-colors" onClick={() => setMobileMenuOpen(false)}>
               Pricing
             </Link>
-            <Link href="/blog" className="block px-4 py-3 text-sm font-medium rounded-xl hover:bg-[#1e293b] transition-colors" onClick={() => setMobileMenuOpen(false)}>
-              Blog
+            <Link href="/enterprise" className="block px-4 py-3 text-sm font-medium rounded-xl hover:bg-[#1e293b] transition-colors" onClick={() => setMobileMenuOpen(false)}>
+              Enterprise
             </Link>
-            <Link href="/changelog" className="block px-4 py-3 text-sm font-medium rounded-xl hover:bg-[#1e293b] transition-colors" onClick={() => setMobileMenuOpen(false)}>
-              Changelog
+            <Link href="/about" className="block px-4 py-3 text-sm font-medium rounded-xl hover:bg-[#1e293b] transition-colors" onClick={() => setMobileMenuOpen(false)}>
+              About
+            </Link>
+            <Link href="/contact" className="block px-4 py-3 text-sm font-medium rounded-xl hover:bg-[#1e293b] transition-colors" onClick={() => setMobileMenuOpen(false)}>
+              Contact
+            </Link>
+            <Link href="/security" className="block px-4 py-3 text-sm font-medium rounded-xl hover:bg-[#1e293b] transition-colors" onClick={() => setMobileMenuOpen(false)}>
+              Security
             </Link>
 
             {user && (

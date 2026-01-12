@@ -18,14 +18,17 @@ const footerLinks = {
     { name: "All Tools", href: "/tools" },
   ],
   company: [
+    { name: "About", href: "/about" },
     { name: "Pricing", href: "/pricing" },
+    { name: "Enterprise", href: "/enterprise" },
     { name: "Blog", href: "/blog" },
     { name: "Changelog", href: "/changelog" },
-    { name: "Compare", href: "/compare" },
+    { name: "Contact", href: "/contact" },
   ],
   legal: [
     { name: "Privacy Policy", href: "/privacy" },
     { name: "Terms of Service", href: "/terms" },
+    { name: "Security", href: "/security" },
   ],
 };
 
@@ -133,9 +136,9 @@ export function Footer() {
                 Terms
               </Link>
               <span className="text-[var(--border)]">•</span>
-              <a href="mailto:hello@pdfflow.com" className="hover:text-[var(--foreground)] transition-colors">
+              <Link href="/contact" className="hover:text-[var(--foreground)] transition-colors">
                 Contact
-              </a>
+              </Link>
             </div>
           </div>
         </div>

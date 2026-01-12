@@ -419,6 +419,90 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Logo Cloud */}
+      <section className="py-16 bg-black border-b border-[#1e293b]">
+        <div className="max-w-6xl mx-auto px-4">
+          <p className="text-center text-[#64748b] text-sm mb-10 uppercase tracking-wider">
+            Trusted by teams at leading companies
+          </p>
+          <div className="flex items-center justify-center gap-12 flex-wrap opacity-60 grayscale brightness-200">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg" alt="Google" className="h-7 object-contain" />
+            <img src="https://upload.wikimedia.org/wikipedia/commons/9/96/Microsoft_logo_%282012%29.svg" alt="Microsoft" className="h-7 object-contain" />
+            <img src="https://upload.wikimedia.org/wikipedia/commons/f/f9/Salesforce.com_logo.svg" alt="Salesforce" className="h-7 object-contain" />
+            <img src="https://upload.wikimedia.org/wikipedia/commons/4/4a/Amazon_icon.svg" alt="Amazon" className="h-7 object-contain" />
+            <img src="https://upload.wikimedia.org/wikipedia/commons/e/e8/Tesla_logo.png" alt="Tesla" className="h-5 object-contain" />
+            <img src="https://upload.wikimedia.org/wikipedia/commons/7/7e/Spotify_logo.svg" alt="Spotify" className="h-7 object-contain" />
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section className="py-20 bg-[#050508] relative">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div className="text-center mb-16" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+            <p className="text-xs font-medium text-[#64748b] uppercase tracking-widest mb-3">How It Works</p>
+            <h2 className="text-3xl sm:text-4xl font-semibold text-white tracking-tight">Three simple steps</h2>
+            <p className="mt-4 text-[#94a3b8] max-w-2xl mx-auto">No sign up required. Start editing PDFs in seconds.</p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              {
+                step: "01",
+                title: "Select your tool",
+                description: "Choose from 20+ PDF tools. Merge, split, compress, convert, and more.",
+                icon: Sparkles,
+              },
+              {
+                step: "02",
+                title: "Drop your files",
+                description: "Drag and drop your PDFs. Everything is processed locally in your browser.",
+                icon: Shield,
+              },
+              {
+                step: "03",
+                title: "Download result",
+                description: "Get your processed PDF instantly. No watermarks, no email required.",
+                icon: Zap,
+              },
+            ].map((item, index) => (
+              <motion.div
+                key={item.step}
+                className="relative p-8 rounded-2xl bg-[#0a0a0f] border border-[#1e293b] hover:border-[#334155] transition-colors"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.15 }}
+              >
+                <div className="absolute -top-4 left-8 w-8 h-8 rounded-full bg-gradient-to-br from-[#0ea5e9] to-[#06b6d4] flex items-center justify-center text-white font-bold text-sm">
+                  {index + 1}
+                </div>
+                <div className="w-12 h-12 rounded-xl bg-[#0ea5e9]/10 flex items-center justify-center mb-4 mt-2">
+                  <item.icon className="w-6 h-6 text-[#0ea5e9]" />
+                </div>
+                <h3 className="text-xl font-semibold text-white mb-2">{item.title}</h3>
+                <p className="text-[#94a3b8]">{item.description}</p>
+              </motion.div>
+            ))}
+          </div>
+
+          <motion.div
+            className="mt-12 text-center"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+          >
+            <Link
+              href="#tools"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white text-black font-medium hover:bg-gray-200 transition-colors"
+            >
+              Browse All Tools <ArrowRight className="w-4 h-4" />
+            </Link>
+          </motion.div>
+        </div>
+        <GlowingBorder delay={1.5} />
+      </section>
+
       {/* Tools Grid */}
       <section id="tools" className="py-20 bg-black relative">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
