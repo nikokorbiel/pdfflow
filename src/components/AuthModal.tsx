@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { X, Mail, Lock, User, ArrowRight, Zap, AlertCircle, CheckCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -21,6 +22,7 @@ export function AuthModal({ isOpen, onClose, initialMode = "signin", promptMessa
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
+  const router = useRouter();
   const { isConfigured } = useAuth();
 
   const supabase = useMemo(() => {
@@ -85,6 +87,7 @@ export function AuthModal({ isOpen, onClose, initialMode = "signin", promptMessa
         });
         if (error) throw error;
         onClose();
+        router.refresh();
       }
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : "Authentication failed";
