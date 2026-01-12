@@ -422,16 +422,32 @@ export default function Home() {
       {/* Logo Cloud */}
       <section className="py-16 bg-black border-b border-[#1e293b]">
         <div className="max-w-6xl mx-auto px-4">
-          <p className="text-center text-[#64748b] text-sm mb-10 uppercase tracking-wider">
+          <motion.p
+            className="text-center text-[#64748b] text-sm mb-10 uppercase tracking-wider"
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
             Trusted by teams at leading companies
-          </p>
+          </motion.p>
           <div className="flex items-center justify-center gap-10 md:gap-16 flex-wrap">
-            <span className="text-[#4a5568] text-xl md:text-2xl font-semibold tracking-tight">Google</span>
-            <span className="text-[#4a5568] text-xl md:text-2xl font-semibold tracking-tight">Microsoft</span>
-            <span className="text-[#4a5568] text-xl md:text-2xl font-semibold tracking-tight">Stripe</span>
-            <span className="text-[#4a5568] text-xl md:text-2xl font-semibold tracking-tight">Shopify</span>
-            <span className="text-[#4a5568] text-xl md:text-2xl font-semibold tracking-tight">Slack</span>
-            <span className="text-[#4a5568] text-xl md:text-2xl font-semibold tracking-tight">Notion</span>
+            {["Google", "Microsoft", "Stripe", "Shopify", "Slack", "Notion"].map((company, index) => (
+              <motion.span
+                key={company}
+                className="text-[#4a5568] text-xl md:text-2xl font-semibold tracking-tight cursor-default select-none"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1, duration: 0.5 }}
+                whileHover={{
+                  scale: 1.1,
+                  color: "#0ea5e9",
+                  transition: { duration: 0.2 }
+                }}
+              >
+                {company}
+              </motion.span>
+            ))}
           </div>
         </div>
       </section>

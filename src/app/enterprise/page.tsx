@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { motion } from "framer-motion";
 import {
   Shield,
   Building,
@@ -154,17 +155,31 @@ export default function EnterprisePage() {
       {/* Trusted By */}
       <section className="py-16 border-t border-white/5">
         <div className="max-w-6xl mx-auto px-6">
-          <p className="text-center text-white/40 text-sm mb-8">
+          <motion.p
+            className="text-center text-white/40 text-sm mb-8"
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
             TRUSTED BY TEAMS AT LEADING COMPANIES
-          </p>
+          </motion.p>
           <div className="flex items-center justify-center gap-10 md:gap-14 flex-wrap">
             {logos.map((company, index) => (
-              <span
+              <motion.span
                 key={index}
-                className="text-white/30 text-xl md:text-2xl font-semibold tracking-tight"
+                className="text-white/30 text-xl md:text-2xl font-semibold tracking-tight cursor-default select-none"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1, duration: 0.5 }}
+                whileHover={{
+                  scale: 1.1,
+                  color: "rgba(255, 255, 255, 0.8)",
+                  transition: { duration: 0.2 }
+                }}
               >
                 {company}
-              </span>
+              </motion.span>
             ))}
           </div>
         </div>
