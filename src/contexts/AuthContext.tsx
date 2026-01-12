@@ -108,6 +108,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    // Safety timeout - ensure loading state resolves even if something hangs
+    const timeout = setTimeout(() => {
+      setIsLoading(false);
+    }, 3000);
+
     const initAuth = async () => {
       try {
         const {
@@ -122,6 +127,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } catch (error) {
         console.error("Auth initialization error:", error);
       } finally {
+        clearTimeout(timeout);
         setIsLoading(false);
       }
     };

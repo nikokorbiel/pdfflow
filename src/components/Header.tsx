@@ -111,7 +111,7 @@ export function Header() {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
-  const { user, profile, isPro, isLoading, signOut } = useAuth();
+  const { user, profile, isPro, signOut } = useAuth();
   const { openAuthModal } = useAuthModal();
 
   const getAvatarUrl = (url: string | null | undefined) => {
@@ -220,11 +220,7 @@ export function Header() {
           <div className="flex-1" />
 
           <div className="flex items-center gap-3">
-            {isLoading ? (
-              <div className="flex items-center gap-2 sm:gap-3">
-                <div className="w-20 h-9 rounded-lg bg-[#1e293b] animate-pulse" />
-              </div>
-            ) : user ? (
+            {user ? (
               <div
                 className="relative"
                 onMouseLeave={() => setUserMenuOpen(false)}
