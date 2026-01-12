@@ -34,6 +34,10 @@ import {
   FileCheck,
   Wrench,
   Layers,
+  Smartphone,
+  Monitor,
+  Download,
+  WifiOff,
 } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -674,6 +678,82 @@ export default function Home() {
               {user ? "Go to Dashboard" : "Get Started Free"}
               <ArrowRight className="w-4 h-4" />
             </button>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Install App Section */}
+      <section className="py-20 bg-black border-t border-[#1e293b]">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <motion.div className="text-center mb-12" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+            <p className="text-xs font-medium text-[#64748b] uppercase tracking-widest mb-3">Get the App</p>
+            <h2 className="text-3xl sm:text-4xl font-semibold text-white tracking-tight">Install PDFflow</h2>
+            <p className="mt-4 text-[#94a3b8] max-w-2xl mx-auto">Add PDFflow to your device for quick access and offline use. No app store needed.</p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            <motion.div
+              className="p-6 rounded-2xl bg-[#0a0a0f] border border-[#1e293b] text-center"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0 }}
+            >
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#0ea5e9]/20 to-[#06b6d4]/20 flex items-center justify-center mx-auto mb-4">
+                <Smartphone className="w-7 h-7 text-[#0ea5e9]" />
+              </div>
+              <h3 className="text-lg font-semibold text-white mb-2">iPhone & iPad</h3>
+              <p className="text-sm text-[#64748b] mb-4">Tap the share button in Safari, then &quot;Add to Home Screen&quot;</p>
+              <div className="text-xs text-[#475569]">Safari required</div>
+            </motion.div>
+
+            <motion.div
+              className="p-6 rounded-2xl bg-[#0a0a0f] border border-[#1e293b] text-center"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+            >
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#0ea5e9]/20 to-[#06b6d4]/20 flex items-center justify-center mx-auto mb-4">
+                <Smartphone className="w-7 h-7 text-[#0ea5e9]" />
+              </div>
+              <h3 className="text-lg font-semibold text-white mb-2">Android</h3>
+              <p className="text-sm text-[#64748b] mb-4">Tap the menu in Chrome, then &quot;Install app&quot; or &quot;Add to Home Screen&quot;</p>
+              <div className="text-xs text-[#475569]">Chrome recommended</div>
+            </motion.div>
+
+            <motion.div
+              className="p-6 rounded-2xl bg-[#0a0a0f] border border-[#1e293b] text-center"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+            >
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#0ea5e9]/20 to-[#06b6d4]/20 flex items-center justify-center mx-auto mb-4">
+                <Monitor className="w-7 h-7 text-[#0ea5e9]" />
+              </div>
+              <h3 className="text-lg font-semibold text-white mb-2">Desktop</h3>
+              <p className="text-sm text-[#64748b] mb-4">Click the install icon in the address bar or browser menu</p>
+              <div className="text-xs text-[#475569]">Chrome, Edge, or Brave</div>
+            </motion.div>
+          </div>
+
+          <motion.div
+            className="mt-10 p-6 rounded-2xl bg-gradient-to-br from-[#0ea5e9]/5 to-[#06b6d4]/5 border border-[#0ea5e9]/20 max-w-2xl mx-auto"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3 }}
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-[#0ea5e9]/10 flex items-center justify-center flex-shrink-0">
+                <WifiOff className="w-6 h-6 text-[#0ea5e9]" />
+              </div>
+              <div>
+                <h4 className="text-base font-semibold text-white mb-1">Works Offline</h4>
+                <p className="text-sm text-[#94a3b8]">Once installed, PDFflow works without internet. Your files are processed locally on your device.</p>
+              </div>
+            </div>
           </motion.div>
         </div>
       </section>
