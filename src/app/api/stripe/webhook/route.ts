@@ -80,8 +80,10 @@ export async function POST(request: NextRequest) {
         if (profile) {
           const status = subscription.status;
           const plan = status === "active" ? "pro" : "free";
-          const periodEnd = subscription.current_period_end
-            ? new Date(subscription.current_period_end * 1000).toISOString()
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const periodEndTimestamp = (subscription as any).current_period_end;
+          const periodEnd = periodEndTimestamp
+            ? new Date(periodEndTimestamp * 1000).toISOString()
             : null;
 
           // Update subscriptions table
