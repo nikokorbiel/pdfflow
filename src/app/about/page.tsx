@@ -35,10 +35,10 @@ const values = [
 ];
 
 const stats = [
-  { value: "2M+", label: "PDFs Processed" },
-  { value: "150K+", label: "Happy Users" },
-  { value: "99.9%", label: "Uptime" },
-  { value: "4.9/5", label: "User Rating" },
+  { value: "20+", label: "PDF Tools" },
+  { value: "100%", label: "Local Processing" },
+  { value: "0", label: "Files Uploaded" },
+  { value: "Free", label: "Core Features" },
 ];
 
 const milestones = [
@@ -49,8 +49,8 @@ const milestones = [
   },
   {
     year: "2024",
-    title: "100K Users",
-    description: "Reached our first major milestone within months of launch.",
+    title: "Core Tools Complete",
+    description: "Launched merge, split, compress, and convert functionality.",
   },
   {
     year: "2025",
@@ -229,7 +229,7 @@ export default function AboutPage() {
               Ready to try PDFflow?
             </h2>
             <p className="text-white/60 mb-8 max-w-xl mx-auto">
-              Join over 150,000 users who trust PDFflow for their PDF needs.
+              Start editing PDFs in seconds. No account required.
             </p>
             <div className="flex items-center justify-center gap-4 flex-wrap">
               <Link

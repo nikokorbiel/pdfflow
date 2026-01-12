@@ -60,7 +60,6 @@ const enterpriseFeatures = [
   },
 ];
 
-const logos = ["Google", "Microsoft", "Salesforce", "Adobe", "Stripe", "Shopify"];
 
 const plans = [
   {
@@ -152,35 +151,26 @@ export default function EnterprisePage() {
         </div>
       </section>
 
-      {/* Trusted By */}
+      {/* Key Benefits */}
       <section className="py-16 border-t border-white/5">
         <div className="max-w-6xl mx-auto px-6">
-          <motion.p
-            className="text-center text-white/40 text-sm mb-8"
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            TRUSTED BY TEAMS AT LEADING COMPANIES
-          </motion.p>
-          <div className="flex items-center justify-center gap-10 md:gap-14 flex-wrap">
-            {logos.map((company, index) => (
-              <motion.span
-                key={index}
-                className="text-white/30 text-xl md:text-2xl font-semibold tracking-tight cursor-default select-none"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1, duration: 0.5 }}
-                whileHover={{
-                  scale: 1.1,
-                  color: "rgba(255, 255, 255, 0.8)",
-                  transition: { duration: 0.2 }
-                }}
-              >
-                {company}
-              </motion.span>
-            ))}
+          <div className="flex items-center justify-center gap-8 md:gap-16 flex-wrap text-center">
+            <div>
+              <div className="text-3xl font-bold text-white mb-1">100%</div>
+              <div className="text-sm text-white/40">Local Processing</div>
+            </div>
+            <div>
+              <div className="text-3xl font-bold text-white mb-1">Zero</div>
+              <div className="text-sm text-white/40">Data Collection</div>
+            </div>
+            <div>
+              <div className="text-3xl font-bold text-white mb-1">20+</div>
+              <div className="text-sm text-white/40">PDF Tools</div>
+            </div>
+            <div>
+              <div className="text-3xl font-bold text-white mb-1">24/7</div>
+              <div className="text-sm text-white/40">Enterprise Support</div>
+            </div>
           </div>
         </div>
       </section>

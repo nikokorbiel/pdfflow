@@ -396,58 +396,22 @@ export default function Home() {
         <GlowingBorder delay={0} />
       </section>
 
-      {/* Social Proof with Avatars */}
+      {/* Social Proof */}
       <section className="py-10 border-b border-[#1e293b] bg-[#050508]">
         <div className="max-w-4xl mx-auto px-4 text-center">
-          <div className="flex items-center justify-center mb-3">
-            <div className="flex -space-x-2">
-              {testimonials.map((t, i) => (
-                <img key={i} src={t.avatar} alt="" className="w-8 h-8 rounded-full border-2 border-[#050508] bg-[#1e293b]" />
-              ))}
-              <div className="w-8 h-8 rounded-full border-2 border-[#050508] bg-[#1e293b] flex items-center justify-center text-[10px] font-medium text-[#94a3b8]">
-                +9k
-              </div>
+          <div className="flex items-center justify-center gap-8 flex-wrap text-sm text-[#94a3b8]">
+            <div className="flex items-center gap-2">
+              <Shield className="w-4 h-4 text-emerald-500" />
+              <span>100% Local Processing</span>
             </div>
-          </div>
-          <p className="text-sm text-[#94a3b8]">
-            Trusted by <span className="text-white font-semibold"><AnimatedCounter target={10000} /></span> users worldwide
-          </p>
-          <div className="mt-2 flex items-center justify-center gap-1">
-            <span className="text-[#fbbf24]">★★★★★</span>
-            <span className="text-xs text-[#64748b] ml-1">4.9/5</span>
-          </div>
-        </div>
-      </section>
-
-      {/* Logo Cloud */}
-      <section className="py-16 bg-black border-b border-[#1e293b]">
-        <div className="max-w-6xl mx-auto px-4">
-          <motion.p
-            className="text-center text-[#64748b] text-sm mb-10 uppercase tracking-wider"
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            Trusted by teams at leading companies
-          </motion.p>
-          <div className="flex items-center justify-center gap-10 md:gap-16 flex-wrap">
-            {["Google", "Microsoft", "Stripe", "Shopify", "Slack", "Notion"].map((company, index) => (
-              <motion.span
-                key={company}
-                className="text-[#4a5568] text-xl md:text-2xl font-semibold tracking-tight cursor-default select-none"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1, duration: 0.5 }}
-                whileHover={{
-                  scale: 1.1,
-                  color: "#0ea5e9",
-                  transition: { duration: 0.2 }
-                }}
-              >
-                {company}
-              </motion.span>
-            ))}
+            <div className="flex items-center gap-2">
+              <Zap className="w-4 h-4 text-amber-500" />
+              <span>Instant Results</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Gift className="w-4 h-4 text-blue-500" />
+              <span>Free to Use</span>
+            </div>
           </div>
         </div>
       </section>
@@ -783,7 +747,7 @@ export default function Home() {
               </button>
             </form>
 
-            <p className="mt-4 text-xs text-[#64748b]">Join 5,000+ subscribers. Unsubscribe anytime.</p>
+            <p className="mt-4 text-xs text-[#64748b]">No spam, ever. Unsubscribe anytime.</p>
           </motion.div>
         </div>
       </section>
