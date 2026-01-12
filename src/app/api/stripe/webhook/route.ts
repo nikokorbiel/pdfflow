@@ -45,16 +45,23 @@ export async function POST(request: NextRequest) {
         const subscriptionId = session.subscription as string;
 
         if (userId) {
-          // Update user's subscription status
+          // Update stripe_customer_id in profiles table
           await getSupabaseAdmin()
             .from("profiles")
-            .update({
+            .update({ stripe_customer_id: customerId })
+            .eq("id", userId);
+
+          // Upsert subscription in subscriptions table
+          await getSupabaseAdmin()
+            .from("subscriptions")
+            .upsert({
+              user_id: userId,
+              plan: "pro",
+              status: "active",
               stripe_customer_id: customerId,
               stripe_subscription_id: subscriptionId,
-              plan: "pro",
-              plan_updated_at: new Date().toISOString(),
-            })
-            .eq("id", userId);
+              current_period_end: null, // Will be set by subscription.updated event
+            }, { onConflict: "user_id" });
         }
         break;
       }
@@ -63,7 +70,7 @@ export async function POST(request: NextRequest) {
         const subscription = event.data.object as Stripe.Subscription;
         const customerId = subscription.customer as string;
 
-        // Find user by customer ID
+        // Find user by stripe_customer_id in profiles
         const { data: profile } = await getSupabaseAdmin()
           .from("profiles")
           .select("id")
@@ -73,15 +80,21 @@ export async function POST(request: NextRequest) {
         if (profile) {
           const status = subscription.status;
           const plan = status === "active" ? "pro" : "free";
+          const periodEnd = subscription.current_period_end
+            ? new Date(subscription.current_period_end * 1000).toISOString()
+            : null;
 
+          // Update subscriptions table
           await getSupabaseAdmin()
-            .from("profiles")
-            .update({
+            .from("subscriptions")
+            .upsert({
+              user_id: profile.id,
               plan,
+              status: status as "active" | "canceled" | "past_due" | "trialing",
+              stripe_customer_id: customerId,
               stripe_subscription_id: subscription.id,
-              plan_updated_at: new Date().toISOString(),
-            })
-            .eq("id", profile.id);
+              current_period_end: periodEnd,
+            }, { onConflict: "user_id" });
         }
         break;
       }
@@ -90,7 +103,7 @@ export async function POST(request: NextRequest) {
         const subscription = event.data.object as Stripe.Subscription;
         const customerId = subscription.customer as string;
 
-        // Find user and downgrade to free
+        // Find user by stripe_customer_id
         const { data: profile } = await getSupabaseAdmin()
           .from("profiles")
           .select("id")
@@ -98,14 +111,17 @@ export async function POST(request: NextRequest) {
           .single();
 
         if (profile) {
+          // Update subscription to free/canceled
           await getSupabaseAdmin()
-            .from("profiles")
-            .update({
+            .from("subscriptions")
+            .upsert({
+              user_id: profile.id,
               plan: "free",
+              status: "canceled",
+              stripe_customer_id: customerId,
               stripe_subscription_id: null,
-              plan_updated_at: new Date().toISOString(),
-            })
-            .eq("id", profile.id);
+              current_period_end: null,
+            }, { onConflict: "user_id" });
         }
         break;
       }
@@ -114,7 +130,20 @@ export async function POST(request: NextRequest) {
         const invoice = event.data.object as Stripe.Invoice;
         const customerId = invoice.customer as string;
 
-        // Optionally notify user or handle failed payment
+        // Find user and update subscription status
+        const { data: profile } = await getSupabaseAdmin()
+          .from("profiles")
+          .select("id")
+          .eq("stripe_customer_id", customerId)
+          .single();
+
+        if (profile) {
+          await getSupabaseAdmin()
+            .from("subscriptions")
+            .update({ status: "past_due" })
+            .eq("user_id", profile.id);
+        }
+
         console.log(`Payment failed for customer: ${customerId}`);
         break;
       }
