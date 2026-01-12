@@ -18,31 +18,20 @@ export default async function Dashboard() {
     redirect("/");
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
-
-  const { data: subscription } = await supabase
-    .from("subscriptions")
-    .select("*")
-    .eq("user_id", user.id)
-    .single();
-
   const today = new Date().toISOString().split("T")[0];
-  const { data: usage } = await supabase
-    .from("usage")
-    .select("*")
-    .eq("user_id", user.id)
-    .eq("date", today)
-    .single();
+
+  // Run all queries in parallel for faster loading
+  const [profileResult, subscriptionResult, usageResult] = await Promise.all([
+    supabase.from("profiles").select("*").eq("id", user.id).single(),
+    supabase.from("subscriptions").select("*").eq("user_id", user.id).single(),
+    supabase.from("usage").select("*").eq("user_id", user.id).eq("date", today).single(),
+  ]);
 
   return (
     <DashboardContent
-      profile={profile}
-      subscription={subscription}
-      usage={usage}
+      profile={profileResult.data}
+      subscription={subscriptionResult.data}
+      usage={usageResult.data}
     />
   );
 }
