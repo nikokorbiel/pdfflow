@@ -32,6 +32,10 @@ import {
   FileCheck,
   LayoutDashboard,
   Mail,
+  Smartphone,
+  WifiOff,
+  BookOpen,
+  MessageSquare,
 } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -54,6 +58,39 @@ interface Update {
 }
 
 const updates: Update[] = [
+  {
+    version: "1.5.0",
+    date: "January 2025",
+    title: "PWA Support & Blog Redesign",
+    description: "Install PDFflow as an app, work offline, and explore our new professional blog with guides and tutorials.",
+    features: [
+      {
+        title: "Install as App (PWA)",
+        description: "Add PDFflow to your home screen on mobile or desktop. Get quick access and a native app experience.",
+        icon: Smartphone,
+        isNew: true,
+      },
+      {
+        title: "Offline Mode",
+        description: "Use your favorite PDF tools even without internet. Core features are cached for offline access.",
+        icon: WifiOff,
+        isNew: true,
+      },
+      {
+        title: "Professional Blog",
+        description: "New blog with comprehensive guides on PDF compression, merging, security, and more. Beautiful gradient illustrations.",
+        icon: BookOpen,
+        link: "/blog",
+        isNew: true,
+      },
+      {
+        title: "Honest Testimonials",
+        description: "Redesigned testimonials section with authentic feedback and clean gradient avatars instead of stock photos.",
+        icon: MessageSquare,
+        isNew: true,
+      },
+    ],
+  },
   {
     version: "1.4.0",
     date: "January 2025",
