@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useCallback, useRef, useEffect } from "react";
+import JSZip from "jszip";
 import { FileDropzone } from "@/components/FileDropzone";
 import { ProgressBar } from "@/components/ProgressBar";
-import { Download, Image as ImageIcon, Sparkles, Settings2, Crown } from "lucide-react";
+import { Download, Image as ImageIcon, Sparkles, Settings2, Crown, Package, Check, Loader2 } from "lucide-react";
 import { useToolUsage } from "@/hooks/useToolUsage";
 import Link from "next/link";
 
@@ -12,12 +13,18 @@ type ImageFormat = "png" | "jpeg";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type PDFLib = any;
 
+interface ProcessedPDF {
+  name: string;
+  images: { name: string; url: string; blob: Blob }[];
+}
+
 export default function PDFToImage() {
   const [files, setFiles] = useState<File[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [status, setStatus] = useState("");
-  const [resultUrls, setResultUrls] = useState<{ name: string; url: string }[]>([]);
+  const [currentFileIndex, setCurrentFileIndex] = useState(0);
+  const [processedPDFs, setProcessedPDFs] = useState<ProcessedPDF[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [pageCount, setPageCount] = useState(0);
   const [format, setFormat] = useState<ImageFormat>("png");
@@ -26,6 +33,9 @@ export default function PDFToImage() {
   const pdfjsRef = useRef<PDFLib | null>(null);
 
   const { isPro, canProcess, maxFileSize, recordUsage, usageDisplay } = useToolUsage();
+
+  // Pro users can batch process up to 20 files
+  const maxFiles = isPro ? 20 : 1;
 
   // Load PDF.js dynamically on client side
   useEffect(() => {
@@ -39,8 +49,11 @@ export default function PDFToImage() {
 
   const handleFilesSelected = useCallback(async (newFiles: File[]) => {
     if (newFiles.length > 0) {
-      setFiles([newFiles[0]]);
-      setResultUrls([]);
+      setFiles(prev => {
+        const combined = [...prev, ...newFiles];
+        return combined.slice(0, maxFiles);
+      });
+      setProcessedPDFs([]);
       setError(null);
 
       if (!pdfjsRef.current) {
@@ -48,25 +61,79 @@ export default function PDFToImage() {
         return;
       }
 
-      try {
-        const buffer = await newFiles[0].arrayBuffer();
-        const pdf = await pdfjsRef.current.getDocument({ data: buffer }).promise;
-        setPageCount(pdf.numPages);
-      } catch {
-        setError("Could not read PDF file");
+      // Only show page count for single file mode
+      if (newFiles.length === 1 && files.length === 0) {
+        try {
+          const buffer = await newFiles[0].arrayBuffer();
+          const pdf = await pdfjsRef.current.getDocument({ data: buffer }).promise;
+          setPageCount(pdf.numPages);
+        } catch {
+          setError("Could not read PDF file");
+        }
+      } else {
+        setPageCount(0);
       }
     }
+  }, [maxFiles, files.length]);
+
+  const handleRemoveFile = useCallback((index: number) => {
+    setFiles(prev => {
+      const newFiles = prev.filter((_, i) => i !== index);
+      if (newFiles.length === 0) {
+        setPageCount(0);
+      }
+      return newFiles;
+    });
+    setProcessedPDFs([]);
   }, []);
 
-  const handleRemoveFile = useCallback(() => {
-    setFiles([]);
-    setResultUrls([]);
-    setPageCount(0);
-  }, []);
+  const convertSinglePDF = async (file: File): Promise<ProcessedPDF> => {
+    if (!pdfjsRef.current) throw new Error("PDF library not loaded");
+
+    const buffer = await file.arrayBuffer();
+    const pdf = await pdfjsRef.current.getDocument({ data: buffer }).promise;
+    const images: { name: string; url: string; blob: Blob }[] = [];
+
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const viewport = page.getViewport({ scale });
+
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d");
+      if (!context) throw new Error("Could not create canvas context");
+
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+
+      await page.render({
+        canvasContext: context,
+        viewport: viewport,
+      }).promise;
+
+      const mimeType = format === "png" ? "image/png" : "image/jpeg";
+      const dataUrl = canvas.toDataURL(mimeType, format === "jpeg" ? quality : undefined);
+
+      // Convert dataUrl to blob for ZIP
+      const response = await fetch(dataUrl);
+      const blob = await response.blob();
+
+      const baseName = file.name.replace(/\.pdf$/i, "");
+      images.push({
+        name: `${baseName}_page_${i}.${format}`,
+        url: dataUrl,
+        blob,
+      });
+    }
+
+    return {
+      name: file.name,
+      images,
+    };
+  };
 
   const convertToImages = async () => {
     if (files.length === 0) {
-      setError("Please select a PDF file");
+      setError("Please select at least one PDF file");
       return;
     }
 
@@ -83,43 +150,29 @@ export default function PDFToImage() {
     setIsProcessing(true);
     setProgress(0);
     setError(null);
-    setResultUrls([]);
+    setProcessedPDFs([]);
+    setCurrentFileIndex(0);
+
+    const results: ProcessedPDF[] = [];
 
     try {
-      setStatus("Loading PDF...");
-      const buffer = await files[0].arrayBuffer();
-      const pdf = await pdfjsRef.current.getDocument({ data: buffer }).promise;
-      const results: { name: string; url: string }[] = [];
+      for (let i = 0; i < files.length; i++) {
+        setCurrentFileIndex(i);
+        setStatus(`Converting ${files[i].name} (${i + 1}/${files.length})...`);
 
-      for (let i = 1; i <= pdf.numPages; i++) {
-        setStatus(`Converting page ${i} of ${pdf.numPages}...`);
-        setProgress((i / pdf.numPages) * 90);
+        const baseProgress = (i / files.length) * 100;
+        setProgress(baseProgress + 10);
 
-        const page = await pdf.getPage(i);
-        const viewport = page.getViewport({ scale });
-
-        const canvas = document.createElement("canvas");
-        const context = canvas.getContext("2d");
-        if (!context) throw new Error("Could not create canvas context");
-
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
-
-        await page.render({
-          canvasContext: context,
-          viewport: viewport,
-        }).promise;
-
-        const mimeType = format === "png" ? "image/png" : "image/jpeg";
-        const dataUrl = canvas.toDataURL(mimeType, format === "jpeg" ? quality : undefined);
-
-        results.push({
-          name: `page_${i}.${format}`,
-          url: dataUrl,
-        });
+        try {
+          const result = await convertSinglePDF(files[i]);
+          results.push(result);
+          setProgress(baseProgress + 90);
+        } catch (err) {
+          console.error(`Error converting ${files[i].name}:`, err);
+        }
       }
 
-      setResultUrls(results);
+      setProcessedPDFs(results);
       setProgress(100);
       setStatus("Complete!");
       await recordUsage();
@@ -131,16 +184,54 @@ export default function PDFToImage() {
     }
   };
 
-  const downloadAll = () => {
-    resultUrls.forEach(({ name, url }) => {
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = name;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    });
+  const downloadSingleImage = (url: string, name: string) => {
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = name;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
+
+  const downloadAllAsZip = async () => {
+    if (processedPDFs.length === 0) return;
+
+    const zip = new JSZip();
+
+    for (const pdf of processedPDFs) {
+      const folderName = pdf.name.replace(/\.pdf$/i, "");
+      const folder = zip.folder(folderName);
+      if (folder) {
+        for (const image of pdf.images) {
+          folder.file(image.name.split("_").pop() || image.name, image.blob);
+        }
+      }
+    }
+
+    const zipBlob = await zip.generateAsync({ type: "blob" });
+    const url = URL.createObjectURL(zipBlob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "pdf_images.zip";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const totalImages = processedPDFs.reduce((sum, pdf) => sum + pdf.images.length, 0);
+
+  const resetAll = () => {
+    setFiles([]);
+    setProcessedPDFs([]);
+    setProgress(0);
+    setError(null);
+    setCurrentFileIndex(0);
+    setPageCount(0);
+  };
+
+  const isBatchMode = files.length > 1;
 
   return (
     <div className="min-h-[80vh]">
@@ -182,6 +273,14 @@ export default function PDFToImage() {
                   {usageDisplay}
                 </span>
               </div>
+              {isPro && (
+                <>
+                  <div className="h-4 w-px bg-[var(--border)]" />
+                  <span className="text-sm text-amber-500 font-medium">
+                    Batch: up to {maxFiles} files
+                  </span>
+                </>
+              )}
               {!isPro && (
                 <>
                   <div className="h-4 w-px bg-[var(--border)]" />
@@ -189,7 +288,7 @@ export default function PDFToImage() {
                     href="/pricing"
                     className="text-sm font-medium text-[var(--accent)] hover:opacity-80 transition-opacity"
                   >
-                    Upgrade
+                    Upgrade for batch processing
                   </Link>
                 </>
               )}
@@ -201,16 +300,31 @@ export default function PDFToImage() {
             <FileDropzone
               onFilesSelected={handleFilesSelected}
               accept=".pdf,application/pdf"
-              multiple={false}
+              multiple={isPro}
               maxSize={maxFileSize}
-              maxFiles={1}
+              maxFiles={maxFiles}
               files={files}
               onRemoveFile={handleRemoveFile}
               disabled={isProcessing}
             />
 
+            {/* Batch indicator for Pro users */}
+            {isPro && isBatchMode && !isProcessing && processedPDFs.length === 0 && (
+              <div className="rounded-3xl bg-amber-500/10 border border-amber-500/20 p-5 animate-fade-in">
+                <div className="flex items-center gap-3">
+                  <Package className="h-5 w-5 text-amber-500" />
+                  <div>
+                    <p className="font-medium text-amber-500">Batch Processing Mode</p>
+                    <p className="text-sm text-[var(--muted-foreground)]">
+                      {files.length} PDFs will be converted to images and packaged into a ZIP
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Options */}
-            {pageCount > 0 && !isProcessing && resultUrls.length === 0 && (
+            {files.length > 0 && !isProcessing && processedPDFs.length === 0 && (
               <div className="rounded-3xl border bg-[var(--card)] p-6 space-y-5 shadow-glass animate-fade-in">
                 <div className="flex items-center gap-3">
                   <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-purple-500/10">
@@ -218,7 +332,11 @@ export default function PDFToImage() {
                   </div>
                   <div>
                     <p className="text-sm font-medium">Conversion settings</p>
-                    <p className="text-xs text-[var(--muted-foreground)]">{pageCount} page{pageCount !== 1 ? "s" : ""} will be converted</p>
+                    <p className="text-xs text-[var(--muted-foreground)]">
+                      {isBatchMode
+                        ? `${files.length} PDFs will be converted`
+                        : `${pageCount} page${pageCount !== 1 ? "s" : ""} will be converted`}
+                    </p>
                   </div>
                 </div>
 
@@ -272,6 +390,11 @@ export default function PDFToImage() {
             {isProcessing && (
               <div className="rounded-3xl border bg-[var(--card)] p-6 shadow-glass animate-fade-in">
                 <ProgressBar progress={progress} status={status} />
+                {files.length > 1 && (
+                  <p className="mt-3 text-sm text-center text-[var(--muted-foreground)]">
+                    Processing file {currentFileIndex + 1} of {files.length}
+                  </p>
+                )}
               </div>
             )}
 
@@ -283,75 +406,118 @@ export default function PDFToImage() {
             )}
 
             {/* Results */}
-            {resultUrls.length > 0 && (
-              <div className="rounded-3xl border bg-[var(--card)] p-6 space-y-4 shadow-glass animate-fade-in">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-purple-500/10">
-                      <ImageIcon className="h-5 w-5 text-purple-500" />
-                    </div>
-                    <span className="font-medium">{resultUrls.length} image{resultUrls.length > 1 ? "s" : ""} ready</span>
+            {processedPDFs.length > 0 && (
+              <div className="space-y-4 animate-fade-in">
+                {/* Summary */}
+                <div className="rounded-3xl border bg-[var(--card)] p-8 shadow-glass text-center">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 text-emerald-500">
+                    <Check className="h-4 w-4" />
+                    <span className="text-sm font-medium">
+                      {totalImages} image{totalImages > 1 ? "s" : ""} from {processedPDFs.length} PDF{processedPDFs.length > 1 ? "s" : ""}
+                    </span>
                   </div>
-                  {resultUrls.length > 1 && (
-                    <button
-                      onClick={downloadAll}
-                      className="text-sm font-medium text-[var(--accent)] hover:opacity-80 transition-opacity"
-                    >
-                      Download all
-                    </button>
-                  )}
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 max-h-96 overflow-y-auto">
-                  {resultUrls.map(({ name, url }, index) => (
-                    <div
-                      key={name}
-                      className="relative group animate-scale-in"
-                      style={{ animationDelay: `${index * 0.05}s` }}
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={url}
-                        alt={name}
-                        className="rounded-2xl border bg-white w-full aspect-[3/4] object-cover shadow-glass"
-                      />
-                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl flex items-center justify-center">
-                        <a
-                          href={url}
-                          download={name}
-                          className="rounded-xl bg-white p-3 hover:bg-gray-100 transition-colors shadow-lg"
-                        >
-                          <Download className="h-5 w-5 text-gray-800" />
-                        </a>
+
+                {/* Image preview for single PDF */}
+                {processedPDFs.length === 1 && (
+                  <div className="rounded-3xl border bg-[var(--card)] p-6 space-y-4 shadow-glass">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-purple-500/10">
+                          <ImageIcon className="h-5 w-5 text-purple-500" />
+                        </div>
+                        <span className="font-medium">{processedPDFs[0].images.length} images ready</span>
                       </div>
-                      <p className="mt-2 text-xs text-center text-[var(--muted-foreground)] truncate">{name}</p>
                     </div>
-                  ))}
-                </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 max-h-96 overflow-y-auto">
+                      {processedPDFs[0].images.map(({ name, url }, index) => (
+                        <div
+                          key={name}
+                          className="relative group animate-scale-in"
+                          style={{ animationDelay: `${index * 0.05}s` }}
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={url}
+                            alt={name}
+                            className="rounded-2xl border bg-white w-full aspect-[3/4] object-cover shadow-glass"
+                          />
+                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl flex items-center justify-center">
+                            <button
+                              onClick={() => downloadSingleImage(url, name)}
+                              className="rounded-xl bg-white p-3 hover:bg-gray-100 transition-colors shadow-lg"
+                            >
+                              <Download className="h-5 w-5 text-gray-800" />
+                            </button>
+                          </div>
+                          <p className="mt-2 text-xs text-center text-[var(--muted-foreground)] truncate">{name}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* File list for batch mode */}
+                {processedPDFs.length > 1 && (
+                  <div className="rounded-3xl border bg-[var(--card)] overflow-hidden shadow-glass">
+                    <div className="p-4 border-b border-[var(--border)]">
+                      <h3 className="font-semibold">Processed Files</h3>
+                    </div>
+                    <div className="divide-y divide-[var(--border)]">
+                      {processedPDFs.map((pdf, index) => (
+                        <div key={index} className="flex items-center justify-between p-4 hover:bg-[var(--muted)]/50 transition-colors">
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                              <Check className="h-4 w-4 text-emerald-500" />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-sm font-medium truncate">{pdf.name}</p>
+                              <p className="text-xs text-[var(--muted-foreground)]">
+                                {pdf.images.length} images
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
             {/* Actions */}
             <div className="flex flex-col sm:flex-row gap-4">
-              {resultUrls.length === 0 ? (
+              {processedPDFs.length === 0 ? (
                 <button
                   onClick={convertToImages}
                   disabled={files.length === 0 || isProcessing}
                   className="flex-1 flex items-center justify-center gap-3 rounded-full bg-gradient-to-r from-purple-500 to-pink-400 px-8 py-4 font-medium text-white shadow-lg shadow-purple-500/25 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all press-effect"
                 >
-                  <ImageIcon className="h-5 w-5" />
-                  Convert to Images
+                  {isProcessing ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : (
+                    <ImageIcon className="h-5 w-5" />
+                  )}
+                  {files.length > 1 ? `Convert ${files.length} PDFs` : "Convert to Images"}
                 </button>
               ) : (
+                <>
+                  <button
+                    onClick={downloadAllAsZip}
+                    className="flex-1 flex items-center justify-center gap-3 rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 px-8 py-4 font-medium text-white shadow-lg shadow-emerald-500/25 hover:opacity-90 transition-all press-effect"
+                  >
+                    <Package className="h-5 w-5" />
+                    Download All as ZIP ({totalImages} images)
+                  </button>
+                </>
+              )}
+
+              {processedPDFs.length > 0 && (
                 <button
-                  onClick={() => {
-                    setFiles([]);
-                    setResultUrls([]);
-                    setProgress(0);
-                    setPageCount(0);
-                  }}
-                  className="flex-1 flex items-center justify-center gap-2 rounded-full border-2 px-8 py-4 font-medium hover:bg-[var(--muted)] transition-all"
+                  onClick={resetAll}
+                  className="flex items-center justify-center gap-2 rounded-full border-2 px-8 py-4 font-medium hover:bg-[var(--muted)] transition-all"
                 >
-                  Convert Another PDF
+                  Convert More PDFs
                 </button>
               )}
             </div>

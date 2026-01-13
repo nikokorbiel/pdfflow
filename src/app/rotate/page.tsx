@@ -2,9 +2,10 @@
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import { PDFDocument, degrees } from "pdf-lib";
+import JSZip from "jszip";
 import { FileDropzone } from "@/components/FileDropzone";
 import { ProgressBar } from "@/components/ProgressBar";
-import { Download, RotateCw, Sparkles, RotateCcw, Crown } from "lucide-react";
+import { Download, RotateCw, Sparkles, RotateCcw, Crown, Package, Check, Loader2 } from "lucide-react";
 import { useToolUsage } from "@/hooks/useToolUsage";
 import Link from "next/link";
 
@@ -13,12 +14,20 @@ type RotationAngle = 90 | 180 | 270;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type PDFLib = any;
 
+interface ProcessedFile {
+  name: string;
+  blob: Blob;
+  url: string;
+  pageCount: number;
+}
+
 export default function RotatePDF() {
   const [files, setFiles] = useState<File[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [status, setStatus] = useState("");
-  const [resultUrl, setResultUrl] = useState<string | null>(null);
+  const [currentFileIndex, setCurrentFileIndex] = useState(0);
+  const [processedFiles, setProcessedFiles] = useState<ProcessedFile[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [pageCount, setPageCount] = useState(0);
   const [rotation, setRotation] = useState<RotationAngle>(90);
@@ -28,6 +37,9 @@ export default function RotatePDF() {
   const pdfjsRef = useRef<PDFLib | null>(null);
 
   const { isPro, canProcess, maxFileSize, recordUsage, usageDisplay } = useToolUsage();
+
+  // Pro users can batch process up to 20 files
+  const maxFiles = isPro ? 20 : 1;
 
   // Load PDF.js dynamically on client side
   useEffect(() => {
@@ -77,30 +89,41 @@ export default function RotatePDF() {
 
   const handleFilesSelected = useCallback(async (newFiles: File[]) => {
     if (newFiles.length > 0) {
-      setFiles([newFiles[0]]);
-      setResultUrl(null);
+      setFiles(prev => {
+        const combined = [...prev, ...newFiles];
+        return combined.slice(0, maxFiles);
+      });
+      setProcessedFiles([]);
       setError(null);
       setPreviews([]);
 
-      try {
-        const buffer = await newFiles[0].arrayBuffer();
-        const pdf = await PDFDocument.load(buffer);
-        setPageCount(pdf.getPageCount());
-
-        // Generate previews
-        generatePreviews(newFiles[0]);
-      } catch {
-        setError("Could not read PDF file");
+      // Only show previews for single file mode
+      if (newFiles.length === 1 && files.length === 0) {
+        try {
+          const buffer = await newFiles[0].arrayBuffer();
+          const pdf = await PDFDocument.load(buffer);
+          setPageCount(pdf.getPageCount());
+          generatePreviews(newFiles[0]);
+        } catch {
+          setError("Could not read PDF file");
+        }
+      } else {
+        setPageCount(0);
       }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [maxFiles, files.length]);
 
-  const handleRemoveFile = useCallback(() => {
-    setFiles([]);
-    setResultUrl(null);
-    setPageCount(0);
-    setPreviews([]);
+  const handleRemoveFile = useCallback((index: number) => {
+    setFiles(prev => {
+      const newFiles = prev.filter((_, i) => i !== index);
+      if (newFiles.length === 0) {
+        setPageCount(0);
+        setPreviews([]);
+      }
+      return newFiles;
+    });
+    setProcessedFiles([]);
   }, []);
 
   const parsePageSelection = (input: string, maxPage: number): number[] => {
@@ -126,9 +149,38 @@ export default function RotatePDF() {
     return Array.from(pages);
   };
 
-  const rotatePDF = async () => {
+  const rotateSinglePDF = async (file: File): Promise<ProcessedFile> => {
+    const fileBuffer = await file.arrayBuffer();
+    const pdf = await PDFDocument.load(fileBuffer);
+    const pages = pdf.getPages();
+
+    const pagesToRotate = rotateAll
+      ? pages.map((_, i) => i + 1)
+      : parsePageSelection(selectedPages, pages.length);
+
+    for (const pageNum of pagesToRotate) {
+      if (pageNum >= 1 && pageNum <= pages.length) {
+        const page = pages[pageNum - 1];
+        const currentRotation = page.getRotation().angle;
+        page.setRotation(degrees(currentRotation + rotation));
+      }
+    }
+
+    const pdfBytes = await pdf.save();
+    const blob = new Blob([new Uint8Array(pdfBytes)], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+
+    return {
+      name: file.name,
+      blob,
+      url,
+      pageCount: pages.length,
+    };
+  };
+
+  const rotatePDFs = async () => {
     if (files.length === 0) {
-      setError("Please select a PDF file");
+      setError("Please select at least one PDF file");
       return;
     }
 
@@ -140,58 +192,82 @@ export default function RotatePDF() {
     setIsProcessing(true);
     setProgress(0);
     setError(null);
+    setProcessedFiles([]);
+    setCurrentFileIndex(0);
+
+    const results: ProcessedFile[] = [];
 
     try {
-      setStatus("Loading PDF...");
-      setProgress(20);
+      for (let i = 0; i < files.length; i++) {
+        setCurrentFileIndex(i);
+        setStatus(`Rotating ${files[i].name} (${i + 1}/${files.length})...`);
 
-      const fileBuffer = await files[0].arrayBuffer();
-      const pdf = await PDFDocument.load(fileBuffer);
-      const pages = pdf.getPages();
+        const baseProgress = (i / files.length) * 100;
+        setProgress(baseProgress + 10);
 
-      setStatus("Rotating pages...");
-      setProgress(50);
-
-      const pagesToRotate = rotateAll
-        ? pages.map((_, i) => i + 1)
-        : parsePageSelection(selectedPages, pages.length);
-
-      for (const pageNum of pagesToRotate) {
-        if (pageNum >= 1 && pageNum <= pages.length) {
-          const page = pages[pageNum - 1];
-          const currentRotation = page.getRotation().angle;
-          page.setRotation(degrees(currentRotation + rotation));
+        try {
+          const result = await rotateSinglePDF(files[i]);
+          results.push(result);
+          setProgress(baseProgress + 90);
+        } catch (err) {
+          console.error(`Error rotating ${files[i].name}:`, err);
         }
       }
 
-      setStatus("Saving PDF...");
-      setProgress(80);
-
-      const pdfBytes = await pdf.save();
-      const blob = new Blob([new Uint8Array(pdfBytes)], { type: "application/pdf" });
-      const url = URL.createObjectURL(blob);
-
-      setResultUrl(url);
+      setProcessedFiles(results);
       setProgress(100);
       setStatus("Complete!");
       await recordUsage();
     } catch (err) {
-      console.error("Rotate error:", err);
-      setError("Failed to rotate PDF. Please ensure the file is a valid PDF.");
+      console.error("Batch rotate error:", err);
+      setError("Failed to rotate PDFs. Please ensure all files are valid PDFs.");
     } finally {
       setIsProcessing(false);
     }
   };
 
-  const downloadResult = () => {
-    if (!resultUrl) return;
+  const downloadSingleFile = (processed: ProcessedFile) => {
     const link = document.createElement("a");
-    link.href = resultUrl;
-    link.download = `rotated_${files[0]?.name || "document.pdf"}`;
+    link.href = processed.url;
+    link.download = `rotated_${processed.name}`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
+
+  const downloadAllAsZip = async () => {
+    if (processedFiles.length === 0) return;
+
+    const zip = new JSZip();
+
+    for (const file of processedFiles) {
+      zip.file(`rotated_${file.name}`, file.blob);
+    }
+
+    const zipBlob = await zip.generateAsync({ type: "blob" });
+    const url = URL.createObjectURL(zipBlob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "rotated_pdfs.zip";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const resetAll = () => {
+    setFiles([]);
+    setProcessedFiles([]);
+    setProgress(0);
+    setError(null);
+    setCurrentFileIndex(0);
+    setPageCount(0);
+    setPreviews([]);
+    setSelectedPages("");
+  };
+
+  const isBatchMode = files.length > 1;
 
   return (
     <div className="min-h-[80vh]">
@@ -233,6 +309,14 @@ export default function RotatePDF() {
                   {usageDisplay}
                 </span>
               </div>
+              {isPro && (
+                <>
+                  <div className="h-4 w-px bg-[var(--border)]" />
+                  <span className="text-sm text-amber-500 font-medium">
+                    Batch: up to {maxFiles} files
+                  </span>
+                </>
+              )}
               {!isPro && (
                 <>
                   <div className="h-4 w-px bg-[var(--border)]" />
@@ -240,7 +324,7 @@ export default function RotatePDF() {
                     href="/pricing"
                     className="text-sm font-medium text-[var(--accent)] hover:opacity-80 transition-opacity"
                   >
-                    Upgrade
+                    Upgrade for batch processing
                   </Link>
                 </>
               )}
@@ -252,19 +336,34 @@ export default function RotatePDF() {
             <FileDropzone
               onFilesSelected={handleFilesSelected}
               accept=".pdf,application/pdf"
-              multiple={false}
+              multiple={isPro}
               maxSize={maxFileSize}
-              maxFiles={1}
+              maxFiles={maxFiles}
               files={files}
               onRemoveFile={handleRemoveFile}
               disabled={isProcessing}
             />
 
+            {/* Batch indicator for Pro users */}
+            {isPro && isBatchMode && !isProcessing && processedFiles.length === 0 && (
+              <div className="rounded-3xl bg-amber-500/10 border border-amber-500/20 p-5 animate-fade-in">
+                <div className="flex items-center gap-3">
+                  <Package className="h-5 w-5 text-amber-500" />
+                  <div>
+                    <p className="font-medium text-amber-500">Batch Processing Mode</p>
+                    <p className="text-sm text-[var(--muted-foreground)]">
+                      {files.length} files will be rotated with the same settings
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Rotation options */}
-            {pageCount > 0 && !isProcessing && !resultUrl && (
+            {files.length > 0 && !isProcessing && processedFiles.length === 0 && (
               <div className="rounded-3xl border bg-[var(--card)] p-6 space-y-6 shadow-glass animate-fade-in">
-                {/* Page previews */}
-                {previews.length > 0 && (
+                {/* Page previews - only for single file */}
+                {!isBatchMode && previews.length > 0 && (
                   <div>
                     <p className="text-sm font-medium mb-3">Page preview</p>
                     <div className="flex gap-2 overflow-x-auto pb-2">
@@ -315,52 +414,61 @@ export default function RotatePDF() {
                   </div>
                 </div>
 
-                {/* Page selection */}
-                <div>
-                  <p className="text-sm font-medium mb-3">Pages to rotate</p>
-                  <div className="space-y-3">
-                    <label className="flex items-center gap-3 p-4 rounded-2xl border cursor-pointer hover:bg-[var(--muted)]/50 transition-colors">
-                      <input
-                        type="radio"
-                        checked={rotateAll}
-                        onChange={() => setRotateAll(true)}
-                        className="h-4 w-4 text-indigo-500 focus:ring-indigo-500"
-                      />
-                      <div>
-                        <span className="text-sm font-medium">All pages</span>
-                        <p className="text-xs text-[var(--muted-foreground)]">Rotate all {pageCount} pages</p>
-                      </div>
-                    </label>
-
-                    <label className="flex items-center gap-3 p-4 rounded-2xl border cursor-pointer hover:bg-[var(--muted)]/50 transition-colors">
-                      <input
-                        type="radio"
-                        checked={!rotateAll}
-                        onChange={() => setRotateAll(false)}
-                        className="h-4 w-4 text-indigo-500 focus:ring-indigo-500"
-                      />
-                      <div className="flex-1">
-                        <span className="text-sm font-medium">Specific pages</span>
-                        <p className="text-xs text-[var(--muted-foreground)]">Choose which pages to rotate</p>
-                      </div>
-                    </label>
-
-                    {!rotateAll && (
-                      <div className="pl-7 animate-fade-in">
+                {/* Page selection - only for single file */}
+                {!isBatchMode && pageCount > 0 && (
+                  <div>
+                    <p className="text-sm font-medium mb-3">Pages to rotate</p>
+                    <div className="space-y-3">
+                      <label className="flex items-center gap-3 p-4 rounded-2xl border cursor-pointer hover:bg-[var(--muted)]/50 transition-colors">
                         <input
-                          type="text"
-                          value={selectedPages}
-                          onChange={(e) => setSelectedPages(e.target.value)}
-                          placeholder="e.g., 1, 3, 5-7"
-                          className="w-full rounded-2xl border bg-[var(--background)] px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
+                          type="radio"
+                          checked={rotateAll}
+                          onChange={() => setRotateAll(true)}
+                          className="h-4 w-4 text-indigo-500 focus:ring-indigo-500"
                         />
-                        <p className="mt-2 text-xs text-[var(--muted-foreground)]">
-                          Use commas to separate pages, dashes for ranges
-                        </p>
-                      </div>
-                    )}
+                        <div>
+                          <span className="text-sm font-medium">All pages</span>
+                          <p className="text-xs text-[var(--muted-foreground)]">Rotate all {pageCount} pages</p>
+                        </div>
+                      </label>
+
+                      <label className="flex items-center gap-3 p-4 rounded-2xl border cursor-pointer hover:bg-[var(--muted)]/50 transition-colors">
+                        <input
+                          type="radio"
+                          checked={!rotateAll}
+                          onChange={() => setRotateAll(false)}
+                          className="h-4 w-4 text-indigo-500 focus:ring-indigo-500"
+                        />
+                        <div className="flex-1">
+                          <span className="text-sm font-medium">Specific pages</span>
+                          <p className="text-xs text-[var(--muted-foreground)]">Choose which pages to rotate</p>
+                        </div>
+                      </label>
+
+                      {!rotateAll && (
+                        <div className="pl-7 animate-fade-in">
+                          <input
+                            type="text"
+                            value={selectedPages}
+                            onChange={(e) => setSelectedPages(e.target.value)}
+                            placeholder="e.g., 1, 3, 5-7"
+                            className="w-full rounded-2xl border bg-[var(--background)] px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
+                          />
+                          <p className="mt-2 text-xs text-[var(--muted-foreground)]">
+                            Use commas to separate pages, dashes for ranges
+                          </p>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
+                )}
+
+                {/* Batch mode note */}
+                {isBatchMode && (
+                  <div className="text-sm text-[var(--muted-foreground)] bg-[var(--muted)]/50 rounded-2xl p-4">
+                    <strong>Note:</strong> In batch mode, all pages in each PDF will be rotated.
+                  </div>
+                )}
               </div>
             )}
 
@@ -368,6 +476,11 @@ export default function RotatePDF() {
             {isProcessing && (
               <div className="rounded-3xl border bg-[var(--card)] p-6 shadow-glass animate-fade-in">
                 <ProgressBar progress={progress} status={status} />
+                {files.length > 1 && (
+                  <p className="mt-3 text-sm text-center text-[var(--muted-foreground)]">
+                    Processing file {currentFileIndex + 1} of {files.length}
+                  </p>
+                )}
               </div>
             )}
 
@@ -378,40 +491,97 @@ export default function RotatePDF() {
               </div>
             )}
 
+            {/* Results */}
+            {processedFiles.length > 0 && (
+              <div className="space-y-4 animate-fade-in">
+                {/* Summary */}
+                <div className="rounded-3xl border bg-[var(--card)] p-8 shadow-glass text-center">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 text-emerald-500">
+                    <Check className="h-4 w-4" />
+                    <span className="text-sm font-medium">
+                      {processedFiles.length} PDF{processedFiles.length > 1 ? "s" : ""} rotated {rotation}°
+                    </span>
+                  </div>
+                </div>
+
+                {/* Individual files table */}
+                {processedFiles.length > 1 && (
+                  <div className="rounded-3xl border bg-[var(--card)] overflow-hidden shadow-glass">
+                    <div className="p-4 border-b border-[var(--border)]">
+                      <h3 className="font-semibold">Processed Files</h3>
+                    </div>
+                    <div className="divide-y divide-[var(--border)]">
+                      {processedFiles.map((file, index) => (
+                        <div key={index} className="flex items-center justify-between p-4 hover:bg-[var(--muted)]/50 transition-colors">
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                              <Check className="h-4 w-4 text-emerald-500" />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-sm font-medium truncate">{file.name}</p>
+                              <p className="text-xs text-[var(--muted-foreground)]">
+                                {file.pageCount} pages rotated
+                              </p>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => downloadSingleFile(file)}
+                            className="flex-shrink-0 p-2 rounded-lg hover:bg-[var(--muted)] transition-colors"
+                            title="Download"
+                          >
+                            <Download className="h-4 w-4 text-[var(--muted-foreground)]" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Actions */}
             <div className="flex flex-col sm:flex-row gap-4">
-              {!resultUrl ? (
+              {processedFiles.length === 0 ? (
                 <button
-                  onClick={rotatePDF}
-                  disabled={files.length === 0 || isProcessing || (!rotateAll && !selectedPages)}
+                  onClick={rotatePDFs}
+                  disabled={files.length === 0 || isProcessing || (!isBatchMode && !rotateAll && !selectedPages)}
                   className="flex-1 flex items-center justify-center gap-3 rounded-full bg-gradient-to-r from-indigo-500 to-blue-400 px-8 py-4 font-medium text-white shadow-lg shadow-indigo-500/25 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all press-effect"
                 >
-                  <RotateCw className="h-5 w-5" />
-                  Rotate PDF
+                  {isProcessing ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : (
+                    <RotateCw className="h-5 w-5" />
+                  )}
+                  {files.length > 1 ? `Rotate ${files.length} PDFs` : "Rotate PDF"}
                 </button>
               ) : (
-                <button
-                  onClick={downloadResult}
-                  className="flex-1 flex items-center justify-center gap-3 rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 px-8 py-4 font-medium text-white shadow-lg shadow-emerald-500/25 hover:opacity-90 transition-all press-effect"
-                >
-                  <Download className="h-5 w-5" />
-                  Download Rotated PDF
-                </button>
+                <>
+                  {processedFiles.length === 1 ? (
+                    <button
+                      onClick={() => downloadSingleFile(processedFiles[0])}
+                      className="flex-1 flex items-center justify-center gap-3 rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 px-8 py-4 font-medium text-white shadow-lg shadow-emerald-500/25 hover:opacity-90 transition-all press-effect"
+                    >
+                      <Download className="h-5 w-5" />
+                      Download Rotated PDF
+                    </button>
+                  ) : (
+                    <button
+                      onClick={downloadAllAsZip}
+                      className="flex-1 flex items-center justify-center gap-3 rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 px-8 py-4 font-medium text-white shadow-lg shadow-emerald-500/25 hover:opacity-90 transition-all press-effect"
+                    >
+                      <Package className="h-5 w-5" />
+                      Download All as ZIP ({processedFiles.length} files)
+                    </button>
+                  )}
+                </>
               )}
 
-              {resultUrl && (
+              {processedFiles.length > 0 && (
                 <button
-                  onClick={() => {
-                    setFiles([]);
-                    setResultUrl(null);
-                    setProgress(0);
-                    setPageCount(0);
-                    setPreviews([]);
-                    setSelectedPages("");
-                  }}
+                  onClick={resetAll}
                   className="flex items-center justify-center gap-2 rounded-full border-2 px-8 py-4 font-medium hover:bg-[var(--muted)] transition-all"
                 >
-                  Rotate Another PDF
+                  Rotate More PDFs
                 </button>
               )}
             </div>
