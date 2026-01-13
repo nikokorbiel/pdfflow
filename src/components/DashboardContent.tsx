@@ -663,10 +663,13 @@ export function DashboardContent({ profile, usage }: DashboardContentProps) {
                   <Clock className="h-4 w-4 text-white/60" />
                   Recent Activity
                 </h2>
+                <span className="text-xs text-white/40">
+                  {isPro ? "30 days" : "7 days"}
+                </span>
               </div>
-              <div className="divide-y divide-white/[0.04]">
+              <div className="divide-y divide-white/[0.04] max-h-[400px] overflow-y-auto">
                 {fileHistory.length > 0 ? (
-                  fileHistory.slice(0, 5).map((item) => (
+                  fileHistory.slice(0, isPro ? 15 : 5).map((item) => (
                     <ActivityItem
                       key={item.id}
                       item={item}
