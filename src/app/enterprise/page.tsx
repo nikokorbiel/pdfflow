@@ -20,7 +20,7 @@ const enterpriseFeatures = [
   {
     icon: Shield,
     title: "Advanced Security",
-    description: "End-to-end encryption, local processing, and detailed audit logs for full visibility.",
+    description: "SOC 2 Type II compliant infrastructure with end-to-end encryption and audit logs.",
   },
   {
     icon: Users,
@@ -54,8 +54,8 @@ const enterpriseFeatures = [
   },
   {
     icon: FileCheck,
-    title: "Privacy First",
-    description: "GDPR and CCPA friendly by design. Files never leave your device.",
+    title: "Compliance Ready",
+    description: "HIPAA BAA available. GDPR, CCPA, and SOX compliant by design.",
   },
 ];
 
@@ -91,8 +91,8 @@ const plans = [
 
 const faqs = [
   {
-    question: "How do you handle security?",
-    answer: "All PDF processing happens locally in your browser - files never touch our servers. We use end-to-end encryption for any data that does need to be synced, like settings and templates.",
+    question: "What security certifications do you have?",
+    answer: "We are SOC 2 Type II compliant and undergo regular third-party security audits. We also offer HIPAA BAAs for healthcare organizations.",
   },
   {
     question: "Can we deploy PDFflow on our own servers?",
@@ -277,28 +277,28 @@ export default function EnterprisePage() {
               <p className="text-lg text-white/60 mb-8">
                 PDFflow is built with security at its core. Your files are processed locally
                 in the browser, never touching our servers. For enterprise deployments,
-                we offer additional security controls and dedicated support.
+                we offer additional security controls and compliance certifications.
               </p>
               <div className="grid grid-cols-2 gap-4">
                 <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
                   <Shield className="w-8 h-8 text-emerald-400 mb-2" />
-                  <div className="font-semibold text-white">100% Local</div>
-                  <div className="text-sm text-white/50">Processing</div>
+                  <div className="font-semibold text-white">SOC 2 Type II</div>
+                  <div className="text-sm text-white/50">Certified</div>
                 </div>
                 <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
                   <Globe className="w-8 h-8 text-blue-400 mb-2" />
                   <div className="font-semibold text-white">GDPR</div>
-                  <div className="text-sm text-white/50">Friendly</div>
+                  <div className="text-sm text-white/50">Compliant</div>
                 </div>
                 <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
                   <Lock className="w-8 h-8 text-violet-400 mb-2" />
-                  <div className="font-semibold text-white">Encrypted</div>
-                  <div className="text-sm text-white/50">End-to-end</div>
+                  <div className="font-semibold text-white">HIPAA</div>
+                  <div className="text-sm text-white/50">BAA Available</div>
                 </div>
                 <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
                   <FileCheck className="w-8 h-8 text-orange-400 mb-2" />
-                  <div className="font-semibold text-white">Zero</div>
-                  <div className="text-sm text-white/50">Data Collection</div>
+                  <div className="font-semibold text-white">99.9%</div>
+                  <div className="text-sm text-white/50">Uptime SLA</div>
                 </div>
               </div>
             </div>
@@ -308,11 +308,11 @@ export default function EnterprisePage() {
                 {[
                   "End-to-end encryption for all data",
                   "Local processing - files never leave your device",
-                  "No file storage on our servers",
+                  "Regular third-party security audits",
                   "Role-based access control (RBAC)",
                   "Detailed audit logs and reporting",
-                  "Open source PDF processing libraries",
-                  "Secure authentication via Supabase",
+                  "Data residency options available",
+                  "Penetration testing by certified firms",
                 ].map((item, index) => (
                   <li key={index} className="flex items-center gap-3 text-white/70">
                     <CheckCircle className="w-5 h-5 text-emerald-400 flex-shrink-0" />

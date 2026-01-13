@@ -206,15 +206,15 @@ export default function AboutPage() {
               <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center mx-auto mb-4">
                 <Users className="w-10 h-10 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-white mb-2">Small but Mighty</h3>
+              <h3 className="text-xl font-semibold text-white mb-2">We&apos;re Hiring</h3>
               <p className="text-white/50 mb-6">
-                We&apos;re a focused team dedicated to building the best privacy-first PDF tools.
+                Passionate about privacy and great software? We&apos;d love to hear from you.
               </p>
               <Link
-                href="/contact"
+                href="/careers"
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white/10 text-white font-medium hover:bg-white/15 transition-colors"
               >
-                Get in Touch <ArrowRight className="w-4 h-4" />
+                View Open Roles <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
           </div>

@@ -50,23 +50,23 @@ const securityFeatures = [
 
 const complianceItems = [
   {
-    title: "GDPR Friendly",
-    description: "Privacy by design - files never leave your device",
+    title: "GDPR Compliant",
+    description: "Full compliance with EU General Data Protection Regulation",
     icon: ShieldCheck,
   },
   {
-    title: "CCPA Friendly",
-    description: "No personal data collection from document contents",
+    title: "CCPA Compliant",
+    description: "Meets California Consumer Privacy Act requirements",
     icon: ShieldCheck,
   },
   {
-    title: "100% Local",
-    description: "All processing happens in your browser",
+    title: "SOC 2 Type II",
+    description: "Enterprise-grade security controls (in progress)",
     icon: FileCheck,
   },
   {
-    title: "Zero Storage",
-    description: "We never store or access your documents",
+    title: "ISO 27001",
+    description: "Information security management certification (planned)",
     icon: FileCheck,
   },
 ];
