@@ -2,10 +2,11 @@
 
 import { useState, useCallback, useEffect } from "react";
 import { PDFDocument, rgb, degrees, StandardFonts } from "pdf-lib";
+import JSZip from "jszip";
 import { FileDropzone } from "@/components/FileDropzone";
 import { ProgressBar } from "@/components/ProgressBar";
 import { TemplateManager } from "@/components/TemplateManager";
-import { Download, Droplets, Sparkles, Type, Image as ImageIcon, Crown } from "lucide-react";
+import { Download, Droplets, Sparkles, Type, Image as ImageIcon, Crown, Lock, Package, Check, Loader2, X } from "lucide-react";
 import { useToolUsage } from "@/hooks/useToolUsage";
 import {
   WatermarkTemplate,
@@ -19,12 +20,19 @@ import Link from "next/link";
 type WatermarkType = "text" | "image";
 type Position = "center" | "top-left" | "top-right" | "bottom-left" | "bottom-right" | "tiled";
 
+interface ProcessedFile {
+  name: string;
+  blob: Blob;
+  url: string;
+}
+
 export default function WatermarkPDF() {
   const [files, setFiles] = useState<File[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [status, setStatus] = useState("");
-  const [resultUrl, setResultUrl] = useState<string | null>(null);
+  const [currentFileIndex, setCurrentFileIndex] = useState(0);
+  const [processedFiles, setProcessedFiles] = useState<ProcessedFile[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   // Watermark options
@@ -36,6 +44,8 @@ export default function WatermarkPDF() {
   const [position, setPosition] = useState<Position>("center");
   const [color, setColor] = useState("#6b7280");
   const [watermarkImage, setWatermarkImage] = useState<File | null>(null);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
+  const [imageScale, setImageScale] = useState(0.5);
   const [applyToAll, setApplyToAll] = useState(true);
   const [specificPages, setSpecificPages] = useState("");
 
@@ -50,6 +60,9 @@ export default function WatermarkPDF() {
 
   const { isPro, canProcess, maxFileSize, recordUsage, usageDisplay } = useToolUsage();
 
+  // Pro users can batch process up to 20 files
+  const maxFiles = isPro ? 20 : 1;
+
   const handleSelectTemplate = (template: WatermarkTemplate) => {
     setWatermarkType(template.type);
     if (template.text) setWatermarkText(template.text);
@@ -58,7 +71,6 @@ export default function WatermarkPDF() {
     if (template.opacity) setOpacity(template.opacity);
     if (template.rotation) setRotation(template.rotation);
     if (template.position) {
-      // Map template position to page position (handle "diagonal" -> "center")
       const posMap: Record<string, Position> = {
         center: "center",
         "top-left": "top-left",
@@ -91,20 +103,36 @@ export default function WatermarkPDF() {
   };
 
   const handleFilesSelected = useCallback((newFiles: File[]) => {
-    setFiles(newFiles.slice(0, 1)); // Only allow 1 file
-    setResultUrl(null);
-    setError(null);
-  }, []);
+    if (newFiles.length > 0) {
+      setFiles(prev => {
+        const combined = [...prev, ...newFiles];
+        return combined.slice(0, maxFiles);
+      });
+      setProcessedFiles([]);
+      setError(null);
+    }
+  }, [maxFiles]);
 
-  const handleRemoveFile = useCallback(() => {
-    setFiles([]);
-    setResultUrl(null);
+  const handleRemoveFile = useCallback((index: number) => {
+    setFiles(prev => prev.filter((_, i) => i !== index));
+    setProcessedFiles([]);
   }, []);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && file.type.startsWith("image/")) {
       setWatermarkImage(file);
+      // Create preview URL
+      const url = URL.createObjectURL(file);
+      setImagePreviewUrl(url);
+    }
+  };
+
+  const clearWatermarkImage = () => {
+    setWatermarkImage(null);
+    if (imagePreviewUrl) {
+      URL.revokeObjectURL(imagePreviewUrl);
+      setImagePreviewUrl(null);
     }
   };
 
@@ -119,154 +147,127 @@ export default function WatermarkPDF() {
       : { r: 0.5, g: 0.5, b: 0.5 };
   };
 
-  const addWatermark = async () => {
-    if (files.length === 0) {
-      setError("Please select a PDF file");
-      return;
-    }
+  const watermarkSinglePDF = async (file: File): Promise<ProcessedFile> => {
+    const fileBuffer = await file.arrayBuffer();
+    const pdfDoc = await PDFDocument.load(fileBuffer);
+    const pages = pdfDoc.getPages();
 
-    if (watermarkType === "text" && !watermarkText.trim()) {
-      setError("Please enter watermark text");
-      return;
-    }
-
-    if (watermarkType === "image" && !watermarkImage) {
-      setError("Please upload a watermark image");
-      return;
-    }
-
-    if (!canProcess) {
-      setError("Daily limit reached. Upgrade to Pro for unlimited processing.");
-      return;
-    }
-
-    setIsProcessing(true);
-    setProgress(0);
-    setError(null);
-
-    try {
-      setStatus("Loading PDF...");
-      const fileBuffer = await files[0].arrayBuffer();
-      const pdfDoc = await PDFDocument.load(fileBuffer);
-      const pages = pdfDoc.getPages();
-
-      setProgress(20);
-      setStatus("Adding watermark...");
-
-      // Determine which pages to watermark
-      let pageIndices: number[] = [];
-      if (applyToAll) {
-        pageIndices = pages.map((_, i) => i);
-      } else {
-        // Parse specific pages (e.g., "1,3,5-7")
-        const ranges = specificPages.split(",").map((s) => s.trim());
-        for (const range of ranges) {
-          if (range.includes("-")) {
-            const [start, end] = range.split("-").map((n) => parseInt(n) - 1);
-            for (let i = start; i <= end && i < pages.length; i++) {
-              if (i >= 0) pageIndices.push(i);
-            }
-          } else {
-            const pageNum = parseInt(range) - 1;
-            if (pageNum >= 0 && pageNum < pages.length) {
-              pageIndices.push(pageNum);
-            }
+    // Determine which pages to watermark
+    let pageIndices: number[] = [];
+    if (applyToAll) {
+      pageIndices = pages.map((_, i) => i);
+    } else {
+      const ranges = specificPages.split(",").map((s) => s.trim());
+      for (const range of ranges) {
+        if (range.includes("-")) {
+          const [start, end] = range.split("-").map((n) => parseInt(n) - 1);
+          for (let i = start; i <= end && i < pages.length; i++) {
+            if (i >= 0) pageIndices.push(i);
+          }
+        } else {
+          const pageNum = parseInt(range) - 1;
+          if (pageNum >= 0 && pageNum < pages.length) {
+            pageIndices.push(pageNum);
           }
         }
       }
+    }
 
-      const rgbColor = hexToRgb(color);
+    const rgbColor = hexToRgb(color);
 
-      if (watermarkType === "text") {
-        const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    if (watermarkType === "text") {
+      const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
-        for (let i = 0; i < pageIndices.length; i++) {
-          const pageIndex = pageIndices[i];
-          const page = pages[pageIndex];
-          const { width, height } = page.getSize();
+      for (const pageIndex of pageIndices) {
+        const page = pages[pageIndex];
+        const { width, height } = page.getSize();
 
-          setProgress(20 + ((i + 1) / pageIndices.length) * 60);
+        if (position === "tiled") {
+          const textWidth = font.widthOfTextAtSize(watermarkText, fontSize);
+          const spacingX = textWidth + 100;
+          const spacingY = fontSize + 100;
 
-          if (position === "tiled") {
-            // Tiled watermark
-            const textWidth = font.widthOfTextAtSize(watermarkText, fontSize);
-            const spacingX = textWidth + 100;
-            const spacingY = fontSize + 100;
-
-            for (let x = 0; x < width + spacingX; x += spacingX) {
-              for (let y = 0; y < height + spacingY; y += spacingY) {
-                page.drawText(watermarkText, {
-                  x,
-                  y,
-                  size: fontSize,
-                  font,
-                  color: rgb(rgbColor.r, rgbColor.g, rgbColor.b),
-                  opacity,
-                  rotate: degrees(rotation),
-                });
-              }
+          for (let x = 0; x < width + spacingX; x += spacingX) {
+            for (let y = 0; y < height + spacingY; y += spacingY) {
+              page.drawText(watermarkText, {
+                x,
+                y,
+                size: fontSize,
+                font,
+                color: rgb(rgbColor.r, rgbColor.g, rgbColor.b),
+                opacity,
+                rotate: degrees(rotation),
+              });
             }
-          } else {
-            // Single position watermark
-            const textWidth = font.widthOfTextAtSize(watermarkText, fontSize);
-            let x = 0,
-              y = 0;
-
-            switch (position) {
-              case "center":
-                x = (width - textWidth) / 2;
-                y = height / 2;
-                break;
-              case "top-left":
-                x = 50;
-                y = height - 50 - fontSize;
-                break;
-              case "top-right":
-                x = width - textWidth - 50;
-                y = height - 50 - fontSize;
-                break;
-              case "bottom-left":
-                x = 50;
-                y = 50;
-                break;
-              case "bottom-right":
-                x = width - textWidth - 50;
-                y = 50;
-                break;
-            }
-
-            page.drawText(watermarkText, {
-              x,
-              y,
-              size: fontSize,
-              font,
-              color: rgb(rgbColor.r, rgbColor.g, rgbColor.b),
-              opacity,
-              rotate: degrees(rotation),
-            });
           }
-        }
-      } else if (watermarkType === "image" && watermarkImage) {
-        // Image watermark
-        const imageBuffer = await watermarkImage.arrayBuffer();
-        let image;
-        if (watermarkImage.type === "image/png") {
-          image = await pdfDoc.embedPng(imageBuffer);
         } else {
-          image = await pdfDoc.embedJpg(imageBuffer);
+          const textWidth = font.widthOfTextAtSize(watermarkText, fontSize);
+          let x = 0, y = 0;
+
+          switch (position) {
+            case "center":
+              x = (width - textWidth) / 2;
+              y = height / 2;
+              break;
+            case "top-left":
+              x = 50;
+              y = height - 50 - fontSize;
+              break;
+            case "top-right":
+              x = width - textWidth - 50;
+              y = height - 50 - fontSize;
+              break;
+            case "bottom-left":
+              x = 50;
+              y = 50;
+              break;
+            case "bottom-right":
+              x = width - textWidth - 50;
+              y = 50;
+              break;
+          }
+
+          page.drawText(watermarkText, {
+            x,
+            y,
+            size: fontSize,
+            font,
+            color: rgb(rgbColor.r, rgbColor.g, rgbColor.b),
+            opacity,
+            rotate: degrees(rotation),
+          });
         }
+      }
+    } else if (watermarkType === "image" && watermarkImage) {
+      const imageBuffer = await watermarkImage.arrayBuffer();
+      let image;
+      if (watermarkImage.type === "image/png") {
+        image = await pdfDoc.embedPng(imageBuffer);
+      } else {
+        image = await pdfDoc.embedJpg(imageBuffer);
+      }
 
-        const imgDims = image.scale(0.5);
+      const imgDims = image.scale(imageScale);
 
-        for (let i = 0; i < pageIndices.length; i++) {
-          const pageIndex = pageIndices[i];
-          const page = pages[pageIndex];
-          const { width, height } = page.getSize();
+      for (const pageIndex of pageIndices) {
+        const page = pages[pageIndex];
+        const { width, height } = page.getSize();
 
-          setProgress(20 + ((i + 1) / pageIndices.length) * 60);
-
-          let x = 0,
-            y = 0;
+        if (position === "tiled") {
+          for (let tx = 0; tx < width; tx += imgDims.width + 50) {
+            for (let ty = 0; ty < height; ty += imgDims.height + 50) {
+              page.drawImage(image, {
+                x: tx,
+                y: ty,
+                width: imgDims.width,
+                height: imgDims.height,
+                opacity,
+                rotate: degrees(rotation),
+              });
+            }
+          }
+        } else {
+          let x = 0, y = 0;
 
           switch (position) {
             case "center":
@@ -289,21 +290,6 @@ export default function WatermarkPDF() {
               x = width - imgDims.width - 50;
               y = 50;
               break;
-            case "tiled":
-              // For tiled, draw multiple
-              for (let tx = 0; tx < width; tx += imgDims.width + 50) {
-                for (let ty = 0; ty < height; ty += imgDims.height + 50) {
-                  page.drawImage(image, {
-                    x: tx,
-                    y: ty,
-                    width: imgDims.width,
-                    height: imgDims.height,
-                    opacity,
-                    rotate: degrees(rotation),
-                  });
-                }
-              }
-              continue;
           }
 
           page.drawImage(image, {
@@ -316,34 +302,114 @@ export default function WatermarkPDF() {
           });
         }
       }
+    }
 
-      setStatus("Finalizing...");
-      setProgress(90);
+    const pdfBytes = await pdfDoc.save();
+    const blob = new Blob([pdfBytes as BlobPart], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
 
-      const pdfBytes = await pdfDoc.save();
-      const blob = new Blob([pdfBytes as BlobPart], { type: "application/pdf" });
-      const url = URL.createObjectURL(blob);
+    return { name: file.name, blob, url };
+  };
 
-      setResultUrl(url);
+  const addWatermark = async () => {
+    if (files.length === 0) {
+      setError("Please select at least one PDF file");
+      return;
+    }
+
+    if (watermarkType === "text" && !watermarkText.trim()) {
+      setError("Please enter watermark text");
+      return;
+    }
+
+    if (watermarkType === "image" && !watermarkImage) {
+      setError("Please upload a watermark image");
+      return;
+    }
+
+    if (watermarkType === "image" && !isPro) {
+      setError("Image watermarks are a Pro feature. Upgrade to access.");
+      return;
+    }
+
+    if (!canProcess) {
+      setError("Daily limit reached. Upgrade to Pro for unlimited processing.");
+      return;
+    }
+
+    setIsProcessing(true);
+    setProgress(0);
+    setError(null);
+    setProcessedFiles([]);
+    setCurrentFileIndex(0);
+
+    const results: ProcessedFile[] = [];
+
+    try {
+      for (let i = 0; i < files.length; i++) {
+        setCurrentFileIndex(i);
+        setStatus(`Adding watermark to ${files[i].name} (${i + 1}/${files.length})...`);
+
+        const baseProgress = (i / files.length) * 100;
+        setProgress(baseProgress + 10);
+
+        try {
+          const result = await watermarkSinglePDF(files[i]);
+          results.push(result);
+          setProgress(baseProgress + 90);
+        } catch (err) {
+          console.error(`Error watermarking ${files[i].name}:`, err);
+        }
+      }
+
+      setProcessedFiles(results);
       setProgress(100);
       setStatus("Complete!");
       await recordUsage();
     } catch (err) {
       console.error("Watermark error:", err);
-      setError("Failed to add watermark. Please ensure the file is a valid PDF.");
+      setError("Failed to add watermark. Please ensure all files are valid PDFs.");
     } finally {
       setIsProcessing(false);
     }
   };
 
-  const downloadResult = () => {
-    if (!resultUrl) return;
+  const downloadSingleFile = (processed: ProcessedFile) => {
     const link = document.createElement("a");
-    link.href = resultUrl;
-    link.download = "watermarked.pdf";
+    link.href = processed.url;
+    link.download = `watermarked_${processed.name}`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const downloadAllAsZip = async () => {
+    if (processedFiles.length === 0) return;
+
+    const zip = new JSZip();
+
+    for (const file of processedFiles) {
+      zip.file(`watermarked_${file.name}`, file.blob);
+    }
+
+    const zipBlob = await zip.generateAsync({ type: "blob" });
+    const url = URL.createObjectURL(zipBlob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "watermarked_pdfs.zip";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const resetAll = () => {
+    setFiles([]);
+    setProcessedFiles([]);
+    setProgress(0);
+    setError(null);
+    setCurrentFileIndex(0);
   };
 
   return (
@@ -376,26 +442,27 @@ export default function WatermarkPDF() {
             <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-[var(--muted)] border border-[var(--border)]">
               <div className="flex items-center gap-2">
                 {isPro ? (
-                  <>
-                    <Crown className="h-4 w-4 text-amber-500" />
-                    <span className="text-sm text-[var(--muted-foreground)]">
-                      Unlimited
-                    </span>
-                  </>
+                  <Crown className="h-4 w-4 text-amber-500" />
                 ) : (
-                  <>
-                    <Sparkles className="h-4 w-4 text-[var(--accent)]" />
-                    <span className="text-sm text-[var(--muted-foreground)]">
-                      {usageDisplay}
-                    </span>
-                  </>
+                  <Sparkles className="h-4 w-4 text-[var(--accent)]" />
                 )}
+                <span className="text-sm text-[var(--muted-foreground)]">
+                  {usageDisplay}
+                </span>
               </div>
+              {isPro && (
+                <>
+                  <div className="h-4 w-px bg-[var(--border)]" />
+                  <span className="text-sm text-amber-500 font-medium">
+                    Batch + Image watermarks
+                  </span>
+                </>
+              )}
               {!isPro && (
                 <>
                   <div className="h-4 w-px bg-[var(--border)]" />
                   <Link href="/pricing" className="text-sm font-medium text-[var(--accent)] hover:opacity-80 transition-opacity">
-                    Upgrade
+                    Upgrade for image watermarks
                   </Link>
                 </>
               )}
@@ -407,16 +474,31 @@ export default function WatermarkPDF() {
             <FileDropzone
               onFilesSelected={handleFilesSelected}
               accept=".pdf,application/pdf"
-              multiple={false}
+              multiple={isPro}
               maxSize={maxFileSize}
-              maxFiles={1}
+              maxFiles={maxFiles}
               files={files}
               onRemoveFile={handleRemoveFile}
               disabled={isProcessing}
             />
 
+            {/* Batch indicator for Pro users */}
+            {isPro && files.length > 1 && !isProcessing && processedFiles.length === 0 && (
+              <div className="rounded-3xl bg-amber-500/10 border border-amber-500/20 p-5 animate-fade-in">
+                <div className="flex items-center gap-3">
+                  <Package className="h-5 w-5 text-amber-500" />
+                  <div>
+                    <p className="font-medium text-amber-500">Batch Processing Mode</p>
+                    <p className="text-sm text-[var(--muted-foreground)]">
+                      {files.length} files will be watermarked with the same settings
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Watermark Options */}
-            {files.length > 0 && !isProcessing && !resultUrl && (
+            {files.length > 0 && !isProcessing && processedFiles.length === 0 && (
               <div className="rounded-3xl border bg-[var(--card)] p-6 shadow-glass animate-fade-in space-y-6">
                 {/* Templates */}
                 <div className="flex items-center justify-between">
@@ -468,17 +550,28 @@ export default function WatermarkPDF() {
                       Text
                     </button>
                     <button
-                      onClick={() => setWatermarkType("image")}
-                      className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border transition-all ${
+                      onClick={() => isPro && setWatermarkType("image")}
+                      disabled={!isPro}
+                      className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border transition-all relative ${
                         watermarkType === "image"
                           ? "bg-purple-500/10 border-purple-500 text-purple-400"
+                          : !isPro
+                          ? "border-[var(--border)] opacity-60 cursor-not-allowed"
                           : "border-[var(--border)] hover:bg-[var(--muted)]"
                       }`}
                     >
                       <ImageIcon className="h-4 w-4" />
                       Image
+                      {!isPro && (
+                        <Lock className="h-3 w-3 absolute top-2 right-2 text-[var(--muted-foreground)]" />
+                      )}
                     </button>
                   </div>
+                  {!isPro && (
+                    <p className="mt-2 text-xs text-amber-500">
+                      Image watermarks are a Pro feature
+                    </p>
+                  )}
                 </div>
 
                 {/* Text Options */}
@@ -520,21 +613,54 @@ export default function WatermarkPDF() {
                   </>
                 )}
 
-                {/* Image Upload */}
-                {watermarkType === "image" && (
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Upload Image</label>
-                    <input
-                      type="file"
-                      accept="image/png,image/jpeg"
-                      onChange={handleImageUpload}
-                      className="w-full px-4 py-3 rounded-xl bg-[var(--background)] border border-[var(--border)] file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-purple-500/10 file:text-purple-400"
-                    />
-                    {watermarkImage && (
-                      <p className="mt-2 text-sm text-[var(--muted-foreground)]">
-                        Selected: {watermarkImage.name}
-                      </p>
+                {/* Image Upload (Pro only) */}
+                {watermarkType === "image" && isPro && (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Upload Image</label>
+                      <input
+                        type="file"
+                        accept="image/png,image/jpeg"
+                        onChange={handleImageUpload}
+                        className="w-full px-4 py-3 rounded-xl bg-[var(--background)] border border-[var(--border)] file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-purple-500/10 file:text-purple-400"
+                      />
+                    </div>
+
+                    {/* Image Preview */}
+                    {imagePreviewUrl && (
+                      <div className="relative inline-block">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={imagePreviewUrl}
+                          alt="Watermark preview"
+                          className="max-h-32 rounded-lg border"
+                          style={{ opacity }}
+                        />
+                        <button
+                          onClick={clearWatermarkImage}
+                          className="absolute -top-2 -right-2 p-1 rounded-full bg-red-500 text-white hover:bg-red-600 transition-colors"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                        <p className="mt-2 text-xs text-[var(--muted-foreground)]">
+                          {watermarkImage?.name}
+                        </p>
+                      </div>
                     )}
+
+                    {/* Image Scale */}
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Image Size: {Math.round(imageScale * 100)}%</label>
+                      <input
+                        type="range"
+                        min="0.1"
+                        max="1.5"
+                        step="0.05"
+                        value={imageScale}
+                        onChange={(e) => setImageScale(Number(e.target.value))}
+                        className="w-full accent-purple-500"
+                      />
+                    </div>
                   </div>
                 )}
 
@@ -627,6 +753,11 @@ export default function WatermarkPDF() {
             {isProcessing && (
               <div className="rounded-3xl border bg-[var(--card)] p-6 shadow-glass animate-fade-in">
                 <ProgressBar progress={progress} status={status} />
+                {files.length > 1 && (
+                  <p className="mt-3 text-sm text-center text-[var(--muted-foreground)]">
+                    Processing file {currentFileIndex + 1} of {files.length}
+                  </p>
+                )}
               </div>
             )}
 
@@ -637,37 +768,94 @@ export default function WatermarkPDF() {
               </div>
             )}
 
+            {/* Results */}
+            {processedFiles.length > 0 && (
+              <div className="space-y-4 animate-fade-in">
+                {/* Summary */}
+                <div className="rounded-3xl border bg-[var(--card)] p-8 shadow-glass text-center">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 text-emerald-500">
+                    <Check className="h-4 w-4" />
+                    <span className="text-sm font-medium">
+                      {processedFiles.length} PDF{processedFiles.length > 1 ? "s" : ""} watermarked
+                    </span>
+                  </div>
+                </div>
+
+                {/* Individual files table */}
+                {processedFiles.length > 1 && (
+                  <div className="rounded-3xl border bg-[var(--card)] overflow-hidden shadow-glass">
+                    <div className="p-4 border-b border-[var(--border)]">
+                      <h3 className="font-semibold">Processed Files</h3>
+                    </div>
+                    <div className="divide-y divide-[var(--border)]">
+                      {processedFiles.map((file, index) => (
+                        <div key={index} className="flex items-center justify-between p-4 hover:bg-[var(--muted)]/50 transition-colors">
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                              <Check className="h-4 w-4 text-emerald-500" />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-sm font-medium truncate">{file.name}</p>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => downloadSingleFile(file)}
+                            className="flex-shrink-0 p-2 rounded-lg hover:bg-[var(--muted)] transition-colors"
+                            title="Download"
+                          >
+                            <Download className="h-4 w-4 text-[var(--muted-foreground)]" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Actions */}
             <div className="flex flex-col sm:flex-row gap-4">
-              {!resultUrl ? (
+              {processedFiles.length === 0 ? (
                 <button
                   onClick={addWatermark}
                   disabled={files.length === 0 || isProcessing}
                   className="flex-1 flex items-center justify-center gap-3 rounded-full bg-gradient-to-r from-purple-500 to-pink-400 px-8 py-4 font-medium text-white shadow-lg shadow-purple-500/25 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                 >
-                  <Droplets className="h-5 w-5" />
-                  Add Watermark
+                  {isProcessing ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : (
+                    <Droplets className="h-5 w-5" />
+                  )}
+                  {files.length > 1 ? `Watermark ${files.length} PDFs` : "Add Watermark"}
                 </button>
               ) : (
-                <button
-                  onClick={downloadResult}
-                  className="flex-1 flex items-center justify-center gap-3 rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 px-8 py-4 font-medium text-white shadow-lg shadow-emerald-500/25 hover:opacity-90 transition-all"
-                >
-                  <Download className="h-5 w-5" />
-                  Download Watermarked PDF
-                </button>
+                <>
+                  {processedFiles.length === 1 ? (
+                    <button
+                      onClick={() => downloadSingleFile(processedFiles[0])}
+                      className="flex-1 flex items-center justify-center gap-3 rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 px-8 py-4 font-medium text-white shadow-lg shadow-emerald-500/25 hover:opacity-90 transition-all"
+                    >
+                      <Download className="h-5 w-5" />
+                      Download Watermarked PDF
+                    </button>
+                  ) : (
+                    <button
+                      onClick={downloadAllAsZip}
+                      className="flex-1 flex items-center justify-center gap-3 rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 px-8 py-4 font-medium text-white shadow-lg shadow-emerald-500/25 hover:opacity-90 transition-all"
+                    >
+                      <Package className="h-5 w-5" />
+                      Download All as ZIP ({processedFiles.length} files)
+                    </button>
+                  )}
+                </>
               )}
 
-              {resultUrl && (
+              {processedFiles.length > 0 && (
                 <button
-                  onClick={() => {
-                    setFiles([]);
-                    setResultUrl(null);
-                    setProgress(0);
-                  }}
+                  onClick={resetAll}
                   className="flex items-center justify-center gap-2 rounded-full border-2 px-8 py-4 font-medium hover:bg-[var(--muted)] transition-all"
                 >
-                  Watermark Another PDF
+                  Watermark More PDFs
                 </button>
               )}
             </div>
