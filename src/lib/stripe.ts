@@ -25,7 +25,9 @@ export const stripe = {
 
 // Price IDs - you'll need to create these in your Stripe Dashboard
 // Go to Products > Add Product > Add Price
+// Monthly: $4.99/month recurring subscription
+// Lifetime: $24.99 one-time payment
 export const PRICES = {
   PRO_MONTHLY: process.env.STRIPE_PRICE_MONTHLY || "price_monthly_placeholder",
-  PRO_ANNUAL: process.env.STRIPE_PRICE_ANNUAL || "price_annual_placeholder",
+  PRO_LIFETIME: process.env.STRIPE_PRICE_LIFETIME || "price_lifetime_placeholder",
 };

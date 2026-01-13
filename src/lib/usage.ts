@@ -1,7 +1,8 @@
 import { createClient } from "@/lib/supabase/client";
 
 const USAGE_KEY = "pdf-tools-usage";
-const MAX_FREE_FILES_PER_DAY = 2;
+const PREMIUM_USAGE_KEY = "pdf-tools-premium-usage";
+const MAX_FREE_PREMIUM_TOOLS = 4; // 4 free uses for premium tools, then Pro required
 const MAX_FREE_FILE_SIZE_MB = 10;
 const MAX_PRO_FILE_SIZE_MB = 100;
 
@@ -10,10 +11,15 @@ interface UsageData {
   count: number;
 }
 
+interface PremiumUsageData {
+  count: number; // Total uses (not per day)
+}
+
 function getTodayString(): string {
   return new Date().toISOString().split("T")[0];
 }
 
+// Legacy daily usage (no longer used for new system but kept for backwards compatibility)
 function getUsageData(): UsageData {
   if (typeof window === "undefined") {
     return { date: getTodayString(), count: 0 };
@@ -26,7 +32,6 @@ function getUsageData(): UsageData {
 
   try {
     const data = JSON.parse(stored) as UsageData;
-    // Reset if it's a new day
     if (data.date !== getTodayString()) {
       return { date: getTodayString(), count: 0 };
     }
@@ -41,17 +46,48 @@ function saveUsageData(data: UsageData): void {
   localStorage.setItem(USAGE_KEY, JSON.stringify(data));
 }
 
+// Premium tool usage (total, not per day)
+function getPremiumUsageData(): PremiumUsageData {
+  if (typeof window === "undefined") {
+    return { count: 0 };
+  }
+
+  const stored = localStorage.getItem(PREMIUM_USAGE_KEY);
+  if (!stored) {
+    return { count: 0 };
+  }
+
+  try {
+    return JSON.parse(stored) as PremiumUsageData;
+  } catch {
+    return { count: 0 };
+  }
+}
+
+function savePremiumUsageData(data: PremiumUsageData): void {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(PREMIUM_USAGE_KEY, JSON.stringify(data));
+}
+
 // ============================================
 // Synchronous functions for anonymous users
 // ============================================
 
-export function getRemainingUsage(): number {
-  const usage = getUsageData();
-  return Math.max(0, MAX_FREE_FILES_PER_DAY - usage.count);
+// For premium tools - returns remaining uses (out of 4 total)
+export function getRemainingPremiumUsage(): number {
+  const usage = getPremiumUsageData();
+  return Math.max(0, MAX_FREE_PREMIUM_TOOLS - usage.count);
 }
 
-export function canProcessFile(): boolean {
-  return getRemainingUsage() > 0;
+// Legacy - kept for backwards compatibility
+export function getRemainingUsage(): number {
+  const usage = getUsageData();
+  return Math.max(0, 2 - usage.count); // Legacy 2 per day
+}
+
+export function canProcessFile(isPremiumTool: boolean = false): boolean {
+  if (!isPremiumTool) return true; // Free tools are unlimited
+  return getRemainingPremiumUsage() > 0;
 }
 
 export function incrementUsage(): void {
@@ -60,12 +96,18 @@ export function incrementUsage(): void {
   saveUsageData(usage);
 }
 
+export function incrementPremiumUsage(): void {
+  const usage = getPremiumUsageData();
+  usage.count += 1;
+  savePremiumUsageData(usage);
+}
+
 export function getMaxFileSize(isPro: boolean = false): number {
   return isPro ? MAX_PRO_FILE_SIZE_MB : MAX_FREE_FILE_SIZE_MB;
 }
 
-export function getMaxFilesPerDay(): number {
-  return MAX_FREE_FILES_PER_DAY;
+export function getMaxFreePremiumTools(): number {
+  return MAX_FREE_PREMIUM_TOOLS;
 }
 
 // Check cached Pro status (set by AuthContext)
@@ -94,19 +136,19 @@ export async function checkIsProAsync(): Promise<boolean> {
     .eq("user_id", user.id)
     .single();
 
-  return subscription?.plan === "pro" || subscription?.plan === "team";
+  return subscription?.plan === "pro" || subscription?.plan === "team" || subscription?.plan === "lifetime";
 }
 
-export async function getRemainingUsageAsync(
+// For premium tools - get remaining uses for logged-in users
+export async function getRemainingPremiumUsageAsync(
   userId?: string
 ): Promise<number> {
   // Anonymous user - use localStorage
   if (!userId) {
-    return getRemainingUsage();
+    return getRemainingPremiumUsage();
   }
 
   const supabase = createClient();
-  const today = getTodayString();
 
   // Check subscription status first
   const { data: subscription } = await supabase
@@ -115,22 +157,58 @@ export async function getRemainingUsageAsync(
     .eq("user_id", userId)
     .single();
 
-  // Pro users have unlimited usage
-  if (subscription?.plan === "pro" || subscription?.plan === "team") {
+  // Pro/Team/Lifetime users have unlimited usage
+  if (subscription?.plan === "pro" || subscription?.plan === "team" || subscription?.plan === "lifetime") {
     return Infinity;
   }
 
-  // Get today's usage for free users
+  // Get total premium usage for free users (not per day)
   const { data: usage } = await supabase
-    .from("usage")
-    .select("file_count")
+    .from("premium_usage")
+    .select("total_count")
     .eq("user_id", userId)
-    .eq("date", today)
     .single();
 
-  return Math.max(0, MAX_FREE_FILES_PER_DAY - (usage?.file_count || 0));
+  return Math.max(0, MAX_FREE_PREMIUM_TOOLS - (usage?.total_count || 0));
 }
 
+// Legacy - kept for backwards compatibility
+export async function getRemainingUsageAsync(
+  userId?: string
+): Promise<number> {
+  // For the new system, free tools are unlimited
+  // This is kept for backwards compatibility
+  if (!userId) {
+    return getRemainingUsage();
+  }
+  return Infinity; // Free tools are now unlimited
+}
+
+export async function incrementPremiumUsageAsync(userId: string): Promise<void> {
+  const supabase = createClient();
+
+  // Check if usage record exists
+  const { data: existing } = await supabase
+    .from("premium_usage")
+    .select("id, total_count")
+    .eq("user_id", userId)
+    .single();
+
+  if (existing) {
+    // Update existing record
+    await supabase
+      .from("premium_usage")
+      .update({ total_count: existing.total_count + 1 })
+      .eq("id", existing.id);
+  } else {
+    // Create new record
+    await supabase
+      .from("premium_usage")
+      .insert({ user_id: userId, total_count: 1 });
+  }
+}
+
+// Legacy - kept for backwards compatibility
 export async function incrementUsageAsync(userId: string): Promise<void> {
   const supabase = createClient();
   const today = getTodayString();
@@ -144,21 +222,20 @@ export async function incrementUsageAsync(userId: string): Promise<void> {
     .single();
 
   if (existing) {
-    // Update existing record
     await supabase
       .from("usage")
       .update({ file_count: existing.file_count + 1 })
       .eq("id", existing.id);
   } else {
-    // Create new record
     await supabase
       .from("usage")
       .insert({ user_id: userId, date: today, file_count: 1 });
   }
 }
 
-export async function canProcessFileAsync(userId?: string): Promise<boolean> {
-  const remaining = await getRemainingUsageAsync(userId);
+export async function canProcessFileAsync(userId?: string, isPremiumTool: boolean = false): Promise<boolean> {
+  if (!isPremiumTool) return true; // Free tools are unlimited
+  const remaining = await getRemainingPremiumUsageAsync(userId);
   return remaining > 0;
 }
 

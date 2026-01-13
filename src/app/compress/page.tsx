@@ -10,6 +10,7 @@ import { useToolUsage } from "@/hooks/useToolUsage";
 import Link from "next/link";
 import { trackFileProcessed } from "@/lib/analytics";
 import { addFreeTierBranding } from "@/lib/branding";
+import { ToolSuggestions } from "@/components/ToolSuggestions";
 
 type CompressionLevel = "low" | "medium" | "high" | "extreme";
 
@@ -587,6 +588,11 @@ export default function CompressPDF() {
                 </button>
               )}
             </div>
+
+            {/* Tool Suggestions */}
+            {processedFiles.length > 0 && (
+              <ToolSuggestions currentTool="compress" showAfterProcess={true} />
+            )}
           </div>
         </div>
       </div>

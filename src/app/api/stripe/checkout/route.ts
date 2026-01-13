@@ -43,13 +43,14 @@ export async function POST(request: NextRequest) {
         .eq("id", user.id);
     }
 
-    // Determine price ID
-    const priceId = priceType === "annual" ? PRICES.PRO_ANNUAL : PRICES.PRO_MONTHLY;
+    // Determine price ID and mode based on price type
+    const isLifetime = priceType === "lifetime";
+    const priceId = isLifetime ? PRICES.PRO_LIFETIME : PRICES.PRO_MONTHLY;
 
     // Create checkout session
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
-      mode: "subscription",
+      mode: isLifetime ? "payment" : "subscription",
       payment_method_types: ["card"],
       line_items: [
         {
@@ -61,6 +62,7 @@ export async function POST(request: NextRequest) {
       cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/pricing?canceled=true`,
       metadata: {
         user_id: user.id,
+        price_type: priceType,
       },
     });
 

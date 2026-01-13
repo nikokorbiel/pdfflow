@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { Upload, X, FileText, Image as ImageIcon } from "lucide-react";
+import { Upload, X, FileText, Image as ImageIcon, FolderOpen } from "lucide-react";
+import { useFileTray } from "@/contexts/FileTrayContext";
 
 interface FileDropzoneProps {
   onFilesSelected: (files: File[]) => void;
@@ -12,6 +13,7 @@ interface FileDropzoneProps {
   files: File[];
   onRemoveFile: (index: number) => void;
   disabled?: boolean;
+  addToTray?: boolean; // Whether to also add files to the global File Tray
 }
 
 export function FileDropzone({
@@ -23,9 +25,11 @@ export function FileDropzone({
   files,
   onRemoveFile,
   disabled = false,
+  addToTray = true,
 }: FileDropzoneProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { addFiles: addToFileTray, getFile, files: trayFiles, toggleTray } = useFileTray();
 
   const validateFiles = useCallback(
     (fileList: File[]): File[] => {
@@ -75,13 +79,35 @@ export function FileDropzone({
 
       if (disabled) return;
 
+      // Check if this is a file dragged from the File Tray
+      const trayData = e.dataTransfer.getData("application/json");
+      if (trayData) {
+        try {
+          const { fileId } = JSON.parse(trayData);
+          const trayFile = getFile(fileId);
+          if (trayFile) {
+            const validFiles = validateFiles([trayFile.file]);
+            if (validFiles.length > 0) {
+              onFilesSelected(validFiles);
+            }
+            return;
+          }
+        } catch {
+          // Not a valid tray file, continue with normal drop
+        }
+      }
+
       const droppedFiles = Array.from(e.dataTransfer.files);
       const validFiles = validateFiles(droppedFiles);
       if (validFiles.length > 0) {
         onFilesSelected(validFiles);
+        // Also add to File Tray for persistence
+        if (addToTray) {
+          addToFileTray(validFiles);
+        }
       }
     },
-    [disabled, validateFiles, onFilesSelected]
+    [disabled, validateFiles, onFilesSelected, getFile, addToTray, addToFileTray]
   );
 
   const handleFileInput = useCallback(
@@ -92,10 +118,14 @@ export function FileDropzone({
       const validFiles = validateFiles(selectedFiles);
       if (validFiles.length > 0) {
         onFilesSelected(validFiles);
+        // Also add to File Tray for persistence
+        if (addToTray) {
+          addToFileTray(validFiles);
+        }
       }
       e.target.value = "";
     },
-    [disabled, validateFiles, onFilesSelected]
+    [disabled, validateFiles, onFilesSelected, addToTray, addToFileTray]
   );
 
   const formatFileSize = (bytes: number): string => {
@@ -165,6 +195,17 @@ export function FileDropzone({
           </div>
         </div>
       </div>
+
+      {/* File Tray hint */}
+      {trayFiles.length > 0 && files.length === 0 && (
+        <button
+          onClick={toggleTray}
+          className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-[var(--accent)]/5 border border-[var(--accent)]/20 text-[var(--accent)] text-sm font-medium hover:bg-[var(--accent)]/10 transition-all animate-fade-in"
+        >
+          <FolderOpen className="w-4 h-4" />
+          Use file from File Tray ({trayFiles.length} available)
+        </button>
+      )}
 
       {/* Error message */}
       {error && (

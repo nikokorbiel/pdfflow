@@ -4,9 +4,12 @@ import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AuthModalProvider } from "@/contexts/AuthModalContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { FileTrayProvider } from "@/contexts/FileTrayContext";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Background } from "@/components/Background";
+import { FileTray } from "@/components/FileTray";
+import { GlobalFeatures } from "@/components/GlobalFeatures";
 import { ServiceWorkerRegistration } from "@/components/ServiceWorkerRegistration";
 import { Analytics } from "@vercel/analytics/next";
 
@@ -80,11 +83,15 @@ export default function RootLayout({
         <ThemeProvider>
           <AuthProvider>
             <AuthModalProvider>
-              <Background />
-              <Header />
-              <main className="flex-1 relative z-10">{children}</main>
-              <Footer />
-              <ServiceWorkerRegistration />
+              <FileTrayProvider>
+                <Background />
+                <Header />
+                <main className="flex-1 relative z-10">{children}</main>
+                <Footer />
+                <FileTray />
+                <GlobalFeatures />
+                <ServiceWorkerRegistration />
+              </FileTrayProvider>
             </AuthModalProvider>
           </AuthProvider>
         </ThemeProvider>

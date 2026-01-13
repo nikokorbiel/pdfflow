@@ -26,6 +26,7 @@ import { ToolRequestModal } from "@/components/ToolRequestModal";
 import { tools, getToolsByCategory, searchTools, ToolCategory } from "@/config/tools";
 import { ToolSearch } from "@/components/ToolSearch";
 import { ToolCategories } from "@/components/ToolCategories";
+import { RecentFiles } from "@/components/RecentFiles";
 
 const features = [
   {
@@ -277,6 +278,9 @@ export default function Home() {
         </div>
         <GlowingBorder delay={1.5} />
       </section>
+
+      {/* Recent Files */}
+      <RecentFiles />
 
       {/* Tools Grid */}
       <section id="tools" className="py-20 bg-black relative">

@@ -9,6 +9,7 @@ import { useToolUsage } from "@/hooks/useToolUsage";
 import Link from "next/link";
 import { trackFileProcessed } from "@/lib/analytics";
 import { createBrandedPdfBlob } from "@/lib/branding";
+import { ToolSuggestions } from "@/components/ToolSuggestions";
 
 export default function MergePDF() {
   const [files, setFiles] = useState<File[]>([]);
@@ -266,6 +267,11 @@ export default function MergePDF() {
                 </button>
               )}
             </div>
+
+            {/* Tool Suggestions */}
+            {resultUrl && (
+              <ToolSuggestions currentTool="merge" showAfterProcess={true} />
+            )}
           </div>
         </div>
       </div>
