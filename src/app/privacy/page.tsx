@@ -17,7 +17,7 @@ const sections = [
     subsections: [
       {
         title: "Files You Process",
-        content: "For our free tier, all PDF processing happens directly in your browser. Your files are never uploaded to our servers. For Pro features that require server-side processing, files are temporarily stored only for the duration of processing and are automatically deleted afterward.",
+        content: "All PDF processing happens directly in your browser. Your files are never uploaded to our servers. We use client-side technology (JavaScript and WebAssembly) to process your documents locally on your device.",
       },
       {
         title: "Account Information",
