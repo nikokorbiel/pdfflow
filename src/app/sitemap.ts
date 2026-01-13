@@ -1,7 +1,7 @@
 import { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://pdfflow-kappa.vercel.app";
+  const baseUrl = "https://pdfflow.space";
 
   // Static pages
   const staticPages = [
