@@ -22,7 +22,7 @@ export default function ProtectPDF() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const { isPro, canProcess, maxFileSize, recordUsage: _recordUsage, usageDisplay } = useToolUsage();
+  const { isPro, canProcess, maxFileSize, usageDisplay } = useToolUsage();
 
   const handleFilesSelected = useCallback((newFiles: File[]) => {
     if (newFiles.length > 0) {
