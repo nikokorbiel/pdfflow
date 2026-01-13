@@ -34,8 +34,8 @@ export default function PDFToImage() {
 
   const { isPro, canProcess, maxFileSize, recordUsage, usageDisplay } = useToolUsage();
 
-  // Pro users can batch process up to 20 files
-  const maxFiles = isPro ? 20 : 1;
+  // Pro users can batch process up to 100 files
+  const maxFiles = isPro ? 100 : 1;
 
   // Load PDF.js dynamically on client side
   useEffect(() => {

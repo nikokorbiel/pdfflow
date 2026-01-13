@@ -43,7 +43,7 @@ export default function PageNumbers() {
 
   const { isPro, canProcess, maxFileSize, recordUsage, usageDisplay } = useToolUsage();
 
-  const maxFiles = isPro ? 20 : 1;
+  const maxFiles = isPro ? 100 : 1;
 
   const handleFilesSelected = useCallback((newFiles: File[]) => {
     if (newFiles.length > 0) {
