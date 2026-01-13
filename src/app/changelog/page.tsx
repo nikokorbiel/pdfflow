@@ -35,6 +35,11 @@ import {
   WifiOff,
   BookOpen,
   MessageSquare,
+  Crown,
+  Package,
+  BarChart3,
+  Cloud,
+  Type,
 } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -57,6 +62,67 @@ interface Update {
 }
 
 const updates: Update[] = [
+  {
+    version: "1.6.0",
+    date: "January 2025",
+    title: "Pro Features & Power User Tools",
+    description: "Major Pro tier update with unlimited batch processing, advanced compression, usage analytics, and cloud sync.",
+    features: [
+      {
+        title: "Unlimited Batch Processing",
+        description: "Pro users can now process unlimited files at once. Compress, rotate, watermark, or convert entire folders in one go.",
+        icon: Package,
+        isNew: true,
+      },
+      {
+        title: "Advanced Compression",
+        description: "New High and Extreme compression levels for Pro users. Achieve up to 70% file size reduction.",
+        icon: FileDown,
+        link: "/compress",
+        isNew: true,
+      },
+      {
+        title: "Image Watermarks",
+        description: "Add logo and image watermarks to your PDFs. Pro users get full image watermark support with scaling and positioning.",
+        icon: Image,
+        link: "/watermark",
+        isNew: true,
+      },
+      {
+        title: "Custom Page Numbers",
+        description: "Pro users get Roman numerals, custom fonts (Times Roman, Courier), and color picker for page numbers.",
+        icon: Type,
+        link: "/page-numbers",
+        isNew: true,
+      },
+      {
+        title: "Usage Analytics Dashboard",
+        description: "Track your PDF processing with detailed analytics. See weekly trends, top tools, and total files processed.",
+        icon: BarChart3,
+        link: "/dashboard",
+        isNew: true,
+      },
+      {
+        title: "Extended File History",
+        description: "Pro users get 50 items and 30 days retention (vs 10 items and 7 days for free). Search and filter your history.",
+        icon: History,
+        link: "/dashboard",
+        isNew: true,
+      },
+      {
+        title: "Template Cloud Sync",
+        description: "Your watermark and signature templates now sync across all your devices. Create once, use anywhere.",
+        icon: Cloud,
+        isNew: true,
+      },
+      {
+        title: "No Branding on Outputs",
+        description: "Pro users get clean outputs without PDFflow branding. Free tier adds a subtle watermark on the last page.",
+        icon: Crown,
+        isNew: true,
+      },
+    ],
+  },
   {
     version: "1.5.0",
     date: "January 2025",

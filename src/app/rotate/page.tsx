@@ -40,8 +40,8 @@ export default function RotatePDF() {
 
   const { isPro, canProcess, maxFileSize, recordUsage, usageDisplay } = useToolUsage();
 
-  // Pro users can batch process up to 100 files
-  const maxFiles = isPro ? 100 : 1;
+  // Pro users have unlimited batch processing
+  const maxFiles = isPro ? Infinity : 1;
 
   // Load PDF.js dynamically on client side
   useEffect(() => {
