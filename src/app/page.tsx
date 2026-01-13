@@ -3,40 +3,18 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
-  Combine,
-  Split,
-  FileDown,
-  Image,
-  FileImage,
-  RotateCw,
   Zap,
   Shield,
   Gift,
   ArrowRight,
   FileText,
-  Droplets,
-  Hash,
-  ArrowUpDown,
-  PenTool,
-  Unlock,
   Sparkles,
   Check,
   X,
   Mail,
-  Table,
-  Presentation,
-  Code,
-  Crop,
-  Trash2,
-  ImageIcon,
-  EyeOff,
-  Wrench,
-  Layers,
   Smartphone,
   Monitor,
   WifiOff,
-  Palette,
-  Type,
 } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -45,165 +23,9 @@ import { ParticleBackground } from "@/components/ParticleBackground";
 import { useAuth } from "@/contexts/AuthContext";
 import { GlowingBorder } from "@/components/GlowingBorder";
 import { ToolRequestModal } from "@/components/ToolRequestModal";
-
-const tools = [
-  // Core tools
-  {
-    name: "Merge PDF",
-    description: "Combine multiple PDFs into one",
-    href: "/merge",
-    icon: Combine,
-  },
-  {
-    name: "Split PDF",
-    description: "Extract or divide your PDF",
-    href: "/split",
-    icon: Split,
-  },
-  {
-    name: "Compress PDF",
-    description: "Reduce file size, keep quality",
-    href: "/compress",
-    icon: FileDown,
-  },
-  // Convert
-  {
-    name: "PDF to Image",
-    description: "Convert pages to PNG/JPG",
-    href: "/pdf-to-image",
-    icon: Image,
-  },
-  {
-    name: "Image to PDF",
-    description: "Create PDF from images",
-    href: "/image-to-pdf",
-    icon: FileImage,
-  },
-  {
-    name: "PDF to Word",
-    description: "Convert to editable DOCX",
-    href: "/pdf-to-word",
-    icon: FileText,
-  },
-  {
-    name: "PDF to Excel",
-    description: "Extract tables to spreadsheet",
-    href: "/pdf-to-excel",
-    icon: Table,
-  },
-  {
-    name: "PDF to PowerPoint",
-    description: "Convert to slide images",
-    href: "/pdf-to-powerpoint",
-    icon: Presentation,
-  },
-  {
-    name: "HTML to PDF",
-    description: "Convert web pages to PDF",
-    href: "/html-to-pdf",
-    icon: Code,
-  },
-  // Edit
-  {
-    name: "Rotate PDF",
-    description: "Rotate pages any direction",
-    href: "/rotate",
-    icon: RotateCw,
-  },
-  {
-    name: "Crop PDF",
-    description: "Trim and resize pages",
-    href: "/crop",
-    icon: Crop,
-  },
-  {
-    name: "Delete Pages",
-    description: "Remove unwanted pages",
-    href: "/delete-pages",
-    icon: Trash2,
-  },
-  {
-    name: "Extract Images",
-    description: "Pull images from PDF",
-    href: "/extract-images",
-    icon: ImageIcon,
-  },
-  {
-    name: "Watermark",
-    description: "Add text or image watermarks",
-    href: "/watermark",
-    icon: Droplets,
-  },
-  {
-    name: "Page Numbers",
-    description: "Add page numbering",
-    href: "/page-numbers",
-    icon: Hash,
-  },
-  {
-    name: "Reorder Pages",
-    description: "Drag & drop to rearrange",
-    href: "/reorder",
-    icon: ArrowUpDown,
-  },
-  {
-    name: "Sign PDF",
-    description: "Add signatures & initials",
-    href: "/sign",
-    icon: PenTool,
-  },
-  // Security
-  {
-    name: "Unlock PDF",
-    description: "Remove PDF password",
-    href: "/unlock",
-    icon: Unlock,
-  },
-  {
-    name: "Redact PDF",
-    description: "Hide sensitive information",
-    href: "/redact",
-    icon: EyeOff,
-  },
-  // Advanced
-  {
-    name: "Repair PDF",
-    description: "Fix corrupted PDFs",
-    href: "/repair",
-    icon: Wrench,
-  },
-  {
-    name: "Flatten PDF",
-    description: "Flatten forms & layers",
-    href: "/flatten",
-    icon: Layers,
-  },
-  // New tools
-  {
-    name: "Edit Metadata",
-    description: "View & edit PDF properties",
-    href: "/metadata",
-    icon: FileText,
-  },
-  {
-    name: "Grayscale PDF",
-    description: "Convert to black & white",
-    href: "/grayscale",
-    icon: Palette,
-  },
-  {
-    name: "Extract Text",
-    description: "Pull text from PDF",
-    href: "/extract-text",
-    icon: FileText,
-  },
-  {
-    name: "Headers & Footers",
-    description: "Add custom headers/footers",
-    href: "/headers-footers",
-    icon: Type,
-  },
-];
+import { tools, getToolsByCategory, searchTools, ToolCategory } from "@/config/tools";
+import { ToolSearch } from "@/components/ToolSearch";
+import { ToolCategories } from "@/components/ToolCategories";
 
 const features = [
   {
@@ -293,8 +115,15 @@ const itemVariants = {
 export default function Home() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [toolRequestOpen, setToolRequestOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<ToolCategory | "all">("all");
   const { user } = useAuth();
   const router = useRouter();
+
+  // Filter tools based on search and category
+  const filteredTools = searchQuery
+    ? searchTools(searchQuery)
+    : getToolsByCategory(selectedCategory);
 
   const handleGetStarted = () => {
     if (user) {
@@ -452,13 +281,39 @@ export default function Home() {
       {/* Tools Grid */}
       <section id="tools" className="py-20 bg-black relative">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <motion.div className="text-center mb-12" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+          <motion.div className="text-center mb-8" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
             <p className="text-xs font-medium text-[#64748b] uppercase tracking-widest mb-3">PDF Tools</p>
             <h2 className="text-3xl sm:text-4xl font-semibold text-white tracking-tight">Every tool you need</h2>
+            <p className="mt-3 text-[#94a3b8]">{tools.length} tools to handle all your PDF needs</p>
           </motion.div>
 
+          {/* Search and Categories */}
+          <div className="mb-8 space-y-4">
+            <ToolSearch
+              value={searchQuery}
+              onChange={(value) => {
+                setSearchQuery(value);
+                if (value) setSelectedCategory("all");
+              }}
+              placeholder={`Search ${tools.length} tools...`}
+            />
+            {!searchQuery && (
+              <ToolCategories
+                selected={selectedCategory}
+                onChange={setSelectedCategory}
+              />
+            )}
+          </div>
+
+          {/* Results count when searching */}
+          {searchQuery && (
+            <p className="text-sm text-[#64748b] mb-4">
+              Found {filteredTools.length} tool{filteredTools.length !== 1 ? "s" : ""} for &ldquo;{searchQuery}&rdquo;
+            </p>
+          )}
+
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
-            {tools.map((tool, index) => (
+            {filteredTools.map((tool, index) => (
               <motion.div key={tool.name} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: Math.min(index * 0.03, 0.5) }}>
                 <Link href={tool.href} className="flex flex-col h-full p-3 sm:p-4 rounded-xl bg-[#0a0a0f] border border-[#1e293b] hover:border-[#334155] transition-all group">
                   <tool.icon className="w-4 h-4 sm:w-5 sm:h-5 text-[#64748b] group-hover:text-[#0ea5e9] transition-colors mb-2 flex-shrink-0" />
@@ -467,18 +322,33 @@ export default function Home() {
                 </Link>
               </motion.div>
             ))}
-            {/* CTA Card */}
-            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.6 }}>
-              <button
-                onClick={() => setToolRequestOpen(true)}
-                className="flex flex-col h-full w-full text-left p-3 sm:p-4 rounded-xl bg-gradient-to-br from-[#0ea5e9]/10 to-[#06b6d4]/10 border border-[#0ea5e9]/20 hover:border-[#0ea5e9]/40 transition-all group"
-              >
-                <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-[#0ea5e9] group-hover:text-[#22d3ee] transition-colors mb-2 flex-shrink-0" />
-                <h3 className="text-xs sm:text-sm font-medium text-white mb-0.5">Request a Tool</h3>
-                <p className="text-[10px] sm:text-xs text-[#64748b] leading-snug">Need something else?</p>
-              </button>
-            </motion.div>
+            {/* CTA Card - only show when not searching */}
+            {!searchQuery && (
+              <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.6 }}>
+                <button
+                  onClick={() => setToolRequestOpen(true)}
+                  className="flex flex-col h-full w-full text-left p-3 sm:p-4 rounded-xl bg-gradient-to-br from-[#0ea5e9]/10 to-[#06b6d4]/10 border border-[#0ea5e9]/20 hover:border-[#0ea5e9]/40 transition-all group"
+                >
+                  <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-[#0ea5e9] group-hover:text-[#22d3ee] transition-colors mb-2 flex-shrink-0" />
+                  <h3 className="text-xs sm:text-sm font-medium text-white mb-0.5">Request a Tool</h3>
+                  <p className="text-[10px] sm:text-xs text-[#64748b] leading-snug">Need something else?</p>
+                </button>
+              </motion.div>
+            )}
           </div>
+
+          {/* No results message */}
+          {filteredTools.length === 0 && searchQuery && (
+            <div className="text-center py-12">
+              <p className="text-[#64748b]">No tools found matching &ldquo;{searchQuery}&rdquo;</p>
+              <button
+                onClick={() => setSearchQuery("")}
+                className="mt-4 text-[#0ea5e9] hover:text-[#22d3ee] text-sm"
+              >
+                Clear search
+              </button>
+            </div>
+          )}
         </div>
         <GlowingBorder delay={2.5} />
       </section>

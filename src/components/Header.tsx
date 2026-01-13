@@ -11,92 +11,52 @@ import {
   LayoutDashboard,
   Crown,
   Settings,
-  Combine,
-  Split,
-  FileDown,
-  Image,
-  FileImage,
-  RotateCw,
-  Droplets,
-  FileText,
-  ArrowUpDown,
-  PenTool,
-  Unlock,
   FolderOpen,
   RefreshCw,
   Pencil,
   Shield,
   Sparkles,
-  Table,
-  Presentation,
-  Code,
-  Crop,
-  Trash2,
+  FileText,
+  ArrowUpDown,
   ImageIcon,
-  EyeOff,
-  Wrench,
-  Hash,
-  Layers,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAuthModal } from "@/contexts/AuthModalContext";
 import { PDFflowLogo } from "./Logo";
+import { tools, categories, ToolCategory } from "@/config/tools";
+
+// Get tools by category for header dropdown
+const getTopToolsForCategory = (category: ToolCategory, limit: number = 5) => {
+  return tools.filter(t => t.category === category).slice(0, limit);
+};
 
 const toolCategories = [
   {
-    name: "Organize",
+    name: categories.core.name,
     icon: FolderOpen,
-    tools: [
-      { name: "Merge PDF", href: "/merge", description: "Combine multiple PDFs", icon: Combine },
-      { name: "Split PDF", href: "/split", description: "Extract or divide pages", icon: Split },
-      { name: "Reorder Pages", href: "/reorder", description: "Drag & drop to rearrange", icon: ArrowUpDown },
-      { name: "Delete Pages", href: "/delete-pages", description: "Remove unwanted pages", icon: Trash2 },
-      { name: "Page Numbers", href: "/page-numbers", description: "Add page numbering", icon: Hash },
-    ],
+    tools: getTopToolsForCategory("core", 5),
   },
   {
-    name: "Export",
+    name: categories.convert.name,
     icon: RefreshCw,
-    tools: [
-      { name: "PDF to Image", href: "/pdf-to-image", description: "Convert to PNG/JPG", icon: Image },
-      { name: "PDF to Word", href: "/pdf-to-word", description: "Convert to DOCX", icon: FileText },
-      { name: "PDF to Excel", href: "/pdf-to-excel", description: "Extract to spreadsheet", icon: Table },
-      { name: "PDF to PPT", href: "/pdf-to-powerpoint", description: "Convert to slides", icon: Presentation },
-      { name: "Extract Images", href: "/extract-images", description: "Pull images out", icon: ImageIcon },
-    ],
+    tools: getTopToolsForCategory("convert", 5),
   },
   {
-    name: "Create",
-    icon: FileImage,
-    tools: [
-      { name: "Image to PDF", href: "/image-to-pdf", description: "Images to PDF", icon: FileImage },
-      { name: "HTML to PDF", href: "/html-to-pdf", description: "Web page to PDF", icon: Code },
-    ],
-  },
-  {
-    name: "Edit",
+    name: categories.edit.name,
     icon: Pencil,
-    tools: [
-      { name: "Compress", href: "/compress", description: "Reduce file size", icon: FileDown },
-      { name: "Rotate PDF", href: "/rotate", description: "Rotate pages", icon: RotateCw },
-      { name: "Crop PDF", href: "/crop", description: "Trim pages", icon: Crop },
-      { name: "Watermark", href: "/watermark", description: "Add watermarks", icon: Droplets },
-      { name: "Sign PDF", href: "/sign", description: "Add signatures", icon: PenTool },
-      { name: "Flatten PDF", href: "/flatten", description: "Flatten forms", icon: Layers },
-    ],
+    tools: getTopToolsForCategory("edit", 5),
   },
   {
-    name: "Security",
+    name: categories.security.name,
     icon: Shield,
-    tools: [
-      { name: "Unlock PDF", href: "/unlock", description: "Remove password", icon: Unlock },
-      { name: "Redact PDF", href: "/redact", description: "Hide sensitive info", icon: EyeOff },
-      { name: "Repair PDF", href: "/repair", description: "Fix corrupted files", icon: Wrench },
-    ],
+    tools: getTopToolsForCategory("security", 5),
+  },
+  {
+    name: categories.images.name,
+    icon: ImageIcon,
+    tools: getTopToolsForCategory("images", 5),
   },
 ];
-
-// Flat list for mobile menu
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -190,6 +150,17 @@ export function Header() {
                           </div>
                         </div>
                       ))}
+                    </div>
+
+                    <div className="mt-4 pt-4 border-t border-[#1e293b]">
+                      <Link
+                        href="/#tools"
+                        onClick={() => setToolsOpen(false)}
+                        className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[#1e293b] hover:bg-[#334155] text-white text-sm font-medium transition-colors"
+                      >
+                        <Sparkles className="w-4 h-4 text-[#0ea5e9]" />
+                        View All {tools.length} Tools
+                      </Link>
                     </div>
                   </div>
                 )}
