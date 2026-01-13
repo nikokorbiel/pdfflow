@@ -4,12 +4,20 @@ import { useState, useCallback } from "react";
 import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 import { FileDropzone } from "@/components/FileDropzone";
 import { ProgressBar } from "@/components/ProgressBar";
-import { Download, Hash, Sparkles, Crown } from "lucide-react";
+import { Download, Hash, Sparkles, Crown, Lock, FileArchive } from "lucide-react";
 import { useToolUsage } from "@/hooks/useToolUsage";
 import Link from "next/link";
+import JSZip from "jszip";
 
 type Position = "top-left" | "top-center" | "top-right" | "bottom-left" | "bottom-center" | "bottom-right";
-type NumberFormat = "number" | "page-n" | "n-of-total" | "page-n-of-total";
+type NumberFormat = "number" | "page-n" | "n-of-total" | "page-n-of-total" | "roman" | "roman-page";
+type FontOption = "Helvetica" | "TimesRoman" | "Courier";
+
+interface ProcessedFile {
+  name: string;
+  url: string;
+  blob: Blob;
+}
 
 export default function PageNumbers() {
   const [files, setFiles] = useState<File[]>([]);
@@ -17,6 +25,7 @@ export default function PageNumbers() {
   const [progress, setProgress] = useState(0);
   const [status, setStatus] = useState("");
   const [resultUrl, setResultUrl] = useState<string | null>(null);
+  const [processedFiles, setProcessedFiles] = useState<ProcessedFile[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   // Options
@@ -26,20 +35,65 @@ export default function PageNumbers() {
   const [startNumber, setStartNumber] = useState(1);
   const [margin, setMargin] = useState(30);
 
+  // Pro options
+  const [fontOption, setFontOption] = useState<FontOption>("Helvetica");
+  const [textColor, setTextColor] = useState("#4d4d4d"); // Default gray
+
   const { isPro, canProcess, maxFileSize, recordUsage, usageDisplay } = useToolUsage();
+
+  const maxFiles = isPro ? 20 : 1;
 
   const handleFilesSelected = useCallback((newFiles: File[]) => {
     if (newFiles.length > 0) {
-      setFiles([newFiles[0]]);
+      const filesToAdd = newFiles.slice(0, maxFiles);
+      setFiles((prev) => {
+        const combined = [...prev, ...filesToAdd];
+        return combined.slice(0, maxFiles);
+      });
       setResultUrl(null);
+      setProcessedFiles([]);
       setError(null);
     }
+  }, [maxFiles]);
+
+  const handleRemoveFile = useCallback((index?: number) => {
+    if (index !== undefined) {
+      setFiles((prev) => prev.filter((_, i) => i !== index));
+    } else {
+      setFiles([]);
+    }
+    setResultUrl(null);
+    setProcessedFiles([]);
   }, []);
 
-  const handleRemoveFile = useCallback(() => {
-    setFiles([]);
-    setResultUrl(null);
-  }, []);
+  // Convert to Roman numerals
+  const toRoman = (num: number): string => {
+    const romanNumerals: [number, string][] = [
+      [1000, "M"], [900, "CM"], [500, "D"], [400, "CD"],
+      [100, "C"], [90, "XC"], [50, "L"], [40, "XL"],
+      [10, "X"], [9, "IX"], [5, "V"], [4, "IV"], [1, "I"],
+    ];
+    let result = "";
+    for (const [value, symbol] of romanNumerals) {
+      while (num >= value) {
+        result += symbol;
+        num -= value;
+      }
+    }
+    return result;
+  };
+
+  // Convert hex to RGB
+  const hexToRgb = (hex: string): { r: number; g: number; b: number } => {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result
+      ? {
+          r: parseInt(result[1], 16) / 255,
+          g: parseInt(result[2], 16) / 255,
+          b: parseInt(result[3], 16) / 255,
+        }
+      : { r: 0.3, g: 0.3, b: 0.3 };
+  };
 
   const formatPageNumber = (pageNum: number, totalPages: number): string => {
     switch (format) {
@@ -51,9 +105,96 @@ export default function PageNumbers() {
         return `${pageNum} of ${totalPages}`;
       case "page-n-of-total":
         return `Page ${pageNum} of ${totalPages}`;
+      case "roman":
+        return toRoman(pageNum);
+      case "roman-page":
+        return `Page ${toRoman(pageNum)}`;
       default:
         return `${pageNum}`;
     }
+  };
+
+  // Get the correct StandardFont
+  const getFont = (option: FontOption) => {
+    switch (option) {
+      case "TimesRoman":
+        return StandardFonts.TimesRoman;
+      case "Courier":
+        return StandardFonts.Courier;
+      default:
+        return StandardFonts.Helvetica;
+    }
+  };
+
+  const processFile = async (
+    file: File,
+    fileIndex: number,
+    totalFiles: number
+  ): Promise<ProcessedFile> => {
+    const baseProgress = (fileIndex / totalFiles) * 100;
+    const progressPerFile = 100 / totalFiles;
+
+    setStatus(`Processing ${file.name}...`);
+    setProgress(baseProgress + progressPerFile * 0.1);
+
+    const fileBuffer = await file.arrayBuffer();
+    const pdf = await PDFDocument.load(fileBuffer, { ignoreEncryption: true });
+    const font = await pdf.embedFont(getFont(fontOption));
+    const color = hexToRgb(textColor);
+
+    const pages = pdf.getPages();
+    const totalPages = pages.length;
+
+    for (let i = 0; i < totalPages; i++) {
+      setProgress(baseProgress + progressPerFile * (0.1 + ((i + 1) / totalPages) * 0.8));
+      setStatus(`${file.name}: Page ${i + 1} of ${totalPages}`);
+
+      const page = pages[i];
+      const { width, height } = page.getSize();
+      const pageNumber = startNumber + i;
+      const text = formatPageNumber(pageNumber, totalPages + startNumber - 1);
+      const textWidth = font.widthOfTextAtSize(text, fontSize);
+
+      let x: number;
+      let y: number;
+
+      // Calculate X position
+      if (position.includes("left")) {
+        x = margin;
+      } else if (position.includes("right")) {
+        x = width - textWidth - margin;
+      } else {
+        x = (width - textWidth) / 2;
+      }
+
+      // Calculate Y position
+      if (position.includes("top")) {
+        y = height - margin - fontSize;
+      } else {
+        y = margin;
+      }
+
+      page.drawText(text, {
+        x,
+        y,
+        size: fontSize,
+        font,
+        color: rgb(color.r, color.g, color.b),
+      });
+    }
+
+    setProgress(baseProgress + progressPerFile * 0.95);
+
+    const pdfBytes = await pdf.save();
+    const blob = new Blob([pdfBytes as BlobPart], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+
+    const originalName = file.name.replace(/\.pdf$/i, "");
+    return {
+      name: `${originalName}_numbered.pdf`,
+      url,
+      blob,
+    };
   };
 
   const addPageNumbers = async () => {
@@ -70,66 +211,23 @@ export default function PageNumbers() {
     setIsProcessing(true);
     setProgress(0);
     setError(null);
+    setProcessedFiles([]);
 
     try {
-      setStatus("Loading PDF...");
-      setProgress(10);
+      const results: ProcessedFile[] = [];
 
-      const fileBuffer = await files[0].arrayBuffer();
-      const pdf = await PDFDocument.load(fileBuffer, { ignoreEncryption: true });
-      const font = await pdf.embedFont(StandardFonts.Helvetica);
-
-      const pages = pdf.getPages();
-      const totalPages = pages.length;
-
-      setStatus("Adding page numbers...");
-
-      for (let i = 0; i < totalPages; i++) {
-        setProgress(10 + ((i + 1) / totalPages) * 80);
-        setStatus(`Processing page ${i + 1} of ${totalPages}...`);
-
-        const page = pages[i];
-        const { width, height } = page.getSize();
-        const pageNumber = startNumber + i;
-        const text = formatPageNumber(pageNumber, totalPages + startNumber - 1);
-        const textWidth = font.widthOfTextAtSize(text, fontSize);
-
-        let x: number;
-        let y: number;
-
-        // Calculate X position
-        if (position.includes("left")) {
-          x = margin;
-        } else if (position.includes("right")) {
-          x = width - textWidth - margin;
-        } else {
-          x = (width - textWidth) / 2;
-        }
-
-        // Calculate Y position
-        if (position.includes("top")) {
-          y = height - margin - fontSize;
-        } else {
-          y = margin;
-        }
-
-        page.drawText(text, {
-          x,
-          y,
-          size: fontSize,
-          font,
-          color: rgb(0.3, 0.3, 0.3),
-        });
+      for (let i = 0; i < files.length; i++) {
+        const result = await processFile(files[i], i, files.length);
+        results.push(result);
       }
 
-      setStatus("Saving PDF...");
-      setProgress(95);
+      setProcessedFiles(results);
 
-      const pdfBytes = await pdf.save();
-      const blob = new Blob([pdfBytes as BlobPart], { type: "application/pdf" });
-      const url = URL.createObjectURL(blob);
+      // For single file, set resultUrl for backward compatibility
+      if (results.length === 1) {
+        setResultUrl(results[0].url);
+      }
 
-      setResultUrl(url);
       setProgress(100);
       setStatus("Complete!");
       await recordUsage();
@@ -141,15 +239,36 @@ export default function PageNumbers() {
     }
   };
 
-  const downloadResult = () => {
-    if (!resultUrl) return;
+  const downloadResult = (url?: string, filename?: string) => {
+    const downloadUrl = url || resultUrl;
+    if (!downloadUrl) return;
     const link = document.createElement("a");
-    link.href = resultUrl;
-    const originalName = files[0]?.name?.replace(/\.pdf$/i, "") || "document";
-    link.download = `${originalName}_numbered.pdf`;
+    link.href = downloadUrl;
+    link.download = filename || `${files[0]?.name?.replace(/\.pdf$/i, "") || "document"}_numbered.pdf`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const downloadAllAsZip = async () => {
+    if (processedFiles.length === 0) return;
+
+    setStatus("Creating ZIP archive...");
+    const zip = new JSZip();
+
+    for (const file of processedFiles) {
+      zip.file(file.name, file.blob);
+    }
+
+    const zipBlob = await zip.generateAsync({ type: "blob" });
+    const url = URL.createObjectURL(zipBlob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "numbered_pdfs.zip";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   const positions: { value: Position; label: string }[] = [
@@ -161,11 +280,27 @@ export default function PageNumbers() {
     { value: "bottom-right", label: "Bottom Right" },
   ];
 
-  const formats: { value: NumberFormat; label: string; example: string }[] = [
+  const formats: { value: NumberFormat; label: string; example: string; proOnly?: boolean }[] = [
     { value: "number", label: "Number only", example: "1, 2, 3..." },
     { value: "page-n", label: "Page N", example: "Page 1, Page 2..." },
     { value: "n-of-total", label: "N of Total", example: "1 of 10, 2 of 10..." },
     { value: "page-n-of-total", label: "Page N of Total", example: "Page 1 of 10..." },
+    { value: "roman", label: "Roman Numerals", example: "I, II, III...", proOnly: true },
+    { value: "roman-page", label: "Page Roman", example: "Page I, Page II...", proOnly: true },
+  ];
+
+  const fontOptions: { value: FontOption; label: string; proOnly?: boolean }[] = [
+    { value: "Helvetica", label: "Helvetica" },
+    { value: "TimesRoman", label: "Times Roman", proOnly: true },
+    { value: "Courier", label: "Courier", proOnly: true },
+  ];
+
+  const colorPresets = [
+    { value: "#4d4d4d", label: "Gray" },
+    { value: "#000000", label: "Black" },
+    { value: "#1e40af", label: "Blue" },
+    { value: "#b91c1c", label: "Red" },
+    { value: "#15803d", label: "Green" },
   ];
 
   return (
@@ -222,21 +357,31 @@ export default function PageNumbers() {
             </div>
           </div>
 
+          {/* Batch mode indicator */}
+          {isPro && (
+            <div className="mt-6 flex justify-center animate-fade-in" style={{ animationDelay: "0.15s" }}>
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-violet-500/10 border border-violet-500/20">
+                <FileArchive className="h-4 w-4 text-violet-400" />
+                <span className="text-sm text-violet-400">Batch mode: Process up to 20 PDFs at once</span>
+              </div>
+            </div>
+          )}
+
           {/* Main content */}
           <div className="mt-12 space-y-6 animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
             <FileDropzone
               onFilesSelected={handleFilesSelected}
               accept=".pdf,application/pdf"
-              multiple={false}
+              multiple={isPro}
               maxSize={maxFileSize}
-              maxFiles={1}
+              maxFiles={maxFiles}
               files={files}
               onRemoveFile={handleRemoveFile}
               disabled={isProcessing}
             />
 
             {/* Options */}
-            {files.length > 0 && !resultUrl && (
+            {files.length > 0 && !resultUrl && processedFiles.length === 0 && (
               <div className="rounded-3xl border bg-[var(--card)] p-6 shadow-glass animate-fade-in space-y-6">
                 <h3 className="text-lg font-semibold">Numbering Options</h3>
 
@@ -268,20 +413,27 @@ export default function PageNumbers() {
                     Format
                   </label>
                   <div className="grid grid-cols-2 gap-2">
-                    {formats.map((fmt) => (
-                      <button
-                        key={fmt.value}
-                        onClick={() => setFormat(fmt.value)}
-                        className={`px-4 py-3 text-sm rounded-xl border transition-all text-left ${
-                          format === fmt.value
-                            ? "border-violet-500 bg-violet-500/10"
-                            : "border-[var(--border)] hover:border-violet-500/50 hover:bg-[var(--muted)]"
-                        }`}
-                      >
-                        <span className={format === fmt.value ? "text-violet-400" : ""}>{fmt.label}</span>
-                        <span className="block text-xs text-[var(--muted-foreground)] mt-0.5">{fmt.example}</span>
-                      </button>
-                    ))}
+                    {formats.map((fmt) => {
+                      const isLocked = fmt.proOnly && !isPro;
+                      return (
+                        <button
+                          key={fmt.value}
+                          onClick={() => !isLocked && setFormat(fmt.value)}
+                          disabled={isLocked}
+                          className={`relative px-4 py-3 text-sm rounded-xl border transition-all text-left ${
+                            format === fmt.value
+                              ? "border-violet-500 bg-violet-500/10"
+                              : isLocked
+                              ? "border-[var(--border)] opacity-60 cursor-not-allowed"
+                              : "border-[var(--border)] hover:border-violet-500/50 hover:bg-[var(--muted)]"
+                          }`}
+                        >
+                          {isLocked && <Lock className="h-3 w-3 absolute top-2 right-2 text-[var(--muted-foreground)]" />}
+                          <span className={format === fmt.value ? "text-violet-400" : ""}>{fmt.label}</span>
+                          <span className="block text-xs text-[var(--muted-foreground)] mt-0.5">{fmt.example}</span>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -328,6 +480,99 @@ export default function PageNumbers() {
                     className="w-full accent-violet-500"
                   />
                 </div>
+
+                {/* Pro Options Divider */}
+                <div className="relative py-2">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-[var(--border)]" />
+                  </div>
+                  <div className="relative flex justify-center">
+                    <span className="flex items-center gap-2 px-3 bg-[var(--card)] text-sm text-[var(--muted-foreground)]">
+                      <Crown className="h-4 w-4 text-amber-500" />
+                      Pro Styling Options
+                    </span>
+                  </div>
+                </div>
+
+                {/* Font Selection (Pro) */}
+                <div>
+                  <label className="block text-sm font-medium text-[var(--muted-foreground)] mb-3">
+                    Font
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {fontOptions.map((font) => {
+                      const isLocked = font.proOnly && !isPro;
+                      return (
+                        <button
+                          key={font.value}
+                          onClick={() => !isLocked && setFontOption(font.value)}
+                          disabled={isLocked}
+                          className={`relative px-4 py-2.5 text-sm rounded-xl border transition-all ${
+                            fontOption === font.value
+                              ? "border-violet-500 bg-violet-500/10 text-violet-400"
+                              : isLocked
+                              ? "border-[var(--border)] opacity-60 cursor-not-allowed"
+                              : "border-[var(--border)] hover:border-violet-500/50 hover:bg-[var(--muted)]"
+                          }`}
+                        >
+                          {isLocked && <Lock className="h-3 w-3 absolute top-1 right-1 text-[var(--muted-foreground)]" />}
+                          <span style={{ fontFamily: font.value === "TimesRoman" ? "Times New Roman, serif" : font.value === "Courier" ? "Courier New, monospace" : "Helvetica, sans-serif" }}>
+                            {font.label}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Color Selection (Pro) */}
+                <div>
+                  <label className="flex items-center gap-2 text-sm font-medium text-[var(--muted-foreground)] mb-3">
+                    Text Color
+                    {!isPro && <Lock className="h-3 w-3" />}
+                  </label>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {colorPresets.map((color) => (
+                      <button
+                        key={color.value}
+                        onClick={() => isPro && setTextColor(color.value)}
+                        disabled={!isPro}
+                        className={`relative w-10 h-10 rounded-xl border-2 transition-all ${
+                          textColor === color.value
+                            ? "border-violet-500 scale-110"
+                            : !isPro
+                            ? "border-[var(--border)] opacity-60 cursor-not-allowed"
+                            : "border-[var(--border)] hover:border-violet-500/50"
+                        }`}
+                        title={color.label}
+                      >
+                        <div
+                          className="absolute inset-1 rounded-lg"
+                          style={{ backgroundColor: color.value }}
+                        />
+                      </button>
+                    ))}
+                    {isPro && (
+                      <label className="relative cursor-pointer">
+                        <input
+                          type="color"
+                          value={textColor}
+                          onChange={(e) => setTextColor(e.target.value)}
+                          className="absolute inset-0 w-10 h-10 opacity-0 cursor-pointer"
+                        />
+                        <div className="w-10 h-10 rounded-xl border-2 border-dashed border-[var(--border)] flex items-center justify-center hover:border-violet-500/50 transition-colors">
+                          <span className="text-xs">+</span>
+                        </div>
+                      </label>
+                    )}
+                    <div
+                      className="ml-2 px-3 py-1.5 rounded-lg text-sm"
+                      style={{ backgroundColor: textColor, color: textColor === "#000000" ? "#fff" : "#fff" }}
+                    >
+                      Preview
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
 
@@ -345,8 +590,8 @@ export default function PageNumbers() {
               </div>
             )}
 
-            {/* Success result */}
-            {resultUrl && (
+            {/* Success result - Single file */}
+            {resultUrl && processedFiles.length === 1 && (
               <div className="rounded-3xl border bg-[var(--card)] p-8 shadow-glass animate-fade-in">
                 <div className="text-center">
                   <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-500 mb-4">
@@ -360,9 +605,43 @@ export default function PageNumbers() {
               </div>
             )}
 
+            {/* Success result - Multiple files (Batch) */}
+            {processedFiles.length > 1 && (
+              <div className="rounded-3xl border bg-[var(--card)] p-6 shadow-glass animate-fade-in">
+                <div className="text-center mb-6">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-500 mb-4">
+                    <Hash className="h-8 w-8 text-white" />
+                  </div>
+                  <h3 className="text-lg font-semibold mb-2">
+                    {processedFiles.length} PDFs Numbered!
+                  </h3>
+                  <p className="text-sm text-[var(--muted-foreground)]">
+                    Download individually or all at once
+                  </p>
+                </div>
+                <div className="space-y-2 max-h-64 overflow-y-auto">
+                  {processedFiles.map((file, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-3 rounded-xl bg-[var(--muted)] hover:bg-[var(--muted)]/80 transition-colors"
+                    >
+                      <span className="text-sm truncate flex-1 mr-4">{file.name}</span>
+                      <button
+                        onClick={() => downloadResult(file.url, file.name)}
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-violet-500/10 text-violet-400 text-sm hover:bg-violet-500/20 transition-colors"
+                      >
+                        <Download className="h-4 w-4" />
+                        Download
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Actions */}
             <div className="flex flex-col sm:flex-row gap-4">
-              {!resultUrl ? (
+              {processedFiles.length === 0 ? (
                 <button
                   onClick={addPageNumbers}
                   disabled={files.length === 0 || isProcessing}
@@ -371,26 +650,35 @@ export default function PageNumbers() {
                   <Hash className="h-5 w-5" />
                   Add Page Numbers
                 </button>
-              ) : (
+              ) : processedFiles.length === 1 ? (
                 <button
-                  onClick={downloadResult}
+                  onClick={() => downloadResult()}
                   className="flex-1 flex items-center justify-center gap-3 rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 px-8 py-4 font-medium text-white shadow-lg shadow-emerald-500/25 hover:opacity-90 transition-all press-effect"
                 >
                   <Download className="h-5 w-5" />
                   Download Numbered PDF
                 </button>
+              ) : (
+                <button
+                  onClick={downloadAllAsZip}
+                  className="flex-1 flex items-center justify-center gap-3 rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 px-8 py-4 font-medium text-white shadow-lg shadow-emerald-500/25 hover:opacity-90 transition-all press-effect"
+                >
+                  <FileArchive className="h-5 w-5" />
+                  Download All as ZIP
+                </button>
               )}
 
-              {resultUrl && (
+              {processedFiles.length > 0 && (
                 <button
                   onClick={() => {
                     setFiles([]);
                     setResultUrl(null);
+                    setProcessedFiles([]);
                     setProgress(0);
                   }}
                   className="flex items-center justify-center gap-2 rounded-full border-2 px-8 py-4 font-medium hover:bg-[var(--muted)] transition-all"
                 >
-                  Number Another PDF
+                  Number More PDFs
                 </button>
               )}
             </div>
