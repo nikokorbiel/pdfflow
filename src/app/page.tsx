@@ -35,6 +35,8 @@ import {
   Smartphone,
   Monitor,
   WifiOff,
+  Palette,
+  Type,
 } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -175,6 +177,31 @@ const tools = [
     description: "Flatten forms & layers",
     href: "/flatten",
     icon: Layers,
+  },
+  // New tools
+  {
+    name: "Edit Metadata",
+    description: "View & edit PDF properties",
+    href: "/metadata",
+    icon: FileText,
+  },
+  {
+    name: "Grayscale PDF",
+    description: "Convert to black & white",
+    href: "/grayscale",
+    icon: Palette,
+  },
+  {
+    name: "Extract Text",
+    description: "Pull text from PDF",
+    href: "/extract-text",
+    icon: FileText,
+  },
+  {
+    name: "Headers & Footers",
+    description: "Add custom headers/footers",
+    href: "/headers-footers",
+    icon: Type,
   },
 ];
 
