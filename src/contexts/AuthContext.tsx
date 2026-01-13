@@ -10,6 +10,7 @@ import {
 } from "react";
 import { User, Session, SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
+import { autoSyncTemplates } from "@/lib/templates";
 
 interface UserProfile {
   id: string;
@@ -80,10 +81,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (subResult.data) {
         setSubscription(subResult.data);
         // Cache pro status for sync checks
-        localStorage.setItem(
-          "pdf-tools-pro-cached",
-          subResult.data.plan === "pro" || subResult.data.plan === "team" ? "true" : "false"
-        );
+        const isPro = subResult.data.plan === "pro" || subResult.data.plan === "team";
+        localStorage.setItem("pdf-tools-pro-cached", isPro ? "true" : "false");
+
+        // Auto-sync templates for Pro users
+        if (isPro) {
+          autoSyncTemplates().catch(console.error);
+        }
       }
     } catch (error) {
       console.error("Error fetching user data:", error);
