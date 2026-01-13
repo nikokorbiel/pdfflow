@@ -1,13 +1,18 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { PDFDocument } from "pdf-lib";
 import JSZip from "jszip";
 import { FileDropzone } from "@/components/FileDropzone";
 import { ProgressBar } from "@/components/ProgressBar";
-import { Download, FileDown, ArrowRight, Sparkles, TrendingDown, Crown, Package, Check, Loader2 } from "lucide-react";
+import { Download, FileDown, ArrowRight, Sparkles, TrendingDown, Crown, Package, Check, Loader2, Settings2, Lock } from "lucide-react";
 import { useToolUsage } from "@/hooks/useToolUsage";
 import Link from "next/link";
+
+type CompressionLevel = "low" | "medium" | "high" | "extreme";
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type PDFLib = any;
 
 interface ProcessedFile {
   name: string;
@@ -17,6 +22,13 @@ interface ProcessedFile {
   url: string;
 }
 
+const compressionLevels = [
+  { value: "low", label: "Low", description: "Minimal compression, best quality", reduction: "5-15%", proOnly: false },
+  { value: "medium", label: "Medium", description: "Balanced quality and size", reduction: "15-30%", proOnly: false },
+  { value: "high", label: "High", description: "Smaller files, good quality", reduction: "30-50%", proOnly: true },
+  { value: "extreme", label: "Extreme", description: "Maximum compression", reduction: "50-70%", proOnly: true },
+];
+
 export default function CompressPDF() {
   const [files, setFiles] = useState<File[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -25,11 +37,23 @@ export default function CompressPDF() {
   const [currentFileIndex, setCurrentFileIndex] = useState(0);
   const [processedFiles, setProcessedFiles] = useState<ProcessedFile[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [compressionLevel, setCompressionLevel] = useState<CompressionLevel>("medium");
+  const pdfjsRef = useRef<PDFLib | null>(null);
 
   const { isPro, canProcess, maxFileSize, recordUsage, usageDisplay } = useToolUsage();
 
   // Pro users can batch process up to 20 files
   const maxFiles = isPro ? 20 : 1;
+
+  // Load PDF.js dynamically for advanced compression
+  useEffect(() => {
+    const loadPdfJs = async () => {
+      const pdfjs = await import("pdfjs-dist");
+      pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+      pdfjsRef.current = pdfjs;
+    };
+    loadPdfJs();
+  }, []);
 
   const handleFilesSelected = useCallback((newFiles: File[]) => {
     if (newFiles.length > 0) {
@@ -53,13 +77,94 @@ export default function CompressPDF() {
     return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
   };
 
+  // Get compression settings based on level
+  const getCompressionSettings = (level: CompressionLevel) => {
+    switch (level) {
+      case "low":
+        return { scale: 2, quality: 0.95, useCanvas: false };
+      case "medium":
+        return { scale: 1.5, quality: 0.85, useCanvas: false };
+      case "high":
+        return { scale: 1.2, quality: 0.7, useCanvas: true };
+      case "extreme":
+        return { scale: 1, quality: 0.5, useCanvas: true };
+    }
+  };
+
   const compressSinglePDF = async (file: File): Promise<ProcessedFile> => {
     const fileBuffer = await file.arrayBuffer();
+    const settings = getCompressionSettings(compressionLevel);
+
+    // For high/extreme compression with canvas rendering
+    if (settings.useCanvas && pdfjsRef.current) {
+      try {
+        const sourcePdf = await pdfjsRef.current.getDocument({ data: fileBuffer }).promise;
+        const newPdf = await PDFDocument.create();
+
+        for (let i = 1; i <= sourcePdf.numPages; i++) {
+          const page = await sourcePdf.getPage(i);
+          const viewport = page.getViewport({ scale: settings.scale });
+
+          const canvas = document.createElement("canvas");
+          const context = canvas.getContext("2d");
+          if (!context) throw new Error("Could not create canvas context");
+
+          canvas.width = viewport.width;
+          canvas.height = viewport.height;
+
+          await page.render({
+            canvasContext: context,
+            viewport: viewport,
+          }).promise;
+
+          // Convert to JPEG for better compression
+          const imageData = canvas.toDataURL("image/jpeg", settings.quality);
+          const imageBytes = await fetch(imageData).then(r => r.arrayBuffer());
+
+          const image = await newPdf.embedJpg(new Uint8Array(imageBytes));
+          const newPage = newPdf.addPage([viewport.width, viewport.height]);
+          newPage.drawImage(image, {
+            x: 0,
+            y: 0,
+            width: viewport.width,
+            height: viewport.height,
+          });
+        }
+
+        // Remove metadata
+        newPdf.setTitle("");
+        newPdf.setAuthor("");
+        newPdf.setSubject("");
+        newPdf.setKeywords([]);
+        newPdf.setProducer("");
+        newPdf.setCreator("");
+
+        const compressedBytes = await newPdf.save({
+          useObjectStreams: true,
+        });
+
+        const blob = new Blob([new Uint8Array(compressedBytes)], { type: "application/pdf" });
+        const url = URL.createObjectURL(blob);
+
+        return {
+          name: file.name,
+          originalSize: file.size,
+          compressedSize: compressedBytes.length,
+          blob,
+          url,
+        };
+      } catch (err) {
+        console.warn("Canvas compression failed, falling back to standard:", err);
+        // Fall through to standard compression
+      }
+    }
+
+    // Standard compression (low/medium or fallback)
     const pdf = await PDFDocument.load(fileBuffer, {
       ignoreEncryption: true,
     });
 
-    // Remove metadata to reduce size
+    // Remove metadata
     pdf.setTitle("");
     pdf.setAuthor("");
     pdf.setSubject("");
@@ -67,7 +172,6 @@ export default function CompressPDF() {
     pdf.setProducer("");
     pdf.setCreator("");
 
-    // Save with object streams for better compression
     const compressedBytes = await pdf.save({
       useObjectStreams: true,
       addDefaultPage: false,
@@ -96,6 +200,13 @@ export default function CompressPDF() {
       return;
     }
 
+    // Check if trying to use Pro-only compression level
+    const selectedLevel = compressionLevels.find(l => l.value === compressionLevel);
+    if (selectedLevel?.proOnly && !isPro) {
+      setError("High and Extreme compression levels require Pro. Upgrade to access.");
+      return;
+    }
+
     setIsProcessing(true);
     setProgress(0);
     setError(null);
@@ -118,7 +229,6 @@ export default function CompressPDF() {
           setProgress(baseProgress + 90);
         } catch (err) {
           console.error(`Error compressing ${files[i].name}:`, err);
-          // Continue with other files even if one fails
         }
       }
 
@@ -233,7 +343,7 @@ export default function CompressPDF() {
                     href="/pricing"
                     className="text-sm font-medium text-[var(--accent)] hover:opacity-80 transition-opacity"
                   >
-                    Upgrade for batch processing
+                    Upgrade for batch + advanced compression
                   </Link>
                 </>
               )}
@@ -252,6 +362,69 @@ export default function CompressPDF() {
               onRemoveFile={handleRemoveFile}
               disabled={isProcessing}
             />
+
+            {/* Compression Options */}
+            {files.length > 0 && !isProcessing && processedFiles.length === 0 && (
+              <div className="rounded-3xl border bg-[var(--card)] p-6 space-y-5 shadow-glass animate-fade-in">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-orange-500/10">
+                    <Settings2 className="h-5 w-5 text-orange-500" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Compression Level</p>
+                    <p className="text-xs text-[var(--muted-foreground)]">
+                      Choose how much to compress your PDF{files.length > 1 ? "s" : ""}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {compressionLevels.map((level) => {
+                    const isLocked = level.proOnly && !isPro;
+                    return (
+                      <button
+                        key={level.value}
+                        onClick={() => !isLocked && setCompressionLevel(level.value as CompressionLevel)}
+                        disabled={isLocked}
+                        className={`relative p-4 rounded-2xl border text-left transition-all ${
+                          compressionLevel === level.value && !isLocked
+                            ? "border-orange-500 bg-orange-500/10"
+                            : isLocked
+                            ? "border-[var(--border)] bg-[var(--muted)]/50 opacity-60 cursor-not-allowed"
+                            : "border-[var(--border)] hover:border-orange-500/50 hover:bg-[var(--muted)]/50"
+                        }`}
+                      >
+                        {isLocked && (
+                          <div className="absolute top-2 right-2">
+                            <Lock className="h-3.5 w-3.5 text-[var(--muted-foreground)]" />
+                          </div>
+                        )}
+                        <p className={`text-sm font-medium ${compressionLevel === level.value && !isLocked ? "text-orange-500" : ""}`}>
+                          {level.label}
+                        </p>
+                        <p className="text-xs text-[var(--muted-foreground)] mt-1">
+                          {level.description}
+                        </p>
+                        <p className={`text-xs mt-2 font-medium ${compressionLevel === level.value && !isLocked ? "text-orange-500" : "text-[var(--muted-foreground)]"}`}>
+                          ~{level.reduction}
+                        </p>
+                        {isLocked && (
+                          <p className="text-xs text-amber-500 mt-1 font-medium">Pro only</p>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {(compressionLevel === "high" || compressionLevel === "extreme") && isPro && (
+                  <div className="rounded-2xl bg-amber-500/10 border border-amber-500/20 p-4 animate-fade-in">
+                    <p className="text-sm text-amber-600 dark:text-amber-400">
+                      <strong>Note:</strong> {compressionLevel === "extreme" ? "Extreme" : "High"} compression converts pages to images for maximum reduction. Text may not be selectable in the output.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Batch indicator for Pro users */}
             {isPro && files.length > 1 && !isProcessing && processedFiles.length === 0 && (
@@ -355,21 +528,6 @@ export default function CompressPDF() {
                     </div>
                   </div>
                 )}
-              </div>
-            )}
-
-            {/* Note */}
-            {processedFiles.length === 0 && (
-              <div className="rounded-3xl bg-[var(--muted)]/50 border border-[var(--border)] p-5 animate-fade-in">
-                <p className="text-sm text-[var(--muted-foreground)] text-center">
-                  <strong className="text-foreground">Note:</strong> Client-side compression removes metadata and optimizes structure.
-                  {!isPro && (
-                    <>
-                      <br className="hidden sm:block" />
-                      <span className="text-[var(--accent)]"> Upgrade to Pro</span> for batch processing up to 20 files at once.
-                    </>
-                  )}
-                </p>
               </div>
             )}
 
