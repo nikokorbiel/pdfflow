@@ -40,6 +40,12 @@ import {
   BarChart3,
   Cloud,
   Type,
+  FolderOpen,
+  Clock,
+  Keyboard,
+  Star,
+  Lightbulb,
+  DollarSign,
 } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -62,6 +68,58 @@ interface Update {
 }
 
 const updates: Update[] = [
+  {
+    version: "1.7.0",
+    date: "January 2025",
+    title: "File Tray, New Pricing & Power User Features",
+    description: "Major update with persistent file sessions, competitive pricing ($4.99/month or $24.99 lifetime), and power user tools like keyboard shortcuts and smart suggestions.",
+    features: [
+      {
+        title: "File Tray - Persistent Sessions",
+        description: "Files now stay available across all tools in a sidebar tray. Upload once, use everywhere. Drag files between tools seamlessly - no more re-importing!",
+        icon: FolderOpen,
+        isNew: true,
+      },
+      {
+        title: "New Competitive Pricing",
+        description: "Simplified pricing: $4.99/month or $24.99 lifetime (save 58%). 32 free tools unlimited, 68 premium tools with 4 free uses each.",
+        icon: DollarSign,
+        link: "/pricing",
+        isNew: true,
+      },
+      {
+        title: "Recent Files Widget",
+        description: "Quick access to your recently processed files right on the homepage. Continue where you left off with one click.",
+        icon: Clock,
+        isNew: true,
+      },
+      {
+        title: "Quick Actions Toolbar",
+        description: "Floating toolbar on tool pages for instant access to common operations. Star your favorites for even faster access.",
+        icon: Star,
+        isNew: true,
+      },
+      {
+        title: "Keyboard Shortcuts",
+        description: "Power user navigation with keyboard shortcuts. Press / to see all shortcuts. Ctrl+M for Merge, Ctrl+Shift+S for Split, and more.",
+        icon: Keyboard,
+        isNew: true,
+      },
+      {
+        title: "Smart Tool Suggestions",
+        description: "After completing an operation, see contextual 'You might also need' recommendations for related tools.",
+        icon: Lightbulb,
+        isNew: true,
+      },
+      {
+        title: "100 Tools Organized",
+        description: "All 100 PDF tools now organized into 8 categories with powerful search. Find any tool instantly.",
+        icon: Layers,
+        link: "/tools",
+        isNew: true,
+      },
+    ],
+  },
   {
     version: "1.6.0",
     date: "January 2025",
