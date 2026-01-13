@@ -8,6 +8,7 @@ import { ProgressBar } from "@/components/ProgressBar";
 import { Download, FileDown, ArrowRight, Sparkles, TrendingDown, Crown, Package, Check, Loader2, Settings2, Lock } from "lucide-react";
 import { useToolUsage } from "@/hooks/useToolUsage";
 import Link from "next/link";
+import { trackFileProcessed } from "@/lib/analytics";
 
 type CompressionLevel = "low" | "medium" | "high" | "extreme";
 
@@ -146,6 +147,9 @@ export default function CompressPDF() {
         const blob = new Blob([new Uint8Array(compressedBytes)], { type: "application/pdf" });
         const url = URL.createObjectURL(blob);
 
+        // Track analytics
+        trackFileProcessed("compress", file.size);
+
         return {
           name: file.name,
           originalSize: file.size,
@@ -179,6 +183,9 @@ export default function CompressPDF() {
 
     const blob = new Blob([new Uint8Array(compressedBytes)], { type: "application/pdf" });
     const url = URL.createObjectURL(blob);
+
+    // Track analytics
+    trackFileProcessed("compress", file.size);
 
     return {
       name: file.name,

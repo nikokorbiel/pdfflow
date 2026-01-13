@@ -56,6 +56,7 @@ import {
   FileHistoryItem,
 } from "@/lib/file-history";
 import { getWorkflows, Workflow as WorkflowType } from "@/lib/workflow";
+import { ProAnalytics } from "./ProAnalytics";
 
 interface DashboardContentProps {
   profile: {
@@ -652,6 +653,9 @@ export function DashboardContent({ profile, usage }: DashboardContentProps) {
 
           {/* Right Column - Activity */}
           <div className="space-y-6">
+            {/* Pro Analytics Dashboard */}
+            {isPro && <ProAnalytics />}
+
             {/* Recent Activity */}
             <div className="rounded-2xl bg-white/[0.02] border border-white/[0.06] overflow-hidden">
               <div className="flex items-center justify-between p-4 border-b border-white/[0.06]">

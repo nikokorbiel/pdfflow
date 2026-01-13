@@ -8,6 +8,7 @@ import { ProgressBar } from "@/components/ProgressBar";
 import { Download, RotateCw, Sparkles, RotateCcw, Crown, Package, Check, Loader2 } from "lucide-react";
 import { useToolUsage } from "@/hooks/useToolUsage";
 import Link from "next/link";
+import { trackFileProcessed } from "@/lib/analytics";
 
 type RotationAngle = 90 | 180 | 270;
 
@@ -169,6 +170,9 @@ export default function RotatePDF() {
     const pdfBytes = await pdf.save();
     const blob = new Blob([new Uint8Array(pdfBytes)], { type: "application/pdf" });
     const url = URL.createObjectURL(blob);
+
+    // Track analytics
+    trackFileProcessed("rotate", file.size);
 
     return {
       name: file.name,

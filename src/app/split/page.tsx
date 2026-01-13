@@ -7,6 +7,7 @@ import { ProgressBar } from "@/components/ProgressBar";
 import { Download, Split, FileText, Sparkles, Crown } from "lucide-react";
 import { useToolUsage } from "@/hooks/useToolUsage";
 import Link from "next/link";
+import { trackFileProcessed } from "@/lib/analytics";
 
 type SplitMode = "all" | "range" | "extract";
 
@@ -118,6 +119,9 @@ export default function SplitPDF() {
           }
         }
       }
+
+      // Track analytics
+      trackFileProcessed("split", files[0].size);
 
       setResultUrls(results);
       setProgress(100);

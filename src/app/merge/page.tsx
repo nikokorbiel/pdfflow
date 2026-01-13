@@ -7,6 +7,7 @@ import { ProgressBar } from "@/components/ProgressBar";
 import { Download, Combine, ArrowUpDown, GripVertical, Sparkles, Crown } from "lucide-react";
 import { useToolUsage } from "@/hooks/useToolUsage";
 import Link from "next/link";
+import { trackFileProcessed } from "@/lib/analytics";
 
 export default function MergePDF() {
   const [files, setFiles] = useState<File[]>([]);
@@ -73,6 +74,10 @@ export default function MergePDF() {
       const mergedPdfBytes = await mergedPdf.save();
       const blob = new Blob([new Uint8Array(mergedPdfBytes)], { type: "application/pdf" });
       const url = URL.createObjectURL(blob);
+
+      // Track analytics - track total size of all files merged
+      const totalSize = files.reduce((sum, f) => sum + f.size, 0);
+      trackFileProcessed("merge", totalSize);
 
       setResultUrl(url);
       setProgress(100);

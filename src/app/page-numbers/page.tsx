@@ -8,6 +8,7 @@ import { Download, Hash, Sparkles, Crown, Lock, FileArchive } from "lucide-react
 import { useToolUsage } from "@/hooks/useToolUsage";
 import Link from "next/link";
 import JSZip from "jszip";
+import { trackFileProcessed } from "@/lib/analytics";
 
 type Position = "top-left" | "top-center" | "top-right" | "bottom-left" | "bottom-center" | "bottom-right";
 type NumberFormat = "number" | "page-n" | "n-of-total" | "page-n-of-total" | "roman" | "roman-page";
@@ -188,6 +189,9 @@ export default function PageNumbers() {
     const pdfBytes = await pdf.save();
     const blob = new Blob([pdfBytes as BlobPart], { type: "application/pdf" });
     const url = URL.createObjectURL(blob);
+
+    // Track analytics
+    trackFileProcessed("page-numbers", file.size);
 
     const originalName = file.name.replace(/\.pdf$/i, "");
     return {
