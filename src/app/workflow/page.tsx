@@ -23,6 +23,7 @@ import {
   ArrowRight,
   Sparkles,
   X,
+  Crown,
 } from "lucide-react";
 import {
   WorkflowStep,
@@ -34,7 +35,7 @@ import {
   deleteWorkflow,
   Workflow as WorkflowType,
 } from "@/lib/workflow";
-import { getRemainingUsage, incrementUsage, getMaxFileSize } from "@/lib/usage";
+import { useToolUsage } from "@/hooks/useToolUsage";
 import Link from "next/link";
 
 const iconMap: Record<string, React.ElementType> = {
@@ -61,7 +62,7 @@ export default function WorkflowBuilder() {
   const [showLoadModal, setShowLoadModal] = useState(false);
   const [workflowName, setWorkflowName] = useState("");
 
-  const remainingUsage = typeof window !== "undefined" ? getRemainingUsage() : 2;
+  const { isPro, canProcess, maxFileSize, recordUsage, usageDisplay } = useToolUsage();
 
   useEffect(() => {
     setSavedWorkflows(getWorkflows());
@@ -140,7 +141,7 @@ export default function WorkflowBuilder() {
       return;
     }
 
-    if (remainingUsage <= 0) {
+    if (!canProcess) {
       setError("Daily limit reached. Upgrade to Pro for unlimited processing.");
       return;
     }
@@ -276,7 +277,7 @@ export default function WorkflowBuilder() {
       setResultUrl(url);
       setProgress(100);
       setStatus("Complete!");
-      incrementUsage();
+      await recordUsage();
     } catch (err) {
       console.error("Workflow error:", err);
       setError("Failed to process workflow. Please check your file and settings.");
@@ -464,15 +465,23 @@ export default function WorkflowBuilder() {
           <div className="mt-8 flex items-center justify-center animate-fade-in" style={{ animationDelay: "0.1s" }}>
             <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-[var(--muted)] border border-[var(--border)]">
               <div className="flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-[var(--accent)]" />
+                {isPro ? (
+                  <Crown className="h-4 w-4 text-amber-500" />
+                ) : (
+                  <Sparkles className="h-4 w-4 text-[var(--accent)]" />
+                )}
                 <span className="text-sm text-[var(--muted-foreground)]">
-                  {remainingUsage} of 2 free uses today
+                  {usageDisplay}
                 </span>
               </div>
-              <div className="h-4 w-px bg-[var(--border)]" />
-              <Link href="/pricing" className="text-sm font-medium text-[var(--accent)] hover:opacity-80 transition-opacity">
-                Upgrade
-              </Link>
+              {!isPro && (
+                <>
+                  <div className="h-4 w-px bg-[var(--border)]" />
+                  <Link href="/pricing" className="text-sm font-medium text-[var(--accent)] hover:opacity-80 transition-opacity">
+                    Upgrade
+                  </Link>
+                </>
+              )}
             </div>
           </div>
 
@@ -532,7 +541,7 @@ export default function WorkflowBuilder() {
                 onFilesSelected={handleFilesSelected}
                 accept=".pdf,application/pdf"
                 multiple={false}
-                maxSize={getMaxFileSize()}
+                maxSize={maxFileSize}
                 maxFiles={1}
                 files={files}
                 onRemoveFile={handleRemoveFile}

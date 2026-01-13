@@ -2,18 +2,15 @@
 
 import { useState, useCallback } from "react";
 import { FileDropzone } from "@/components/FileDropzone";
-import { FileText, Sparkles, AlertCircle } from "lucide-react";
-import {
-  getRemainingUsage,
-  getMaxFileSize,
-} from "@/lib/usage";
+import { FileText, Sparkles, AlertCircle, Crown } from "lucide-react";
+import { useToolUsage } from "@/hooks/useToolUsage";
 import Link from "next/link";
 
 export default function WordToPDF() {
   const [files, setFiles] = useState<File[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  const remainingUsage = typeof window !== "undefined" ? getRemainingUsage() : 2;
+  const { isPro, canProcess, maxFileSize, recordUsage, usageDisplay } = useToolUsage();
 
   const handleFilesSelected = useCallback((newFiles: File[]) => {
     if (newFiles.length > 0) {
@@ -60,15 +57,23 @@ export default function WordToPDF() {
           <div className="mt-8 flex items-center justify-center animate-fade-in" style={{ animationDelay: "0.1s" }}>
             <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-[var(--muted)] border border-[var(--border)]">
               <div className="flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-[var(--accent)]" />
+                {isPro ? (
+                  <Crown className="h-4 w-4 text-[var(--accent)]" />
+                ) : (
+                  <Sparkles className="h-4 w-4 text-[var(--accent)]" />
+                )}
                 <span className="text-sm text-[var(--muted-foreground)]">
-                  {remainingUsage} of 2 free uses today
+                  {usageDisplay}
                 </span>
               </div>
-              <div className="h-4 w-px bg-[var(--border)]" />
-              <Link href="/pricing" className="text-sm font-medium text-[var(--accent)] hover:opacity-80 transition-opacity">
-                Upgrade
-              </Link>
+              {!isPro && (
+                <>
+                  <div className="h-4 w-px bg-[var(--border)]" />
+                  <Link href="/pricing" className="text-sm font-medium text-[var(--accent)] hover:opacity-80 transition-opacity">
+                    Upgrade
+                  </Link>
+                </>
+              )}
             </div>
           </div>
 
@@ -77,7 +82,7 @@ export default function WordToPDF() {
               onFilesSelected={handleFilesSelected}
               accept=".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
               multiple={false}
-              maxSize={getMaxFileSize()}
+              maxSize={maxFileSize}
               maxFiles={1}
               files={files}
               onRemoveFile={handleRemoveFile}

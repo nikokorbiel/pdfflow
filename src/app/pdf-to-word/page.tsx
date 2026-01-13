@@ -3,12 +3,8 @@
 import { useState, useCallback } from "react";
 import { FileDropzone } from "@/components/FileDropzone";
 import { ProgressBar } from "@/components/ProgressBar";
-import { Download, FileText, Sparkles } from "lucide-react";
-import {
-  getRemainingUsage,
-  incrementUsage,
-  getMaxFileSize,
-} from "@/lib/usage";
+import { Crown, Download, FileText, Sparkles } from "lucide-react";
+import { useToolUsage } from "@/hooks/useToolUsage";
 import Link from "next/link";
 
 export default function PDFToWord() {
@@ -21,7 +17,7 @@ export default function PDFToWord() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_extractedText, setExtractedText] = useState<string>("");
 
-  const remainingUsage = typeof window !== "undefined" ? getRemainingUsage() : 2;
+  const { isPro, canProcess, maxFileSize, recordUsage, usageDisplay } = useToolUsage();
 
   const handleFilesSelected = useCallback((newFiles: File[]) => {
     if (newFiles.length > 0) {
@@ -44,7 +40,7 @@ export default function PDFToWord() {
       return;
     }
 
-    if (remainingUsage <= 0) {
+    if (!canProcess) {
       setError("Daily limit reached. Upgrade to Pro for unlimited processing.");
       return;
     }
@@ -102,7 +98,7 @@ export default function PDFToWord() {
       setResultUrl(url);
       setProgress(100);
       setStatus("Complete!");
-      incrementUsage();
+      await recordUsage();
     } catch (err) {
       console.error("Conversion error:", err);
       setError("Failed to convert PDF. Please ensure the file is a valid PDF with text content.");
@@ -153,18 +149,33 @@ export default function PDFToWord() {
           <div className="mt-8 flex items-center justify-center animate-fade-in" style={{ animationDelay: "0.1s" }}>
             <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-[var(--muted)] border border-[var(--border)]">
               <div className="flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-[var(--accent)]" />
-                <span className="text-sm text-[var(--muted-foreground)]">
-                  {remainingUsage} of 2 free uses today
-                </span>
+                {isPro ? (
+                  <>
+                    <Crown className="h-4 w-4 text-amber-500" />
+                    <span className="text-sm text-[var(--muted-foreground)]">
+                      Unlimited
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-4 w-4 text-[var(--accent)]" />
+                    <span className="text-sm text-[var(--muted-foreground)]">
+                      {usageDisplay}
+                    </span>
+                  </>
+                )}
               </div>
-              <div className="h-4 w-px bg-[var(--border)]" />
-              <Link
-                href="/pricing"
-                className="text-sm font-medium text-[var(--accent)] hover:opacity-80 transition-opacity"
-              >
-                Upgrade
-              </Link>
+              {!isPro && (
+                <>
+                  <div className="h-4 w-px bg-[var(--border)]" />
+                  <Link
+                    href="/pricing"
+                    className="text-sm font-medium text-[var(--accent)] hover:opacity-80 transition-opacity"
+                  >
+                    Upgrade
+                  </Link>
+                </>
+              )}
             </div>
           </div>
 
@@ -174,7 +185,7 @@ export default function PDFToWord() {
               onFilesSelected={handleFilesSelected}
               accept=".pdf,application/pdf"
               multiple={false}
-              maxSize={getMaxFileSize()}
+              maxSize={maxFileSize}
               maxFiles={1}
               files={files}
               onRemoveFile={handleRemoveFile}
