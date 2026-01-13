@@ -8,6 +8,7 @@ import { Download, Combine, ArrowUpDown, GripVertical, Sparkles, Crown } from "l
 import { useToolUsage } from "@/hooks/useToolUsage";
 import Link from "next/link";
 import { trackFileProcessed } from "@/lib/analytics";
+import { createBrandedPdfBlob } from "@/lib/branding";
 
 export default function MergePDF() {
   const [files, setFiles] = useState<File[]>([]);
@@ -72,7 +73,9 @@ export default function MergePDF() {
       setProgress(90);
 
       const mergedPdfBytes = await mergedPdf.save();
-      const blob = new Blob([new Uint8Array(mergedPdfBytes)], { type: "application/pdf" });
+
+      // Add branding for free users
+      const blob = await createBrandedPdfBlob(new Uint8Array(mergedPdfBytes), isPro);
       const url = URL.createObjectURL(blob);
 
       // Track analytics - track total size of all files merged

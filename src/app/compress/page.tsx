@@ -9,6 +9,7 @@ import { Download, FileDown, ArrowRight, Sparkles, TrendingDown, Crown, Package,
 import { useToolUsage } from "@/hooks/useToolUsage";
 import Link from "next/link";
 import { trackFileProcessed } from "@/lib/analytics";
+import { addFreeTierBranding } from "@/lib/branding";
 
 type CompressionLevel = "low" | "medium" | "high" | "extreme";
 
@@ -144,7 +145,8 @@ export default function CompressPDF() {
           useObjectStreams: true,
         });
 
-        const blob = new Blob([new Uint8Array(compressedBytes)], { type: "application/pdf" });
+        // Add branding for free users
+        const blob = await addFreeTierBranding(compressedBytes, isPro);
         const url = URL.createObjectURL(blob);
 
         // Track analytics
@@ -153,7 +155,7 @@ export default function CompressPDF() {
         return {
           name: file.name,
           originalSize: file.size,
-          compressedSize: compressedBytes.length,
+          compressedSize: blob.size,
           blob,
           url,
         };
@@ -181,7 +183,8 @@ export default function CompressPDF() {
       addDefaultPage: false,
     });
 
-    const blob = new Blob([new Uint8Array(compressedBytes)], { type: "application/pdf" });
+    // Add branding for free users
+    const blob = await addFreeTierBranding(new Uint8Array(compressedBytes), isPro);
     const url = URL.createObjectURL(blob);
 
     // Track analytics
@@ -190,7 +193,7 @@ export default function CompressPDF() {
     return {
       name: file.name,
       originalSize: file.size,
-      compressedSize: compressedBytes.length,
+      compressedSize: blob.size,
       blob,
       url,
     };

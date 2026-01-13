@@ -9,6 +9,7 @@ import { Download, RotateCw, Sparkles, RotateCcw, Crown, Package, Check, Loader2
 import { useToolUsage } from "@/hooks/useToolUsage";
 import Link from "next/link";
 import { trackFileProcessed } from "@/lib/analytics";
+import { addFreeTierBranding } from "@/lib/branding";
 
 type RotationAngle = 90 | 180 | 270;
 
@@ -168,7 +169,9 @@ export default function RotatePDF() {
     }
 
     const pdfBytes = await pdf.save();
-    const blob = new Blob([new Uint8Array(pdfBytes)], { type: "application/pdf" });
+
+    // Add branding for free users
+    const blob = await addFreeTierBranding(new Uint8Array(pdfBytes), isPro);
     const url = URL.createObjectURL(blob);
 
     // Track analytics
