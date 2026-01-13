@@ -20,7 +20,6 @@ import {
   Hash,
   ArrowUpDown,
   PenTool,
-  Lock,
   Unlock,
   X,
   Star,
@@ -38,7 +37,6 @@ import {
   Code,
   Crop,
   EyeOff,
-  FileCheck,
   Wrench,
   ImageIcon,
   Upload,
@@ -85,7 +83,6 @@ const allTools = [
   { id: "rotate", name: "Rotate", href: "/rotate", description: "Rotate pages", gradient: "from-cyan-500 to-blue-500", icon: RotateCw, shortcut: "R", category: "edit" },
   { id: "watermark", name: "Watermark", href: "/watermark", description: "Add watermarks", gradient: "from-indigo-500 to-blue-500", icon: Droplets, shortcut: "W", category: "edit" },
   { id: "sign", name: "Sign PDF", href: "/sign", description: "Add signatures", gradient: "from-purple-500 to-pink-500", icon: PenTool, shortcut: "G", category: "edit" },
-  { id: "protect", name: "Protect", href: "/protect", description: "Password protect", gradient: "from-amber-500 to-orange-500", icon: Lock, shortcut: "L", category: "security" },
   { id: "unlock", name: "Unlock", href: "/unlock", description: "Remove password", gradient: "from-teal-500 to-emerald-500", icon: Unlock, shortcut: "U", category: "security" },
   { id: "reorder", name: "Reorder", href: "/reorder", description: "Rearrange pages", gradient: "from-rose-500 to-pink-500", icon: ArrowUpDown, shortcut: "O", category: "organize" },
   { id: "delete-pages", name: "Delete Pages", href: "/delete-pages", description: "Remove pages", gradient: "from-red-500 to-rose-500", icon: Trash2, shortcut: "D", category: "organize" },
@@ -98,7 +95,6 @@ const allTools = [
   { id: "pdf-to-excel", name: "PDF to Excel", href: "/pdf-to-excel", description: "To spreadsheet", gradient: "from-green-600 to-emerald-600", icon: Table, shortcut: "X", category: "convert" },
   { id: "pdf-to-powerpoint", name: "PDF to PPT", href: "/pdf-to-powerpoint", description: "To slides", gradient: "from-orange-600 to-red-500", icon: Presentation, shortcut: "T", category: "convert" },
   { id: "html-to-pdf", name: "HTML to PDF", href: "/html-to-pdf", description: "Web to PDF", gradient: "from-violet-600 to-purple-600", icon: Code, shortcut: "H", category: "convert" },
-  { id: "pdf-to-pdfa", name: "PDF/A", href: "/pdf-to-pdfa", description: "Archive format", gradient: "from-emerald-600 to-green-600", icon: FileCheck, shortcut: "V", category: "convert" },
 ];
 
 const FAVORITES_KEY = "pdfflow_favorite_tools";
@@ -122,8 +118,8 @@ function getTimeBasedGreeting(): string {
 }
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-  Combine, Split, FileDown, Image, FileImage, FileText, RotateCw, Droplets, Hash, ArrowUpDown, PenTool, Lock, Unlock,
-  Table, Presentation, Code, Crop, EyeOff, FileCheck, Wrench, ImageIcon, Trash2, Layers,
+  Combine, Split, FileDown, Image, FileImage, FileText, RotateCw, Droplets, Hash, ArrowUpDown, PenTool, Unlock,
+  Table, Presentation, Code, Crop, EyeOff, Wrench, ImageIcon, Trash2, Layers,
 };
 
 const toolGradients: Record<string, string> = {
@@ -135,7 +131,6 @@ const toolGradients: Record<string, string> = {
   rotate: "from-cyan-500 to-blue-500",
   watermark: "from-indigo-500 to-blue-500",
   sign: "from-purple-500 to-pink-500",
-  protect: "from-amber-500 to-orange-500",
   unlock: "from-teal-500 to-emerald-500",
   reorder: "from-rose-500 to-pink-500",
   "delete-pages": "from-red-500 to-rose-500",
@@ -148,7 +143,6 @@ const toolGradients: Record<string, string> = {
   "pdf-to-excel": "from-green-600 to-emerald-600",
   "pdf-to-powerpoint": "from-orange-600 to-red-500",
   "html-to-pdf": "from-violet-600 to-purple-600",
-  "pdf-to-pdfa": "from-emerald-600 to-green-600",
 };
 
 // Command Palette Component

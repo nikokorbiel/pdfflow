@@ -21,7 +21,6 @@ import {
   FileText,
   ArrowUpDown,
   PenTool,
-  Lock,
   Unlock,
   FolderOpen,
   RefreshCw,
@@ -38,7 +37,6 @@ import {
   Wrench,
   Hash,
   Layers,
-  FileCheck,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAuthModal } from "@/contexts/AuthModalContext";
@@ -72,9 +70,6 @@ const toolCategories = [
     icon: FileImage,
     tools: [
       { name: "Image to PDF", href: "/image-to-pdf", description: "Images to PDF", icon: FileImage },
-      { name: "Word to PDF", href: "/word-to-pdf", description: "DOCX to PDF", icon: FileText },
-      { name: "Excel to PDF", href: "/excel-to-pdf", description: "Spreadsheets to PDF", icon: Table },
-      { name: "PPT to PDF", href: "/powerpoint-to-pdf", description: "Slides to PDF", icon: Presentation },
       { name: "HTML to PDF", href: "/html-to-pdf", description: "Web page to PDF", icon: Code },
     ],
   },
@@ -94,11 +89,9 @@ const toolCategories = [
     name: "Security",
     icon: Shield,
     tools: [
-      { name: "Protect PDF", href: "/protect", description: "Add password", icon: Lock },
       { name: "Unlock PDF", href: "/unlock", description: "Remove password", icon: Unlock },
       { name: "Redact PDF", href: "/redact", description: "Hide sensitive info", icon: EyeOff },
       { name: "Repair PDF", href: "/repair", description: "Fix corrupted files", icon: Wrench },
-      { name: "PDF to PDF/A", href: "/pdf-to-pdfa", description: "Archival format", icon: FileCheck },
     ],
   },
 ];

@@ -18,7 +18,6 @@ import {
   Hash,
   ArrowUpDown,
   PenTool,
-  Lock,
   Unlock,
   Sparkles,
   Check,
@@ -31,7 +30,6 @@ import {
   Trash2,
   ImageIcon,
   EyeOff,
-  FileCheck,
   Wrench,
   Layers,
   Smartphone,
@@ -98,24 +96,6 @@ const tools = [
     icon: Presentation,
   },
   {
-    name: "Word to PDF",
-    description: "Convert DOCX to PDF",
-    href: "/word-to-pdf",
-    icon: FileText,
-  },
-  {
-    name: "Excel to PDF",
-    description: "Convert spreadsheets to PDF",
-    href: "/excel-to-pdf",
-    icon: Table,
-  },
-  {
-    name: "PowerPoint to PDF",
-    description: "Convert presentations to PDF",
-    href: "/powerpoint-to-pdf",
-    icon: Presentation,
-  },
-  {
     name: "HTML to PDF",
     description: "Convert web pages to PDF",
     href: "/html-to-pdf",
@@ -172,12 +152,6 @@ const tools = [
   },
   // Security
   {
-    name: "Protect PDF",
-    description: "Password-protect your PDF",
-    href: "/protect",
-    icon: Lock,
-  },
-  {
     name: "Unlock PDF",
     description: "Remove PDF password",
     href: "/unlock",
@@ -190,12 +164,6 @@ const tools = [
     icon: EyeOff,
   },
   // Advanced
-  {
-    name: "PDF to PDF/A",
-    description: "Convert to archive format",
-    href: "/pdf-to-pdfa",
-    icon: FileCheck,
-  },
   {
     name: "Repair PDF",
     description: "Fix corrupted PDFs",

@@ -29,7 +29,6 @@ import {
   EyeOff,
   Wrench,
   Layers,
-  FileCheck,
   LayoutDashboard,
   Mail,
   Smartphone,
@@ -112,13 +111,6 @@ const updates: Update[] = [
         isNew: true,
       },
       {
-        title: "Word/Excel/PPT to PDF",
-        description: "Convert Microsoft Office documents to PDF format with perfect formatting.",
-        icon: FileText,
-        link: "/word-to-pdf",
-        isNew: true,
-      },
-      {
         title: "HTML to PDF",
         description: "Convert web pages and HTML content to PDF documents.",
         icon: Code,
@@ -151,13 +143,6 @@ const updates: Update[] = [
         description: "Fix corrupted files and flatten form fields for sharing.",
         icon: Wrench,
         link: "/repair",
-        isNew: true,
-      },
-      {
-        title: "PDF to PDF/A",
-        description: "Convert documents to archival format for long-term preservation.",
-        icon: FileCheck,
-        link: "/pdf-to-pdfa",
         isNew: true,
       },
       {
@@ -255,13 +240,6 @@ const updates: Update[] = [
         title: "Google Sign-In",
         description: "Sign in with your Google account for a seamless experience. Your settings and preferences sync across devices.",
         icon: Shield,
-        isNew: false,
-      },
-      {
-        title: "Protect PDF",
-        description: "Add password protection to your PDF documents with industry-standard encryption.",
-        icon: Lock,
-        link: "/protect",
         isNew: false,
       },
       {

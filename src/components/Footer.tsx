@@ -14,7 +14,6 @@ const footerLinks = {
     { name: "Crop PDF", href: "/crop" },
     { name: "Sign PDF", href: "/sign" },
     { name: "Watermark", href: "/watermark" },
-    { name: "Protect PDF", href: "/protect" },
     { name: "All Tools", href: "/tools" },
   ],
   company: [

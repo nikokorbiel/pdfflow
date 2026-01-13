@@ -11,7 +11,6 @@ import {
   Hash,
   ArrowUpDown,
   PenTool,
-  Lock,
   Unlock,
   FileText,
   ArrowRight,
@@ -120,14 +119,6 @@ const tools = [
     toolHref: "/sign",
     icon: PenTool,
     gradient: "from-purple-500 to-pink-500",
-  },
-  {
-    name: "Protect PDF",
-    description: "Password-protect your PDF",
-    href: "/tools/protect-pdf",
-    toolHref: "/protect",
-    icon: Lock,
-    gradient: "from-amber-500 to-yellow-500",
   },
   {
     name: "Unlock PDF",

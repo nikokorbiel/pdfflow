@@ -30,19 +30,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/pdf-to-excel",
     "/pdf-to-powerpoint",
     "/image-to-pdf",
-    "/word-to-pdf",
-    "/excel-to-pdf",
-    "/powerpoint-to-pdf",
     "/html-to-pdf",
     "/watermark",
     "/sign",
-    "/protect",
     "/unlock",
     "/flatten",
     "/redact",
     "/repair",
     "/extract-images",
-    "/pdf-to-pdfa",
   ];
 
   // Comparison pages

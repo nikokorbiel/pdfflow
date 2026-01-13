@@ -269,17 +269,6 @@ Additional precautions:
 - Set document expiration when possible
 - Track who has accessed the document
 
-## How to Protect PDFs with PDFflow
-
-Our [Protect PDF](/protect) tool makes security simple:
-
-1. Upload your PDF document
-2. Set a strong password
-3. Choose permission settings
-4. Download your secured PDF
-
-All processing happens locally in your browser, so your sensitive documents never leave your device.
-
 ## Removing PDF Protection
 
 Sometimes you need to remove protection from your own documents:
@@ -301,7 +290,7 @@ Use our [Unlock PDF](/unlock) tool when you have the original password.
 
 PDF security is essential for protecting sensitive information. By using strong passwords, appropriate encryption, and following best practices, you can share documents confidently.
 
-Secure your documents today with our [Protect PDF](/protect) tool!
+Learn more about our security tools at [PDFflow](/tools)!
     `,
   },
   {
