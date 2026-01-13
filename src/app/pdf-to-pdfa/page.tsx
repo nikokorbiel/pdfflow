@@ -10,7 +10,7 @@ export default function PDFToPDFA() {
   const [files, setFiles] = useState<File[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  const { isPro, canProcess, maxFileSize, recordUsage, usageDisplay } = useToolUsage();
+  const { isPro, canProcess: _canProcess, maxFileSize, recordUsage: _recordUsage, usageDisplay } = useToolUsage();
 
   const handleFilesSelected = useCallback((newFiles: File[]) => {
     if (newFiles.length > 0) {
