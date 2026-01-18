@@ -26,6 +26,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://pdfflow.space"),
   title: {
     default: "PDFflow - PDF Tools That Just Flow",
     template: "%s | PDFflow",
@@ -43,9 +44,13 @@ export const metadata: Metadata = {
     "online PDF editor",
   ],
   authors: [{ name: "PDFflow" }],
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
     type: "website",
     locale: "en_US",
+    url: "https://pdfflow.space",
     siteName: "PDFflow",
     title: "PDFflow - PDF Tools That Just Flow",
     description:
