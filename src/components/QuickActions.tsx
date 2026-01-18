@@ -74,7 +74,7 @@ export function QuickActions() {
   };
 
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 animate-fade-in-up">
+    <div className="fixed bottom-6 left-0 right-0 z-40 flex justify-center animate-fade-in-up">
       <div className="relative">
         {/* Toggle Button */}
         <button

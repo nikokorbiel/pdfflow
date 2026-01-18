@@ -226,7 +226,7 @@ export default function Home() {
               {
                 step: "01",
                 title: "Select your tool",
-                description: "Choose from 20+ PDF tools. Merge, split, compress, convert, and more.",
+                description: "Choose from 100+ PDF tools. Merge, split, compress, convert, and more.",
                 icon: Sparkles,
               },
               {

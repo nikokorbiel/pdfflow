@@ -39,9 +39,8 @@ const comparisonFeatures = [
 ];
 
 const pricingComparison = [
-  { plan: "Free", pdfflow: "$0/month", competitor: "7-day trial only" },
-  { plan: "Basic/Pro", pdfflow: "$9/month", competitor: "$12.99/month" },
-  { plan: "Premium/Standard", pdfflow: "$19/month", competitor: "$22.99/month" },
+  { plan: "Free", pdfflow: "36 tools unlimited", competitor: "7-day trial only" },
+  { plan: "Pro", pdfflow: "$4.99/month or $24.99 lifetime", competitor: "$12.99/month" },
 ];
 
 const advantages = [
@@ -123,7 +122,7 @@ export default function AdobeAcrobatComparisonPage() {
               <div className="text-sm text-[var(--text-secondary)]">Software Installs</div>
             </div>
             <div className="p-4">
-              <div className="text-3xl font-bold text-[var(--primary)]">13+</div>
+              <div className="text-3xl font-bold text-[var(--primary)]">100+</div>
               <div className="text-sm text-[var(--text-secondary)]">PDF Tools</div>
             </div>
             <div className="p-4">

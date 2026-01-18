@@ -70,7 +70,7 @@ const pdfflowFeatures = [
   },
   {
     icon: Infinity,
-    title: "26 Professional Tools",
+    title: "100 Professional Tools",
     description: "Merge, split, compress, convert, sign, watermark, protect, and more. All the tools you need in one place.",
   },
   {
@@ -94,13 +94,13 @@ const detailedComparison = [
   { feature: "Browser-based (no install)", pdfflow: true, adobe: false, smallpdf: true, ilovepdf: true, pdf24: true },
   { feature: "Files stay on your device", pdfflow: true, adobe: false, smallpdf: false, ilovepdf: false, pdf24: false },
   { feature: "No account required", pdfflow: true, adobe: false, smallpdf: false, ilovepdf: true, pdf24: true },
-  { feature: "No daily limits (free)", pdfflow: "2 files/day", adobe: "7-day trial", smallpdf: "2 tasks/day", ilovepdf: "Limited", pdf24: "Unlimited" },
+  { feature: "Free tools", pdfflow: "36 unlimited", adobe: "7-day trial", smallpdf: "2 tasks/day", ilovepdf: "Limited", pdf24: "Unlimited" },
   { feature: "Ad-free experience", pdfflow: true, adobe: true, smallpdf: "Pro only", ilovepdf: "Pro only", pdf24: false },
   { feature: "Batch processing", pdfflow: "Pro", adobe: true, smallpdf: "Pro", ilovepdf: "Pro", pdf24: true },
   { feature: "Max file size (free)", pdfflow: "10MB", adobe: "N/A", smallpdf: "5MB", ilovepdf: "15MB", pdf24: "Unlimited" },
   { feature: "Max file size (paid)", pdfflow: "100MB", adobe: "Unlimited", smallpdf: "5GB", ilovepdf: "4GB", pdf24: "N/A" },
   { feature: "Works offline", pdfflow: true, adobe: true, smallpdf: false, ilovepdf: false, pdf24: false },
-  { feature: "Starting price", pdfflow: "£4.99/mo", adobe: "£18/mo", smallpdf: "£10/mo", ilovepdf: "£5.50/mo", pdf24: "Free" },
+  { feature: "Starting price", pdfflow: "$4.99/mo", adobe: "$18/mo", smallpdf: "$10/mo", ilovepdf: "$5.50/mo", pdf24: "Free" },
 ];
 
 export default function ComparePage() {
@@ -171,10 +171,10 @@ export default function ComparePage() {
           <div className="grid sm:grid-cols-2 gap-6 max-w-2xl mx-auto">
             <div className="p-6 rounded-2xl border bg-[var(--card)]">
               <p className="text-sm text-[var(--text-secondary)] mb-2">Free Forever</p>
-              <p className="text-4xl font-bold mb-2">£0</p>
+              <p className="text-4xl font-bold mb-2">$0</p>
               <ul className="text-sm text-[var(--text-secondary)] space-y-2 text-left">
-                <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /> 2 files per day</li>
-                <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /> All 26 tools</li>
+                <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /> 36 tools unlimited</li>
+                <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /> 4 free uses on 64 premium tools</li>
                 <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /> Up to 10MB files</li>
                 <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /> No account needed</li>
               </ul>
@@ -183,11 +183,11 @@ export default function ComparePage() {
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-[var(--primary)] text-white text-xs font-medium">
                 Best Value
               </div>
-              <p className="text-sm text-[var(--text-secondary)] mb-2">Pro Annual</p>
-              <p className="text-4xl font-bold mb-1">£4.99<span className="text-lg font-normal text-[var(--text-secondary)]">/mo</span></p>
-              <p className="text-xs text-[var(--text-secondary)] mb-4">Billed £59.88/year</p>
+              <p className="text-sm text-[var(--text-secondary)] mb-2">Pro</p>
+              <p className="text-4xl font-bold mb-1">$4.99<span className="text-lg font-normal text-[var(--text-secondary)]">/mo</span></p>
+              <p className="text-xs text-[var(--text-secondary)] mb-4">or $24.99 lifetime (save 58%)</p>
               <ul className="text-sm text-[var(--text-secondary)] space-y-2 text-left">
-                <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /> Unlimited files</li>
+                <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /> All 100 tools unlimited</li>
                 <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /> Up to 100MB files</li>
                 <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /> Batch processing</li>
                 <li className="flex items-center gap-2"><Check className="h-4 w-4 text-green-500" /> Priority support</li>

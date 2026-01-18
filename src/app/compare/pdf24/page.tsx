@@ -39,9 +39,8 @@ const comparisonFeatures = [
 ];
 
 const pricingComparison = [
-  { plan: "Free", pdfflow: "Full features", competitor: "Full features" },
-  { plan: "Pro", pdfflow: "$9/month", competitor: "Free (ad-supported)" },
-  { plan: "Desktop App", pdfflow: "N/A", competitor: "Free download" },
+  { plan: "Free", pdfflow: "36 tools unlimited", competitor: "Full features (with ads)" },
+  { plan: "Pro", pdfflow: "$4.99/month or $24.99 lifetime", competitor: "Free (ad-supported)" },
 ];
 
 const advantages = [

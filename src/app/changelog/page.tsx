@@ -82,7 +82,7 @@ const updates: Update[] = [
       },
       {
         title: "New Competitive Pricing",
-        description: "Simplified pricing: $4.99/month or $24.99 lifetime (save 58%). 32 free tools unlimited, 68 premium tools with 4 free uses each.",
+        description: "Simplified pricing: $4.99/month or $24.99 lifetime (save 58%). 36 free tools unlimited, 64 premium tools with 4 free uses each.",
         icon: DollarSign,
         link: "/pricing",
         isNew: true,
@@ -284,7 +284,7 @@ const updates: Update[] = [
       },
       {
         title: "Enhanced Navigation",
-        description: "All 26 tools now accessible from the header dropdown with improved categorization.",
+        description: "All 100 tools now accessible from the header dropdown with improved categorization.",
         icon: Layers,
         isNew: true,
       },

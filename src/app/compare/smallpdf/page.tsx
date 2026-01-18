@@ -39,9 +39,8 @@ const comparisonFeatures = [
 ];
 
 const pricingComparison = [
-  { plan: "Free", pdfflow: "Unlimited basic use", competitor: "2 tasks/day" },
-  { plan: "Pro", pdfflow: "$9/month", competitor: "$12/month" },
-  { plan: "Team", pdfflow: "$19/month", competitor: "$10/user/month" },
+  { plan: "Free", pdfflow: "36 tools unlimited", competitor: "2 tasks/day" },
+  { plan: "Pro", pdfflow: "$4.99/month or $24.99 lifetime", competitor: "$12/month" },
 ];
 
 const advantages = [
